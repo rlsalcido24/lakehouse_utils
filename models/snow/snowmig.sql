@@ -5,11 +5,7 @@
     )
 }}
 
-with customers as (
 
-    select * from {{ ref('base_customer') }}
-
-)
 select 
     c.customer_key,
     c.customer_name,
@@ -19,6 +15,6 @@ select
 
 
 from
-    customers c
+    robertotpch.customers c
 order by
     c.customer_key
