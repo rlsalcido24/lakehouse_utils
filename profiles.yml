@@ -6,10 +6,10 @@ sql_endpoints:
       type: databricks
       method: http
       #catalog: rstpcdi
-      schema: rstpcdi
+      schema: {{insertschema}}
       host: e2-demo-field-eng.cloud.databricks.com
 
-      token: dapi3ef415a013a36b7a115d70e2b686a6b5
+      token: {{inserttoken}}
        
       # optional
       #http_path: /sql/1.0/endpoints/ead10bf07050390f
