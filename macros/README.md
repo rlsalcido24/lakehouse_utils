@@ -54,7 +54,49 @@ For any other value, the result is a single-element array containing this value.
 outputs: array
 
 to_timestamp_ntz (later)
+to_timestamp_tz (later)
 
-to_char
+
+to_char 
+inputs: expr (reqd), format (optional)
+desc: Converts the input expression to a string. For NULL input, the output is NULL.
+outputs: For VARIANT, ARRAY, or OBJECT inputs, the output is the string containing a JSON document or JSON elementary value (unless VARIANT or OBJECT contains an XML tag, in which case the output is a string containing an XML document):A string stored in VARIANT is preserved as is (i.e. it is not converted to a JSON string).
+A JSON null value is converted to a string containing the word “null”.
 
 startswith
+inputs: expr, expr2
+desc: Returns true if expr1 starts with expr2. Both expressions must be text or binary expressions.
+outputs: boolean
+
+try_cast
+inputs: source_string_expr, target_data_type
+desc: A special version of CAST , :: that is available for a subset of data type conversions. It performs the same operation (i.e. converts a value of one data type into another data type), but returns a NULL value instead of raising an error when the conversion can not be performed.
+outputs: returns the casted val, or null if it ca't be casted
+
+to_number
+inputs: expr (reqd), format (optional), precision (optional), scale (optional)
+desc: The function returns NUMBER(p,s), where p is the precision and s is the scale. If the precision is not specified, then it defaults to 38. If the scale is not specified, then it defaults to 0.
+outputs: number(precision, scale)
+
+array_size
+inputs: expr
+desc: Returns the size of the input array. A variation of ARRAY_SIZE takes a VARIANT value as input. If the VARIANT value contains an array, the size of the array is returned; otherwise, NULL is returned if the value is not an array.
+outputs: INT articulating size
+
+array_construct
+inputs: kwarg expressions
+desc: Returns an array constructed from zero, one, or more inputs.
+outputs: array
+
+array_agg
+inputs: expr1, expr2, orderby_clause(optional)
+desc: Returns the input values, pivoted into an ARRAY. If the input is empty, an empty ARRAY is returned.
+outputs: an array
+
+split_part
+inputs: string, delimiter, partnumber
+desc: Splits a given string at a specified character and returns the requested part.
+outputs:
+
+
+
