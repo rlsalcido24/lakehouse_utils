@@ -96,7 +96,47 @@ outputs: an array
 split_part
 inputs: string, delimiter, partnumber
 desc: Splits a given string at a specified character and returns the requested part.
-outputs:
+outputs: split up string
+
+to_time
+inputs: expr, format(optaional)
+desc: Converts an input expression into a time. If input is NULL, returns NULL.
+outputs: time
+
+to_boolean
+inputs: expr
+desc: Coverts the input text or numeric expression to a Boolean value. For NULL input, the output is NULL.
+outputs: boolean
+
+timeadd
+inputs: date_or_time_part, value, date_or_time_expr
+desc: Adds the specified value for the specified date or time part to a date, time, or timestamp.
+outputs: date, time, or timestamp depending on the date_or_time_expr
+
+zeroifnull
+inputs: expr
+desc: Returns 0 if its argument is null; otherwise, returns its argument.
+outputs: zero or the original arg
+
+object_construct
+inputs: kwargs
+desc: Returns an OBJECT constructed from the arguments.
+outputs: instantiated object
+
+timestampdiff
+inputs: date_or_time_part, date_or_time_expr1, date_or_time_expr2
+desc: Calculates the difference between two date, time, or timestamp expressions based on the specified date or time part. The function returns the result of subtracting the second argument from the third argument.
+outputs: Returns an integer representing the number of units (seconds, days, etc.) difference between date_or_time_expr2 and date_or_time_expr1.
+
+is_null_value
+inputs: variant
+desc: Returns true if its VARIANT argument is a JSON null value.
+outputs: boolean 
+
+array_compact
+inputs: array1
+desc: Returns a compacted array with missing and null values removed, effectively converting sparse arrays into dense arrays. 
+outputs: dense array
 
 
 
