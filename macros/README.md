@@ -1,8 +1,8 @@
-to_varchar 
-inputs: expr (reqd), format (optional)
+to_varchar <br> 
+inputs: expr (reqd), format (optional) <br> 
 desc: Converts the input expression to a string. For NULL input, the output is NULL.
 outputs: For VARIANT, ARRAY, or OBJECT inputs, the output is the string containing a JSON document or JSON elementary value (unless VARIANT or OBJECT contains an XML tag, in which case the output is a string containing an XML document):A string stored in VARIANT is preserved as is (i.e. it is not converted to a JSON string).
-A JSON null value is converted to a string containing the word “null”.
+A JSON null value is converted to a string containing the word “null”. <br> 
 
 dateadds
 inout: date_or_time_part, value, date_or_time_expr
