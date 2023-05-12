@@ -1,5 +1,12 @@
-select
-    {{contains(input,'te')}} as output
-from {{ ref('springbricks_tests')}}
+with test as (
+    
+    select
+    *
+    ,{{contains('input','"te"')}} as actual_output
+from {{ ref('springbrickstests')}}
 where function_name = 'contains'
-    and expected_output <> output
+)
+
+select *
+from test
+where expected_output <> actual_output
