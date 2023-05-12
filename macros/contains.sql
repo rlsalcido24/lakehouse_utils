@@ -1,4 +1,4 @@
-{% macro contains(position, column_name) %}
+{% macro contains(column_name, position) %}
 
 charindex({{position}}, {{column_name}}) > 0 
 
