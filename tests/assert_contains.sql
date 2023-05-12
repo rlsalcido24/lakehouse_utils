@@ -9,4 +9,4 @@ where function_name = 'contains'
 
 select *
 from test
-where expected_output <> actual_output
+where expected_output::boolean <> actual_output
