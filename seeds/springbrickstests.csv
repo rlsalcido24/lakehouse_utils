@@ -32,11 +32,11 @@ boolxor_agg,,
 charindex,,
 check_json,,
 compress,,
-contains,coffee,
-contains,iced tea,iced tea
-contains,latte,latte
-contains,tea,tea
-contains,NULL,
+contains,coffee,FALSE
+contains,iced tea,TRUE
+contains,latte,TRUE
+contains,tea,TRUE
+contains,NULL,NULL
 control.harmonize_compact,,
 convert_timezone,,
 current_client,,
@@ -124,11 +124,11 @@ split_part,,
 square,,
 st_intersects,,
 standardize,,
-startswith,coffee,
-startswith,iced tea,
-startswith,latte,
-startswith,tea,tea
-startswith,NULL,
+startswith,coffee,FALSE
+startswith,iced tea,FALSE
+startswith,latte,FALSE
+startswith,tea,TRUE
+startswith,NULL,NULL
 strtok,,
 strtok_to_array,,
 sysdate,,
@@ -141,7 +141,7 @@ timestamp_from_parts,,
 timestamp_ntz_from_parts,,
 timestampadd,,
 timestampdiff,,
-to_array,"1,2,3","[1,2,3]"
+to_array,"(1,2,3)","[1,2,3]"
 to_binary,,
 to_boolean,,
 to_char,,
