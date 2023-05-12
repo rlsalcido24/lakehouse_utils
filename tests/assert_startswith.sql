@@ -10,4 +10,4 @@ where function_name = 'startswith'
 
 select *
 from test
-where expected_output::boolean <> input
+where expected_output::boolean <> actual_output
