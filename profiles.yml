@@ -5,15 +5,14 @@ sql_endpoints:
     dev:
       type: databricks
       method: http
-      #catalog: rstpcdi
-      schema: {{insertschema}}
+      catalog: devrs
+      schema: test
       host: e2-demo-field-eng.cloud.databricks.com
 
       token: {{inserttoken}}
        
       # optional
-      #http_path: /sql/1.0/endpoints/ead10bf07050390f
-      http_path: /sql/1.0/warehouses/50a51e54773c42f8
+      http_path: /sql/1.0/endpoints/ead10bf07050390f
 
 
 
