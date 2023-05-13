@@ -141,7 +141,8 @@ timestamp_from_parts,,
 timestamp_ntz_from_parts,,
 timestampadd,,
 timestampdiff,,
-to_array,"1,2,3","[1,2,3]"
+to_array, 1, [1]
+to_array, 2, [2]
 to_binary,,
 to_boolean,,
 to_char,,
