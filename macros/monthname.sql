@@ -11,5 +11,5 @@
          WHEN EXTRACT(MONTH FROM {{arg}}) = 9 THEN 'Sep'
          WHEN EXTRACT(MONTH FROM {{arg}}) = 10 THEN 'Oct'
          WHEN EXTRACT(MONTH FROM {{arg}}) = 11 THEN 'Nov'
-         ELSE 'Dec' END;
+         ELSE 'Dec' END
 {% endmacro %}
