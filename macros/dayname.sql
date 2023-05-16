@@ -6,5 +6,5 @@
          WHEN datediff(CAST({{arg}} AS DATE), DATE'1799-12-29') % 7 = 3 THEN 'Wed'
          WHEN datediff(CAST({{arg}} AS DATE), DATE'1799-12-29') % 7 = 4 THEN 'Thu'
          WHEN datediff(CAST({{arg}} AS DATE), DATE'1799-12-29') % 7 = 5 THEN 'Fri'
-         ELSE 'Sat' END;
+         ELSE 'Sat' END
 {% endmacro %}
