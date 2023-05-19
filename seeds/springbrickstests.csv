@@ -43,8 +43,7 @@ contains,NULL,NULL,shabbir,v1,yes
 control.harmonize_compact,,,shabbir,,
 convert_timezone,,,shabbir,v1,
 date_from_parts,"{""col1"":""2023"",""col2"":""01"",""col3"":""10""}",10/1/2023,shabbir,v1,yes
-dateadd,"{""col1"":""day"",""col2"":""7"",""col3"":""2023-01-10""}",17/1/2023,shabbir,v1,yes
-dateadd,"{""col1"":""minute"",""col2"":""11"",""col3"":""2023-01-10 7:13""}",10/1/2023 7:24,shabbir,v1,yes
+dateadd,,,shabbir,v1 (native support),
 dayname,3/5/2023,Wed,shabbir,v1,yes
 dayname,8/5/2023 11:15,Mon,shabbir,v1,yes
 dayofweekiso,3/5/2023,3,shabbir,v1,yes
@@ -55,11 +54,11 @@ editdistance,,,shabbir,,
 encrypt,,,shabbir,,
 endswith,,,shabbir,,
 enrich_placement_ad_type,,,shabbir,,
-equal_null,,,shabbir,v1,
+equal_null,,TRUE,shabbir,v1,yes
 get,,,shabbir,,
-get_ddl,,,shabbir,v1,
+get_ddl,,,shabbir,v2,
 get_path,,,shabbir,,
-getdate,,,shabbir,v1,
+getdate,,,shabbir,v1 (does not exist),
 hash_agg,,,shabbir,,
 hex_decode_binary,,,shabbir,,
 hex_decode_string,,,shabbir,,
@@ -67,7 +66,7 @@ hll,,,shabbir,,
 hll_estimate,,,shabbir,,
 hll_export,,,shabbir,,
 hll_import,,,shabbir,,
-iff,,,shabbir,v1 (natively supported),
+iff,,,shabbir,v1 (native support),
 ilike,,,shabbir,,
 insert,,,shabbir,,
 is_boolean,,,shabbir,,
@@ -76,11 +75,14 @@ is_integer,,,shabbir,,
 is_null_value,,,shabbir,,
 is_real,,,shabbir,,
 is_role_in_session,,,shabbir,,
-json_extract_path_text,,,shabbir,v1,
+json_extract_path_text,"{""col1"":""result""}",result,shabbir,v1,yes
 last_query_id,,,shabbir,,
 last_transaction,,,shabbir,,
-len,,,shabbir,v1,
-listagg,,,shabbir,v1,
+len,,,shabbir,v1 (native support),
+listagg,coffee,"coffee, iced tea, latte, tea",shabbir,v1,no
+listagg,iced tea,"coffee, iced tea, latte, tea",shabbir,v1,no
+listagg,latte,"coffee, iced tea, latte, tea",shabbir,v1,no
+listagg,tea,"coffee, iced tea, latte, tea",shabbir,v1,no
 md5_binary,Snowflake,EDF1439075A83A447FB8B630DDC9C8DE,roberto,v1,
 md5_hex,,,roberto,v2,
 md5_number_lower64,,,roberto,v2,
