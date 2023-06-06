@@ -6,7 +6,7 @@ If you want to contribute to unit tests pull the repo, insert a token, and then 
 
 Next steps
 
-i) Complete coverage for 80 most common used snowflake functions (6 remaining)
+i) Complete coverage for ~80 most common used snowflake functions (all v1 in todo/test failure, dont worry about NA/yes/blocked)
 
 ii) Stress test with tpc-di
 
