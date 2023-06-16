@@ -1,19 +1,32 @@
 # springbricks
 
-springbricks is an initiative to automate dbt + snowflake model builds to dbt + databricks with minimal refactoring. This is done through dbt macros. The relevant macros are in the macros folder. Assuming dbt is intalled locally, execute dbt run and witness the comilation that is done under the hood! The sample model leverages 3 of the example macros but feel free to test with any of the ~60 that are currently available!
+Purpose: \
 
-If you want to contribute to unit tests pull the repo, insert a token, and then run dbt seed and dbt test. if all the tests pass submit a PR and LGTM!!
+The purpose of the springbricks initiative is threefold \
 
-Next steps
+i) Expedite the time and level of effort for migrating pipelines built on dbt + snowflake to dbt + databricks. This is done by transpiling snowflake functions that are not natively available in spark sql to compatible spark sql functions that take in the same input(s) and render the same outputs. This is all done via DBT macros (feel free to reference the macros directory).  \
 
-i) Complete coverage for ~80 most common used snowflake functions (all v1 in todo/test failure, dont worry about NA/yes/blocked)
+ii) Be a centralized source of truth for Snowflake functions mapping to Databricks functions. You can find further information in the read.me in the tests directory.  \
 
-ii) Stress test with tpc-di
+iii) Surface best practices around unit tests to instill confidence that the macros are robust and reliable (feel free to reference the tests directory). \
 
-iii) develop regression testing framework 
+'Hello World' CUJ:  \
 
-iv) Add comments in macros read.me to clarrify inputs/outputs for each macro
+To get a quick sense of what this module offers, you can reference and run the models in the models directory. Here are the relevant steps:  \
 
-iv) release package– track how often it is used for migrations, iterate over time based on most requested functions
+i) Prep the yml files...
 
-v) use dashboards/metrics to determine ARR impact of the package
+ii) Build the snowflake models by executing dbt run --target snow --select snow
+
+iii) Build the databricks models by executing dbt run --target dbx --select dbx
+
+iv) Observe that when when the models build on databricks they transpile the snowflake functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. 
+
+Next Steps: \
+
+i) Build parser
+
+ii) deploy dbt hub
+
+iii) welcome contributions from partners/community \ 
+
