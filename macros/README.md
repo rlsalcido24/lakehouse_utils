@@ -247,8 +247,6 @@ inputs: variant <br>
 desc: Returns true if its VARIANT argument is a JSON null value. <br> 
 outputs: boolean  <br> 
 
-
-
-
+array_to_string (todo)
 
 
