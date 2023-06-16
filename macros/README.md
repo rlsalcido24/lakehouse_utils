@@ -1,10 +1,5 @@
 V1 supported string functions: /
 
-contains <br> 
-input: expr1, expr2 <br> 
-desc: Returns true if expr1 contains expr2. Both expressions must be text or binary expressions. <br> 
-output: Returns a BOOLEAN. The value is True if expr2 is found inside expr1. Returns NULL if either input expression is NULL. Otherwise, returns False. <br> 
-
 md5_binary
 inputs: msg <br>
 desc: Returns a 16-byte BINARY value containing the 128-bit MD5 message digest. <br>
@@ -15,15 +10,16 @@ inputs: column, identifier <br>
 desc: Parses the first argument as a JSON string and returns the value of the element pointed to by the path in the second argument. This is equivalent to TO_VARCHAR(GET_PATH(PARSE_JSON(JSON), PATH)) <br>
 outputs: The data type of the returned value is VARCHAR. <br>
 
+base64_encode
+inputs: input, max_line_length(optional), alphabet(optional) <br>
+desc:Encodes the input (string or binary) using Base64 encoding. <br>
+outputs: Returns a string (regardless of whether the input was a string or BINARY). <br>
+
 zeroifnull <br> 
 inputs: expr <br> 
 desc: Returns 0 if its argument is null; otherwise, returns its argument. <br> 
 outputs: zero or the original arg <br> 
 
-startswith <br> 
-inputs: expr, expr2 <br> 
-desc: Returns true if expr1 starts with expr2. Both expressions must be text or binary expressions. <br> 
-outputs: boolean <br> 
 
 seq4
 inputs: (01) optional <br>
@@ -168,10 +164,35 @@ outputs: true/false boolean <br>
 
 to_timestamp_ntz (todo)
 
+contains <br> 
+input: expr1, expr2 <br> 
+desc: Returns true if expr1 contains expr2. Both expressions must be text or binary expressions. <br> 
+output: Returns a BOOLEAN. The value is True if expr2 is found inside expr1. Returns NULL if either input expression is NULL. Otherwise, returns False. <br> 
+
+startswith <br> 
+inputs: expr, expr2 <br> 
+desc: Returns true if expr1 starts with expr2. Both expressions must be text or binary expressions. <br> 
+outputs: boolean <br> 
+
 try_cast <br> 
 inputs: source_string_expr, target_data_type <br> 
 desc: A special version of CAST , :: that is available for a subset of data type conversions. It performs the same operation (i.e. converts a value of one data type into another data type), but returns a NULL value instead of raising an error when the conversion can not be performed.
 outputs: returns the casted val, or null if it ca't be casted <br> 
+
+current_schema
+inputs: n/a <br>
+desc: Returns the name of the schema in use by the current session. <br>
+outputs: current schema <br>
+
+ends_with
+inputs: exp1, expr2 <br>
+desc: Returns TRUE if the first expression ends with second expression. Both expressions must be text or binary expressions. <br>
+outputs: Returns a BOOLEAN. The value is True if expr1 ends with expr2. Returns NULL if either input expression is NULL. Otherwise, returns False. <br>
+
+charindex
+inputs: expr1, expr2, start_pos (optional)<br>
+desc: Searches for the first occurrence of the first argument in the second argument and, if successful, returns the position (1-based) of the first argument in the second argument. <br>
+outputs: If any arguments are NULL, the function returns NULL.If the string or binary value is not found, the function returns 0. If the specified optional start_pos is beyond the end of the second argument (the string to search), the function returns 0. If the first argument is empty (e.g. an empty string), the function returns 1. The data types of the first two arguments should be the same; either both should be strings or both should be binary values. <br>
 
 array_agg <br> 
 inputs: expr1, expr2, orderby_clause(optional) <br> 
@@ -225,26 +246,6 @@ is_null_value <br>
 inputs: variant <br> 
 desc: Returns true if its VARIANT argument is a JSON null value. <br> 
 outputs: boolean  <br> 
-
-base64_encode
-inputs: input, max_line_length(optional), alphabet(optional) <br>
-desc:Encodes the input (string or binary) using Base64 encoding. <br>
-outputs: Returns a string (regardless of whether the input was a string or BINARY). <br>
-
-current_schema
-inputs: n/a <br>
-desc: Returns the name of the schema in use by the current session. <br>
-outputs: current schema <br>
-
-ends_with
-inputs: exp1, expr2 <br>
-desc: Returns TRUE if the first expression ends with second expression. Both expressions must be text or binary expressions. <br>
-outputs: Returns a BOOLEAN. The value is True if expr1 ends with expr2. Returns NULL if either input expression is NULL. Otherwise, returns False. <br>
-
-charindex
-inputs: expr1, expr2, start_pos (optional)<br>
-desc: Searches for the first occurrence of the first argument in the second argument and, if successful, returns the position (1-based) of the first argument in the second argument. <br>
-outputs: If any arguments are NULL, the function returns NULL.If the string or binary value is not found, the function returns 0. If the specified optional start_pos is beyond the end of the second argument (the string to search), the function returns 0. If the first argument is empty (e.g. an empty string), the function returns 1. The data types of the first two arguments should be the same; either both should be strings or both should be binary values. <br>
 
 
 
