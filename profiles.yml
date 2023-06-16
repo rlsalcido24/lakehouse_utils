@@ -1,20 +1,30 @@
 sql_endpoints:
+  target: dev
+
   outputs:
 
-    # Use this if connecting to a hosted spark (e.g. Databricks)
     dev:
+      type: snowflake
+      account: accounthere
+
+      # User/password auth
+      user: userhere
+      password: pwhere
+      
+      role: rolehere
+      database: dbhere
+      warehouse: warehousehere
+      schema: schemahere
+      threads: 1
+      client_session_keep_alive: False
+
+    dbx:
       type: databricks
       method: http
-      catalog: devrs
-      schema: test
-      host: e2-demo-field-eng.cloud.databricks.com
+      catalog: cataloghere
+      schema: schemahere
+      host: hosthere
 
-      token: {{inserttoken}}
-       
-      # optional
-      http_path: /sql/1.0/endpoints/ead10bf07050390f
-
-
-
-  target: dev
+      token: tokenhere
+      http_path: pathere 
       
