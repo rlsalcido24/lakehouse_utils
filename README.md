@@ -1,6 +1,6 @@
 # springbricks
 
-Purpose: \
+Purpose:\
 
 The purpose of the springbricks initiative is threefold \
 
