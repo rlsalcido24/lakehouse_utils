@@ -16,7 +16,7 @@ To get a quick sense of what this module offers, you can reference and run the m
 
 i) Insert the relevant values into the profiles.yml based on your snowflake and databricks credentials.
 
-ii) Build the snowflake models by executing dbt run --target snow --select dev
+ii) Build the snowflake models by executing dbt run --target snow --select snow
 
 iii) Build the databricks models by executing dbt run --target dbx --select dbx
 
