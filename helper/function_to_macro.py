@@ -1,127 +1,116 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC
-# MAGIC ## Pseudologic
+# MAGIC ## What is this doing?
+# MAGIC
 # MAGIC
 # MAGIC - Verify it is running in a dbt repo, e.g. search for a `dbt_project.yml`
-# MAGIC - For all .sql files in the codebase, search for the existence of the fixed list of Snowflake functions
+# MAGIC - For all .sql files in the Models folder, search for the existence of the fixed list of Snowflake functions
 # MAGIC - For each function:
 # MAGIC   - Verify it hasn't already been converted into a macro, e.g. ensure it isn't already preceded by `{{`
+# MAGIC   - Verify the function we are replacing isn't actually a substring of another function, e.g. `xmlget()` not `get()`
 # MAGIC   - Replace the pattern `{function_name}({var1},{var2},...)` with `{{{function_name}("{var1}","{var2}",...)}}`
 # MAGIC
-# MAGIC   ## Progress
-# MAGIC   
-# MAGIC   Essentially works, now just need to create some Verification steps and make sure it can read all files in the repo!
-
-# COMMAND ----------
-
-# MAGIC %pip install GitPython
 
 # COMMAND ----------
 
 import os
 import re
-from git import Repo
 
-# def toy_version(function_name):
-
-#     content = f"SELECT a, {function_name}(input1,input2) FROM table; SELECT b,{function_name}(blah,blah,blah2) FROM table 2"
-#     pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-#     replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
-    
-#     updated_content = re.sub(pattern, replacement, content)
-#     matched_patterns = re.findall(pattern,updated_content) 
-#     #Surround all internal commas with quotes so that a function with arbitrary number of inputs can now have quotes around each input
-#     for i in matched_patterns:
-#       commas = r','
-#       quoted_commas = r'","'
-#       updated_match = re.sub(commas,quoted_commas,i[1])
-#       updated_content = updated_content.replace(i[1], updated_match)
-
-#     return updated_content
-
-def toy_version_2(content,function_name):
-
-    pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-    replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
-    
-    check_preventDoubleReplace_pattern = r'({{{}\()([^)]+)\)'.format(function_name)
-    check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
-
-    # print(re.search(check_preventDoubleReplace_pattern,content))
-    # print(re.search(check_preventInnerReplace_pattern,content))
-
-    if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
-      updated_content = re.sub(pattern, replacement, content)
-      matched_patterns = re.findall(pattern,updated_content) 
-      #Surround all internal commas with quotes so that a function with arbitrary number of inputs can now have quotes around each input
-      for i in matched_patterns:
-        commas = r','
-        quoted_commas = r'","'
-        updated_match = re.sub(commas,quoted_commas,i[1])
-        updated_content = updated_content.replace(i[1], updated_match)
-
-    else:
-      updated_content = content
-
-    return updated_content
-
-# def find_replace_sql_files_local(repo_path):
-
-#     sql_files = repo.git.ls_files("*/*.sql").splitlines()
-
-#     pattern = r'({}\()([^)]+)\)'.format(function_name)
-#     replacement = r'{{\1"\2")}}'
-
-#     for file_path in sql_files:
-#         full_path = os.path.join(repo_path, file_path)
-#         for each function_name: 
-#           with open(full_path, 'r+') as file:
-#               content = file.read()
-#               updated_content = re.sub(pattern, replacement, content)
-#               matched_patterns = re.findall(pattern,updated_content)
-#               for i in matched_patterns:
-#                 commas = r','
-#                 quoted_commas = r'","'
-#                 updated_match = re.sub(commas,quoted_commas,i[1])
-#                 updated_content = updated_content.replace(i[1], updated_match)
-
-#               file.seek(0)
-#               file.write(updated_content)
-#               file.truncate()
-
-#         print(f"Processed: {file_path}")
-
-# def find_replace_sql_files(repo_path):
-#     repo = Repo(repo_path) 
-#     sql_files = repo.git.ls_files("*/*.sql").splitlines()
-
-#     pattern = r'({}\()([^)]+)\)'.format(function_name)
-#     replacement = r'{{\1"\2")}}'
-
-#     for file_path in sql_files:
-#         # full_path = os.path.join(repo_path, file_path)
-#         # for each function_name: 
-#         # with open(full_path, 'r+') as file:
-#         #     content = file.read()
-#         #     updated_content = re.sub(pattern, replacement, content)
-#         #     matched_patterns = re.findall(pattern,updated_content)
-#         #     for i in matched_patterns:
-#         #       commas = r','
-#         #       quoted_commas = r'","'
-#         #       updated_match = re.sub(commas,quoted_commas,i[1])
-#         #       updated_content = updated_content.replace(i[1], updated_match)
-
-#         #     file.seek(0)
-#         #     file.write(updated_content)
-#         #     file.truncate()
-
-#         print(f"Processed: {file_path}")
+dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
 
 # COMMAND ----------
 
-##Proving that the function works to create Macros from Functions
-toy_version_2('SELECT a, xmlget(input1,input2), {{yearofweek(input1,input2)}} FROM table; SELECT b,yearofweek(blah,blah,blah2) FROM table2','get')
+# MAGIC %md
+# MAGIC
+# MAGIC ## Helper functions
+
+# COMMAND ----------
+
+## Function to discover sql files in a given Repo cloned to Databricks
+
+def get_dir_content(ls_path):
+  dir_paths = dbutils.fs.ls(ls_path)
+  subdir_paths = [get_dir_content(p.path) for p in dir_paths if p.isDir() and p.path != ls_path]
+  flat_subdir_paths = [p for subdir in subdir_paths for p in subdir]
+  return list(map(lambda p: p.path, dir_paths)) + flat_subdir_paths
+
+## Function to convert Snowflake functions to dbt macros
+
+def function_to_macro(content, function_name):
+
+  pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
+  replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
+  
+  check_preventDoubleReplace_pattern = r'({{{}\()([^)]+)\)'.format(function_name)
+  check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
+
+  # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
+  if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
+    updated_content = re.sub(pattern, replacement, content)
+    matched_patterns = re.findall(pattern,updated_content) 
+
+    for i in matched_patterns:
+      commas = r','
+      quoted_commas = r'","'
+      updated_match = re.sub(commas,quoted_commas,i[1])
+      updated_content = updated_content.replace(i[1], updated_match)
+
+  # If the previous check failed, continue unchanged
+  else:
+    updated_content = content
+
+  return updated_content
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ## Define function for all .sql files in the dbt repo
+
+# COMMAND ----------
+
+## Function to apply the above to find and replace all sql files
+
+def dbt_project_functions_to_macros(repo_path):
+
+    #Verify we are running in a dbt project
+
+    try:
+      dbutils.fs.ls(f'file:/Workspace/Repos/{repo_path}/dbt_project.yml')
+
+      print("Valid dbt project!")
+      print("Converting .sql files in the Models folder...")
+
+      #List all sql files to be checked in a folder
+      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')
+      sql_files = [i[5:] for i in paths if '.sql' in i]
+
+      #Loop one sql file at a time
+      for full_path in sql_files:
+
+          #Loop one function at a time
+          for function_name in input_functions: 
+            with open(full_path, 'r+') as file:
+                content = file.read()
+
+                updated_content = function_to_macro(content,function_name)
+                
+                file.seek(0)
+                file.write(updated_content)
+                file.truncate()
+
+
+          print(f"Processed: {full_path}")
+
+    except:
+      print("Not a valid dbt project")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ## List of valid Snowflake functions to replace
 
 # COMMAND ----------
 
@@ -292,44 +281,14 @@ input_functions = ["any_value"
 
 # COMMAND ----------
 
-for i in input_functions:
-  find_replace_sql_files('/Workspace/Repos/shabbir.khanbhai@databricks.com/springbricks/',i)
+# MAGIC %md
+# MAGIC
+# MAGIC ## Run the converter
+# MAGIC
+# MAGIC Enter your repo path as shown in the Databricks UI. e.g. `<user-name>/<repo-folder>`
 
 # COMMAND ----------
 
-x = """
-SELECT a
-, array_agg(input1,input2)
-, week(date_input)
-FROM table; 
+repo_path = dbutils.widgets.get("repo_path")
 
-
-SELECT b
-,approx_top_k(blah,blah,blah2)
-,count(columns)
-FROM table2
-
-SELECT listagg(something)
-,xmlget(<dflkjhdfk.hgdf>)
-FROM table
-INNER JOIN thisThing j
-  ON a.x = j.x
-  AND array_slice(input_array,somestuff,etc,[1,2,3]) = 2
-
---This is a typo try_to_time, mode, week
-"""
-for i in input_functions:
-  x=toy_version_2(x,i)
-
-for i in input_functions:
-  x=toy_version_2(x,i)
-  
-print(x)
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
+dbt_project_functions_to_macros(repo_path)
