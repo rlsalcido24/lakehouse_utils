@@ -15,56 +15,113 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install GitPython
+
+# COMMAND ----------
+
 import os
 import re
 from git import Repo
 
-def toy_version(function_name):
+# def toy_version(function_name):
 
-    content = f"SELECT a, {function_name}(input1,input2) FROM table; SELECT b,{function_name}(blah,blah,blah2) FROM table 2"
-    pattern = r'({}\()([^)]+)\)'.format(function_name)
-    replacement = r'{{\1"\2")}}'
+#     content = f"SELECT a, {function_name}(input1,input2) FROM table; SELECT b,{function_name}(blah,blah,blah2) FROM table 2"
+#     pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
+#     replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
     
-    updated_content = re.sub(pattern, replacement, content)
-    matched_patterns = re.findall(pattern,updated_content)
-    for i in matched_patterns:
-      commas = r','
-      quoted_commas = r'","'
-      updated_match = re.sub(commas,quoted_commas,i[1])
-      updated_content = updated_content.replace(i[1], updated_match)
+#     updated_content = re.sub(pattern, replacement, content)
+#     matched_patterns = re.findall(pattern,updated_content) 
+#     #Surround all internal commas with quotes so that a function with arbitrary number of inputs can now have quotes around each input
+#     for i in matched_patterns:
+#       commas = r','
+#       quoted_commas = r'","'
+#       updated_match = re.sub(commas,quoted_commas,i[1])
+#       updated_content = updated_content.replace(i[1], updated_match)
+
+#     return updated_content
+
+def toy_version_2(content,function_name):
+
+    pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
+    replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
+    
+    check_preventDoubleReplace_pattern = r'({{{}\()([^)]+)\)'.format(function_name)
+    check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
+
+    # print(re.search(check_preventDoubleReplace_pattern,content))
+    # print(re.search(check_preventInnerReplace_pattern,content))
+
+    if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
+      updated_content = re.sub(pattern, replacement, content)
+      matched_patterns = re.findall(pattern,updated_content) 
+      #Surround all internal commas with quotes so that a function with arbitrary number of inputs can now have quotes around each input
+      for i in matched_patterns:
+        commas = r','
+        quoted_commas = r'","'
+        updated_match = re.sub(commas,quoted_commas,i[1])
+        updated_content = updated_content.replace(i[1], updated_match)
+
+    else:
+      updated_content = content
 
     return updated_content
 
-def find_replace_sql_files(repo_path, function_name):
-    repo = Repo(repo_path)
-    sql_files = repo.git.ls_files("*/*.sql").splitlines()
+# def find_replace_sql_files_local(repo_path):
 
-    pattern = r'({}\()([^)]+)\)'.format(function_name)
-    replacement = r'{{\1"\2")}}'
+#     sql_files = repo.git.ls_files("*/*.sql").splitlines()
 
-    for file_path in sql_files:
-        full_path = os.path.join(repo_path, file_path)
+#     pattern = r'({}\()([^)]+)\)'.format(function_name)
+#     replacement = r'{{\1"\2")}}'
 
-        with open(full_path, 'r+') as file:
-            content = file.read()
-            updated_content = re.sub(pattern, replacement, content)
-            matched_patterns = re.findall(pattern,updated_content)
-            for i in matched_patterns:
-              commas = r','
-              quoted_commas = r'","'
-              updated_match = re.sub(commas,quoted_commas,i[1])
-              updated_content = updated_content.replace(i[1], updated_match)
+#     for file_path in sql_files:
+#         full_path = os.path.join(repo_path, file_path)
+#         for each function_name: 
+#           with open(full_path, 'r+') as file:
+#               content = file.read()
+#               updated_content = re.sub(pattern, replacement, content)
+#               matched_patterns = re.findall(pattern,updated_content)
+#               for i in matched_patterns:
+#                 commas = r','
+#                 quoted_commas = r'","'
+#                 updated_match = re.sub(commas,quoted_commas,i[1])
+#                 updated_content = updated_content.replace(i[1], updated_match)
 
-            file.seek(0)
-            file.write(updated_content)
-            file.truncate()
+#               file.seek(0)
+#               file.write(updated_content)
+#               file.truncate()
 
-        print(f"Processed: {file_path}")
+#         print(f"Processed: {file_path}")
+
+# def find_replace_sql_files(repo_path):
+#     repo = Repo(repo_path) 
+#     sql_files = repo.git.ls_files("*/*.sql").splitlines()
+
+#     pattern = r'({}\()([^)]+)\)'.format(function_name)
+#     replacement = r'{{\1"\2")}}'
+
+#     for file_path in sql_files:
+#         # full_path = os.path.join(repo_path, file_path)
+#         # for each function_name: 
+#         # with open(full_path, 'r+') as file:
+#         #     content = file.read()
+#         #     updated_content = re.sub(pattern, replacement, content)
+#         #     matched_patterns = re.findall(pattern,updated_content)
+#         #     for i in matched_patterns:
+#         #       commas = r','
+#         #       quoted_commas = r'","'
+#         #       updated_match = re.sub(commas,quoted_commas,i[1])
+#         #       updated_content = updated_content.replace(i[1], updated_match)
+
+#         #     file.seek(0)
+#         #     file.write(updated_content)
+#         #     file.truncate()
+
+#         print(f"Processed: {file_path}")
 
 # COMMAND ----------
 
 ##Proving that the function works to create Macros from Functions
-toy_version("array_agg")
+toy_version_2('SELECT a, xmlget(input1,input2), {{yearofweek(input1,input2)}} FROM table; SELECT b,yearofweek(blah,blah,blah2) FROM table2','get')
 
 # COMMAND ----------
 
@@ -114,7 +171,7 @@ input_functions = ["any_value"
 ,"endswith"
 ,"enrich_placement_ad_type"
 ,"equal_null"
-,"get"
+,"xmlget"
 ,"get_ddl"
 ,"get_path"
 ,"getdate"
@@ -183,7 +240,6 @@ input_functions = ["any_value"
 ,"strtok_to_array"
 ,"sysdate"
 ,"systimestamp"
-,"time"
 ,"time_slice"
 ,"timeadd"
 ,"timediff"
@@ -225,18 +281,50 @@ input_functions = ["any_value"
 ,"uniform"
 ,"uuid_string"
 ,"variance_samp"
-,"week"
 ,"weekiso"
-,"xmlget"
 ,"yearofweek"
 ,"yearofweekiso"
 ,"zeroifnull"
+,"get"
+,"week"
+,"time"
 ]
 
 # COMMAND ----------
 
 for i in input_functions:
-  find_replace_sql_files('git-path',i)
+  find_replace_sql_files('/Workspace/Repos/shabbir.khanbhai@databricks.com/springbricks/',i)
+
+# COMMAND ----------
+
+x = """
+SELECT a
+, array_agg(input1,input2)
+, week(date_input)
+FROM table; 
+
+
+SELECT b
+,approx_top_k(blah,blah,blah2)
+,count(columns)
+FROM table2
+
+SELECT listagg(something)
+,xmlget(<dflkjhdfk.hgdf>)
+FROM table
+INNER JOIN thisThing j
+  ON a.x = j.x
+  AND array_slice(input_array,somestuff,etc,[1,2,3]) = 2
+
+--This is a typo try_to_time, mode, week
+"""
+for i in input_functions:
+  x=toy_version_2(x,i)
+
+for i in input_functions:
+  x=toy_version_2(x,i)
+  
+print(x)
 
 # COMMAND ----------
 
