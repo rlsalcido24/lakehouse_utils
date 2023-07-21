@@ -9,8 +9,7 @@
 # MAGIC - For each function:
 # MAGIC   - Verify it hasn't already been converted into a macro, e.g. ensure it isn't already preceded by `{{`
 # MAGIC   - Verify the function we are replacing isn't actually a substring of another function, e.g. `xmlget()` not `get()`
-# MAGIC   - Replace the pattern `{function_name}({var1},{var2},...)` with `{{{function_name}("{var1}","{var2}",...)}}`
-# MAGIC
+# MAGIC   - Replace the pattern `function_name(var1,var2,...)` with `{{function_name("var1","var2",...)}}`
 
 # COMMAND ----------
 
@@ -28,6 +27,7 @@ dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
 # COMMAND ----------
 
 ## Function to discover sql files in a given Repo cloned to Databricks
+## Add a check for whether in Databricks or external
 
 def get_dir_content(ls_path):
   dir_paths = dbutils.fs.ls(ls_path)
@@ -47,6 +47,10 @@ def function_to_macro(content, function_name):
 
   # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
   if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
+    try:
+      number_of_matches = len(re.findall(pattern, content))
+    except:
+      number_of_matches = 0
     updated_content = re.sub(pattern, replacement, content)
     matched_patterns = re.findall(pattern,updated_content) 
 
@@ -59,8 +63,9 @@ def function_to_macro(content, function_name):
   # If the previous check failed, continue unchanged
   else:
     updated_content = content
+    number_of_matches = 0
 
-  return updated_content
+  return (updated_content, number_of_matches)
 
 # COMMAND ----------
 
@@ -70,41 +75,50 @@ def function_to_macro(content, function_name):
 
 # COMMAND ----------
 
-## Function to apply the above to find and replace all sql files
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 def dbt_project_functions_to_macros(repo_path):
+  # Verify we are running in a dbt project
+  try:
+    dbutils.fs.ls(f'file:/Workspace/Repos/{repo_path}/dbt_project.yml')
 
-    #Verify we are running in a dbt project
+    print("Valid dbt project!")
+    print("Converting .sql files in the Models folder...")
 
-    try:
-      dbutils.fs.ls(f'file:/Workspace/Repos/{repo_path}/dbt_project.yml')
+    # List all sql files to be checked in a folder
+    paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')
+    sql_files = [i[5:] for i in paths if '.sql' in i]
 
-      print("Valid dbt project!")
-      print("Converting .sql files in the Models folder...")
+    with ThreadPoolExecutor() as executor:
+      futures_sql = {executor.submit(process_file, p, input_functions): p for p in sql_files}
+      for future in as_completed(futures_sql):
+        data = future.result()
+        if data:
+            print(f"Processed: {data}")
+        else:
+            print(f"Nothing to change: {data}")
 
-      #List all sql files to be checked in a folder
-      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')
-      sql_files = [i[5:] for i in paths if '.sql' in i]
-
-      #Loop one sql file at a time
-      for full_path in sql_files:
-
-          #Loop one function at a time
-          for function_name in input_functions: 
-            with open(full_path, 'r+') as file:
-                content = file.read()
-
-                updated_content = function_to_macro(content,function_name)
-                
-                file.seek(0)
-                file.write(updated_content)
-                file.truncate()
-
-
-          print(f"Processed: {full_path}")
-
-    except:
+  except:
       print("Not a valid dbt project")
+
+## Function to asynchronously kick off: open each file, loop through every function, write results
+
+def process_file(full_path, functions_list):
+
+  converted_functions = dict()
+  with open(full_path, 'r+') as file:
+    content = file.read()
+    for function_name in functions_list:
+      content, no_matches = function_to_macro(content, function_name)
+
+      if no_matches > 0:
+        converted_functions[function_name] = no_matches
+
+    file.seek(0)
+    file.write(content)
+    file.truncate()
+
+  return ({full_path}, f'Converted functions: {converted_functions}') ## Return list of functions that converted
 
 # COMMAND ----------
 
@@ -114,12 +128,11 @@ def dbt_project_functions_to_macros(repo_path):
 
 # COMMAND ----------
 
-input_functions = ["any_value"
+input_functions = ["array_agg","any_value"
 ,"approx_top_k"
 ,"approximate_count_distinct"
 ,"approximate_jaccard_index"
 ,"approximate_similarity"
-,"array_agg"
 ,"array_append"
 ,"array_cat"
 ,"array_compact"
