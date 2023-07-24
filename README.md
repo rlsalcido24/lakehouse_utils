@@ -20,7 +20,7 @@ ii) Build the snowflake models by executing dbt run --target snow
 
 iii) Build the databricks models by temporarily updating the models_path key in profiles.yml to be tmp and executing dbt run --target dbx
 
-iv) Observe that when when the models build on databricks they transpile the snowflake functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. Also note that manually 'migrating' these two models from scratch should take no longer than 5 mins-- it is just a matter of wrapping the relevant function in braces and wrapping the input parameters in single quotes. 
+iv) Observe that when when the models build on databricks they transpile the snowflake functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. Also note that manually 'migrating' these two models from scratch should take no longer than 5 mins-- it is just a matter of wrapping the relevant function in braces and wrapping the input parameters in quotes. 
 
 Automated 'to the moon' CUJ \
 
