@@ -10,22 +10,33 @@ ii) Be a centralized source of truth for Snowflake functions mapping to Databric
 
 iii) Surface best practices around unit tests to instill confidence that the macros are robust and reliable (feel free to reference the tests directory). \
 
-'Hello World' CUJ:  \
+Manual 'Hello World' CUJ:  \
 
 To get a quick sense of what this module offers, you can reference and run the models in the models directory. Here are the relevant steps:  \
 
 i) Insert the relevant values into the profiles.yml based on your snowflake and databricks credentials.
 
-ii) Build the snowflake models by executing dbt run --target snow --select snow
+ii) Build the snowflake models by executing dbt run --target snow 
 
-iii) Build the databricks models by executing dbt run --target dbx --select dbx
+iii) Build the databricks models by temporarily updating the models_path key in profiles.yml to be tmp and executing dbt run --target dbx
 
 iv) Observe that when when the models build on databricks they transpile the snowflake functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. Also note that manually 'migrating' these two models from scratch should take no longer than 5 mins-- it is just a matter of wrapping the relevant function in braces and wrapping the input parameters in single quotes. 
 
+Automated 'to the moon' CUJ \
+
+i) Create a seperate dev branch of your dbt project. Copy the helper directory into your project. Run the helper function_to_macro.py file on Databricks or locally. Obvserve that all your snowflake models have now been automatically refactored to reference relevant macros.
+
+ii) dbt run.
+
+iii) Execute unit tests to ensure that the models built in Databricks match the models built on Snowflake.
+
+iv) Once you have sufficient confidence copy the directory from the models directory of the dev branch to the models directory of the main branch and name the directory something different to differentiate it from the snowflake models (ie snow and databricks) 
+
+v) Build models in both systems until sufficient confidence is instilled to run the models solely on one system.
+
+
 Next Steps: \
 
-i) Build a parsing script that will leverage regex to create a clone model directory that will wrap the relevant snowflake functions in curly braces (and the input params in single quotes) to trigger function invocation and transpilation to ensure that the tables can build in databricks in an automated fashion.  
+i) Deploy this logic as a package in the dbt hub so it is simpler to interface with
 
-ii) Deploy this logic as a package in the dbt hub so it is simpler to interface with
-
-Note that we gladly welcome contributions from the partners and from the community-- if intersted please submit a pull request!! We can particularly use support with building the regex parsing script and increasing our surface area of supported functions. When submitting a PR please include a unit test for each new macro added. If you have a request so support a particular function please do let us know in the comments and happy building!!
+Note that we gladly welcome contributions from the partners and from the community-- if intersted please submit a pull request!! We can particularly use support with increasing our surface area of supported functions. When submitting a PR please include a unit test for each new macro added. If you have a request so support a particular function please do let us know in the comments and happy building!!
