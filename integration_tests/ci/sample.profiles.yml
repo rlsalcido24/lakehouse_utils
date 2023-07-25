@@ -1,4 +1,4 @@
-sql_endpoints:
+integration_tests:
   target: snow
 
   outputs:
