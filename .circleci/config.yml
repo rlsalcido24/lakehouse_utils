@@ -1,5 +1,14 @@
 version: 2
 
+name: Circle
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
 jobs:
   build:
     docker:
