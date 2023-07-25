@@ -22,7 +22,7 @@ sql_endpoints:
       type: databricks
       method: http
       catalog: hive_metastore
-      schema: robertotpchcircle
+      schema: robertocircle
       host: e2-demo-field-eng.cloud.databricks.com
 
       token: ${{ secrets.DBT_TOKEN }}
