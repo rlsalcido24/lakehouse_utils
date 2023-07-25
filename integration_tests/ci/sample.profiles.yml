@@ -21,10 +21,10 @@ sql_endpoints:
     databricks:
       type: databricks
       method: http
-      catalog: cataloghere
-      schema: schemahere
-      host: hosthere
+      catalog: hive_metastore
+      schema: robertotpchcircle
+      host: e2-demo-field-eng.cloud.databricks.com
 
-      token: tokenhere
-      http_path: pathere 
+      token: ${{ secrets.DBT_TOKEN }}
+      http_path: /sql/1.0/warehouses/ead10bf07050390f 
       
