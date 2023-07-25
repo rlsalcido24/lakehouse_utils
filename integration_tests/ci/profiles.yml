@@ -1,0 +1,30 @@
+sql_endpoints:
+  target: snow
+
+  outputs:
+
+    snow:
+      type: snowflake
+      account: accounthere
+
+      # User/password auth
+      user: userhere
+      password: pwhere
+      
+      role: rolehere
+      database: dbhere
+      warehouse: warehousehere
+      schema: schemahere
+      threads: 1
+      client_session_keep_alive: False
+
+    databricks:
+      type: databricks
+      method: http
+      catalog: cataloghere
+      schema: schemahere
+      host: hosthere
+
+      token: tokenhere
+      http_path: pathere 
+      
