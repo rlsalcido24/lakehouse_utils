@@ -1,8 +1,7 @@
 
 {{
     config(
-        materialized = 'table',
-        tag = 'dbx'
+        materialized = 'table'
     )
 }}
 
