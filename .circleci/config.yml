@@ -1,17 +1,5 @@
 version: 2.1
-parameters:
-  GHA_Actor:
-    type: string
-    default: ""
-  GHA_Action:
-    type: string
-    default: ""
-  GHA_Event:
-    type: string
-    default: ""
-  GHA_Meta:
-    type: string
-    default: ""
+
 
 name: Circle
 on:
@@ -30,20 +18,12 @@ jobs:
         auth:
           username: dbt-labs
           password: ''
-        environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: circle_test
+       
 
     steps:
       - checkout
 
-      - run:
-          name: setup_creds
-          command: |
-            echo $BIGQUERY_SERVICE_ACCOUNT_JSON > ${HOME}/bigquery-service-key.json
-
-      - restore_cache:
-          key: deps1-{{ .Branch }}
+      
 
       - run:
           name: "Setup dbt"
@@ -54,72 +34,22 @@ jobs:
             . dbt_venv/bin/activate
 
             python -m pip install --upgrade pip setuptools
-            python -m pip install --pre dbt-core dbt-postgres dbt-redshift dbt-snowflake dbt-bigquery
+            python -m pip install --pre dbt-core dbt-databricks
 
             mkdir -p ~/.dbt
             cp integration_tests/ci/sample.profiles.yml ~/.dbt/profiles.yml
 
-      - run:
-          name: "Run Tests - Postgres"
-          environment:
-            POSTGRES_TEST_HOST: localhost
-            POSTGRES_TEST_USER: root
-            POSTGRES_TEST_PASS: ''
-            POSTGRES_TEST_PORT: 5432
-            POSTGRES_TEST_DBNAME: circle_test
-          command: |
-            . dbt_venv/bin/activate
-            cd integration_tests
-            dbt deps --target postgres
-            dbt seed --target postgres --full-refresh
-            dbt compile --target postgres
-            dbt run --target postgres
-            dbt test --target postgres
 
       - run:
-          name: "Run Tests - Redshift"
+          name: "Run Tests - Databricks"
           command: |
             . dbt_venv/bin/activate
             echo `pwd`
             cd integration_tests
-            dbt deps --target redshift
-            dbt seed --target redshift --full-refresh
-            dbt compile --target redshift
-            dbt run --target redshift
-            dbt test --target redshift
-
-      - run:
-          name: "Run Tests - Snowflake"
-          command: |
-            . dbt_venv/bin/activate
-            echo `pwd`
-            cd integration_tests
-            dbt deps --target snowflake
-            dbt seed --target snowflake --full-refresh
-            dbt compile --target snowflake
-            dbt run --target snowflake
-            dbt test --target snowflake
-
-      - run:
-          name: "Run Tests - BigQuery"
-          environment:
-              BIGQUERY_SERVICE_KEY_PATH: "/home/circleci/bigquery-service-key.json"
-
-          command: |
-            . dbt_venv/bin/activate
-            echo `pwd`
-            cd integration_tests
-            dbt deps --target bigquery
-            dbt seed --target bigquery --full-refresh
-            dbt compile --target bigquery
-            dbt run --target bigquery --full-refresh
-            dbt test --target bigquery
-
-
-      - save_cache:
-          key: deps1-{{ .Branch }}
-          paths:
-            - "dbt_venv"
+            dbt seed --target databricks --full-refresh
+            dbt compile --target databricks
+            dbt run --target databricks
+            dbt test --target databricks
 
             
       - store_artifacts:
@@ -130,10 +60,7 @@ jobs:
 workflows:
   
   test-all:
-    when: << pipeline.parameters.GHA_Action >>
     jobs:
       - build:
           context:
-            - profile-redshift
-            - profile-snowflake
-            - profile-bigquery
+            - profile-databricks
