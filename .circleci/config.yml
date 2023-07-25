@@ -1,0 +1,65 @@
+version: 2.1
+
+
+name: Circle
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.9.9
+      - image: cimg/postgres:14.0
+        auth:
+          username: dbt-labs
+          password: ''
+       
+
+    steps:
+      - checkout
+
+      
+
+      - run:
+          name: "Setup dbt"
+          command: | 
+            set -x
+
+            python -m venv dbt_venv
+            . dbt_venv/bin/activate
+
+            python -m pip install --upgrade pip setuptools
+            python -m pip install --pre dbt-core dbt-databricks
+
+            mkdir -p ~/.dbt
+            cp integration_tests/ci/sample.profiles.yml ~/.dbt/profiles.yml
+
+
+      - run:
+          name: "Run Tests - Databricks"
+          command: |
+            . dbt_venv/bin/activate
+            echo `pwd`
+            cd integration_tests
+            dbt seed --target databricks --full-refresh
+            dbt compile --target databricks
+            dbt test --target databricks
+
+            
+      - store_artifacts:
+          path: integration_tests/logs
+      - store_artifacts:
+          path: integration_tests/target
+
+workflows:
+  
+  test-all:
+    jobs:
+      - build:
+          context:
+            - profile-databricks
