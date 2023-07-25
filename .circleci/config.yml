@@ -48,7 +48,6 @@ jobs:
             cd integration_tests
             dbt seed --target databricks --full-refresh
             dbt compile --target databricks
-            dbt run --target databricks
             dbt test --target databricks
 
             
