@@ -130,7 +130,7 @@ jobs:
 workflows:
   
   test-all:
-    #when: << pipeline.parameters.GHA_Action >>
+    when: << pipeline.parameters.GHA_Action >>
     jobs:
       - build:
           context:
