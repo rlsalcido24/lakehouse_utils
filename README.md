@@ -37,6 +37,6 @@ v) Build models in both systems until sufficient confidence is instilled to run 
 
 ### Next Steps: 
 
-i) Deploy this logic as a package in the dbt hub so it is simpler to interface with (ci/cd, docs, contributor guide, issue/request guide, sqlfluff)
+i) Deploy this logic as a package in the dbt hub so it is simpler to interface with.
 
 Note that we gladly welcome contributions from the partners and from the community-- if intersted please submit a pull request!! We can particularly use support with increasing our surface area of supported functions. When submitting a PR please include a unit test for each new macro added-- as long as any new unit tests pass, and existing tests continue to pass, we should be able to GTM (example pr template in .github directory). If you have a request so support a particular function please do log it as a feature requests in issues and happy building!!
