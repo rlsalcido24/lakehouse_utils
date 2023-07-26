@@ -42,9 +42,9 @@ jobs:
             . dbt_venv/bin/activate
             echo `pwd`
             cd integration_tests
-            dbt seed --target databricks --full-refresh
-            dbt compile --target databricks
-            dbt test --target databricks
+            dbt seed --full-refresh
+            dbt compile
+            dbt test
 
             
       - store_artifacts:
