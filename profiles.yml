@@ -3,28 +3,26 @@ sql_endpoints:
 
   outputs:
 
-    dev:
+    snowflake:
       type: snowflake
-      account: accounthere
+      account: "{{ env_var('SNOWFLAKE_TEST_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_TEST_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_TEST_PASSWORD') }}"
+      role: "{{ env_var('SNOWFLAKE_TEST_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_TEST_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_TEST_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_TEST_SCHEMA') }}"
 
-      # User/password auth
-      user: userhere
-      password: pwhere
-      
-      role: rolehere
-      database: dbhere
-      warehouse: warehousehere
-      schema: schemahere
-      threads: 1
-      client_session_keep_alive: False
 
-    dbx:
+    databricks:
       type: databricks
       method: http
-      catalog: cataloghere
-      schema: schemahere
-      host: hosthere
+      catalog: "{{ env_var('DATABRICKS_TEST_CATALOG') }}"
+      schema: "{{ env_var('DATABRICKS_TEST_SCHEMA') }}"
+      host: "{{ env_var('DATABRICKS_TEST_HOST') }}"
+      token: "{{ env_var('DATABRICKS_TEST_TOKEN') }}"
+      http_path: "{{ env_var('DATABRICKS_TEST_PATH') }}"
 
-      token: tokenhere
-      http_path: pathere 
+
+      
       
