@@ -3,20 +3,16 @@ integration_tests:
 
   outputs:
 
-    snow:
+    snowflake:
       type: snowflake
-      account: accounthere
+      account: "{{ env_var('SNOWFLAKE_TEST_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_TEST_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_TEST_PASSWORD') }}"
+      role: "{{ env_var('SNOWFLAKE_TEST_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_TEST_DATABASE') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_TEST_WAREHOUSE') }}"
+      schema: "{{ env_var('SNOWFLAKE_TEST_SCHEMA') }}"
 
-      # User/password auth
-      user: userhere
-      password: pwhere
-      
-      role: rolehere
-      database: dbhere
-      warehouse: warehousehere
-      schema: schemahere
-      threads: 1
-      client_session_keep_alive: False
 
     databricks:
       type: databricks
