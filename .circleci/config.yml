@@ -11,10 +11,7 @@ jobs:
   build:
     docker:
       - image: cimg/python:3.9.9
-      - image: cimg/postgres:14.0
-        auth:
-          username: dbt-labs
-          password: ''
+      
        
 
     steps:
@@ -40,7 +37,6 @@ jobs:
           name: "Run Tests - Databricks"
           command: |
             . dbt_venv/bin/activate
-            echo `pwd`
             cd integration_tests
             dbt seed --full-refresh
             dbt compile
