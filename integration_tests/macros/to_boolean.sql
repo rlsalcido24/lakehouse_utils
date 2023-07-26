@@ -13,6 +13,6 @@ WHEN lower({{arg}}) = 'y' THEN TRUE
 WHEN lower({{arg}}) = 'on' THEN TRUE
 WHEN lower({{arg}}) = '1' THEN TRUE
 
-ELSE 'null'
+ELSE NULL
 END
 {% endmacro %}
