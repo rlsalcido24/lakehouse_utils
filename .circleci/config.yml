@@ -31,7 +31,7 @@ jobs:
             . dbt_venv/bin/activate
 
             python -m pip install --upgrade pip setuptools
-            python -m pip install --pre dbt-core dbt-databricks
+            python -m pip install dbt-databricks==1.5.5
 
             mkdir -p ~/.dbt
             cp integration_tests/ci/sample.profiles.yml ~/.dbt/profiles.yml
