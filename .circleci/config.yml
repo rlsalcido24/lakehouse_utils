@@ -38,8 +38,8 @@ jobs:
           command: |
             . dbt_venv/bin/activate
             cd integration_tests
-            dbt seed --full-refresh
             dbt compile
+            dbt seed --full-refresh
             dbt test
 
             
