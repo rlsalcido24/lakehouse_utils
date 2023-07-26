@@ -25,5 +25,6 @@ integration_tests:
       schema: robertocircle
       host: e2-demo-field-eng.cloud.databricks.com
 
-      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      #token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      token: $DATABRICKS_TOKEN
       http_path: /sql/1.0/warehouses/ead10bf07050390f 
