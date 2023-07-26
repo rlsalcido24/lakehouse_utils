@@ -21,9 +21,9 @@ integration_tests:
     databricks:
       type: databricks
       method: http
-      catalog: hive_metastore
-      schema: robertocircleuno
-      host: e2-dogfood.staging.cloud.databricks.com
+      catalog: "{{ env_var('DATABRICKS_TEST_CATALOG') }}"
+      schema: "{{ env_var('DATABRICKS_TEST_SCHEMA') }}"
+      host: "{{ env_var('DATABRICKS_TEST_HOST') }}"
 
-      token: "{{ env_var('dbtokendf') }}"
-      http_path: /sql/1.0/warehouses/3d6d4fc385e4dada
+      token: "{{ env_var('DATABRICKS_TEST_TOKEN') }}"
+      http_path: "{{ env_var('DATABRICKS_TEST_PATH') }}"
