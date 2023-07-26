@@ -22,7 +22,7 @@ integration_tests:
       type: databricks
       method: http
       catalog: hive_metastore
-      schema: robertocircle
+      schema: robertocircleuno
       host: e2-dogfood.staging.cloud.databricks.com
 
       token: "{{ env_var('dbtokendf') }}"
