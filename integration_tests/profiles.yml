@@ -1,0 +1,29 @@
+integration_tests:
+  target: databricks
+
+  outputs:
+
+    snow:
+      type: snowflake
+      account: accounthere
+
+      # User/password auth
+      user: userhere
+      password: pwhere
+      
+      role: rolehere
+      database: dbhere
+      warehouse: warehousehere
+      schema: schemahere
+      threads: 1
+      client_session_keep_alive: False
+
+    databricks:
+      type: databricks
+      method: http
+      catalog: hive_metastore
+      schema: robertocircle
+      host: e2-demo-field-eng.cloud.databricks.com
+
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      http_path: /sql/1.0/warehouses/ead10bf07050390f 
