@@ -24,7 +24,7 @@ iv) Observe that when when the models build on databricks they transpile the sno
 
 ### Automated 'to the moon' CUJ 
 
-i) Create a seperate dev branch of your dbt project. Copy the helper directory and the macros directory into your project. Run the helper function_to_macro.py file on Databricks or locally. Obvserve that all your snowflake models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in databricks.
+i) Create a seperate dev branch of your dbt project. Copy the helper directory and the macros directory into your project. Run the helper function_to_macro.py file on Databricks. Obvserve that all your snowflake models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in databricks.
 
 ii) dbt run.
 
