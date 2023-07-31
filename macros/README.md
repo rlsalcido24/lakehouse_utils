@@ -1,6 +1,6 @@
-*** for the most up to date list of supported functions, refrence the functionlist.csv in the seed directory.
+### For the most up to date list of supported functions, refrence the functionlist.csv in the seed directory.
 
-*** V1 supported string functions: /
+#### V1 supported string functions: 
 
 md5_binary
 inputs: msg <br>
