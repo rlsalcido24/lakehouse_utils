@@ -44,7 +44,7 @@ inputs: expr <br>
 desc: Returns the size of the input array. A variation of ARRAY_SIZE takes a VARIANT value as input. If the VARIANT value contains an array, the size of the array is returned; otherwise, NULL is returned if the value is not an array. <br> 
 outputs: INT articulating size <br> 
 
-V1 supported timestamp functions: /
+#### V1 supported timestamp functions: 
 
 dateadd <br> 
 inout: date_or_time_part, value, date_or_time_expr <br> 
@@ -98,7 +98,7 @@ desc: Adds the specified value for the specified date or time part to a date, ti
 outputs: date, time, or timestamp depending on the date_or_time_expr <br> 
 
 
-V1 supported numeric functions: /
+#### V1 supported numeric functions: 
 
 try_to_number <br> 
 inputs: string, format (optional), precision (optional), scale (optional) <br> 
@@ -120,14 +120,14 @@ inputs: string, format (optional), precision (optional), scale (optional) <br>
 desc: <br> A special version of TO_DECIMAL , TO_NUMBER , TO_NUMERIC that performs the same operation (i.e. converts an input expression to a fixed-point number), but with error-handling support (i.e. if the conversion cannot be performed, it returns a NULL value instead of raising an error). 
 outputs: <br> The function returns NUMBER(p,s), where p is the precision and s is the scale. If the precision is not specified, then it defaults to 38. If the scale is not specified, then it defaults to 0.
 
-V1 supported boolean functions: /
+#### V1 supported boolean functions: 
 
 to_boolean <br> 
 inputs: expr <br> 
 desc: Coverts the input text or numeric expression to a Boolean value. For NULL input, the output is NULL. <br> 
 outputs: boolean <br> 
 
-V1 supported complex functions: /
+#### V1 supported complex functions: 
 
 to_array <br> 
 inputs: expr <br> 
@@ -142,7 +142,7 @@ inputs: expr1, delimiter, expr2, orderby_clause <br>
 desc: Returns the concatenated input values, separated by the delimiter string. <br> 
 outputs: Returns a string that includes all of the non-NULL input values, separated by the delimiter. (Note that this does not return a “list” (e.g. it does not return an ARRAY; it returns a single string that contains all of the non-NULL input values.) <br> 
 
-Recently supported native functions: /
+#### Recently supported native functions: 
 
 to_binary <br> 
 inputs: string_expr, format(optional) <br> 
@@ -207,7 +207,7 @@ desc: Splits a given string at a specified character and returns the requested p
 outputs: split up string <br> 
 
 
-Not yet supported functions /:
+#### Not yet supported functions:
 
 to_varchar <br> 
 inputs: expr (reqd), format (optional) <br> 
