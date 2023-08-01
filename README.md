@@ -11,7 +11,9 @@ III) Surface best practices around unit tests to instill confidence that the mac
 ### Installation instructions:
 
 I) Include this package in your packages.yml — check [here](https://github.com/rlsalcido24/lakehouse_utils/releases/tag/v0.1.1) for the latest version number.
+
 II) Run dbt deps
+
 III) Execute dbt seed -- this project includes a CSV that must be seeded for automated transpilation.
 
 ### Database support:
