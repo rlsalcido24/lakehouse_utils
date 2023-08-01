@@ -59,7 +59,7 @@ Arguments:
 
 a) Column name
 
-### to_number (source)
+### to_number ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/to_number.sql))
 
 This macro takes in an expression and optional format/precision/scale and returns a decimal with default formatting or the specified formatting.
 ```
@@ -97,7 +97,7 @@ b) format (optional) <br>
 c) precision (optional) <br>
 d) scale (optional) 
 
-### timestampadd (source)
+### timestampadd ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/timestampadd.sql))
 
 This macro takes in a time unit and adds the unit to an existing timestamp. 
 ```
@@ -119,7 +119,7 @@ a) time unit <br>
 b) measure (ie number of time units to add) <br>
 c) base timestamp
 
-### timestampdiff (source)
+### timestampdiff ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/timestampdiff.sql))
 
 This macro takes in two timestamps and calculates the difference by quantity of units.
 ```
@@ -148,7 +148,7 @@ a) unit <br>
 b) timestamp being subtracted <br>
 c) timesamp being subtracted from
 
-### dayname (source)
+### dayname ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/dayname.sql))
 
 This macro takes in a date and returns a string for day of week of that date.
 ```
