@@ -1,1 +1,0 @@
-The purpose of this directory is to trigger end to end unit tests that showcase how given a specific input, the databricks macro invocation output matches the snowflake output. / To validate this first execute dbt seed and then run dbt test. In the main branch of this source code the test success rate should always be 100%.
