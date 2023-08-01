@@ -252,6 +252,9 @@ inputs: variant <br>
 desc: Returns true if its VARIANT argument is a JSON null value. <br> 
 outputs: boolean  <br> 
 
-array_to_string (macro complete test todo)
+array_to_string <br> 
+inputs: array, seperator_string <br> 
+desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
+outputs: The data type of the returned value is VARCHAR. <br> 
 
 
