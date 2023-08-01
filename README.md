@@ -46,7 +46,7 @@ V) Build models in both systems until sufficient confidence is instilled to run 
 
 ## Macros:
 
-### zeroifnull (source)
+### zeroifnull ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/zeroifnull.sql))
 
 This macro takes in a column input and leverages the nvl function to return 0 if the input is null.
 ```
