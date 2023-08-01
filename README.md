@@ -44,6 +44,20 @@ IV) Once you have sufficient confidence copy the directory from the models direc
 
 V) Build models in both systems until sufficient confidence is instilled to run the models solely on one system.
 
+## Macros:
+
+### zeroifnull (source)
+
+This macro takes in a column input and leverages the nvl function to return 0 if the input is null.
+```
+{% macro zeroifnull(column_name) %}
+    nvl({{column_name}}, 0)
+{% endmacro %}   ```
+
+Arguments:
+
+a) Column name
+
 
 ### Next Steps: 
 
