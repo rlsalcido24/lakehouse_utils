@@ -1,4 +1,4 @@
-sql_endpoints:
+lakehouse:
   target: snow
 
   outputs:
