@@ -52,7 +52,8 @@ This macro takes in a column input and leverages the nvl function to return 0 if
 ```
 {% macro zeroifnull(column_name) %}
     nvl({{column_name}}, 0)
-{% endmacro %}   ```
+{% endmacro %}
+```
 
 Arguments:
 
