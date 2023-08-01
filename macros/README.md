@@ -2,17 +2,17 @@
 
 #### V1 supported string functions: 
 
-md5_binary
+md5_binary <br>
 inputs: msg <br>
 desc: Returns a 16-byte BINARY value containing the 128-bit MD5 message digest. <br>
 outputs: Returns a 16-byte BINARY value containing the MD5 message digest. <br>
 
-json_extract_path_text
+json_extract_path_text <br>
 inputs: column, identifier <br>
 desc: Parses the first argument as a JSON string and returns the value of the element pointed to by the path in the second argument. This is equivalent to TO_VARCHAR(GET_PATH(PARSE_JSON(JSON), PATH)) <br>
 outputs: The data type of the returned value is VARCHAR. <br>
 
-base64_encode
+base64_encode <br>
 inputs: input, max_line_length(optional), alphabet(optional) <br>
 desc:Encodes the input (string or binary) using Base64 encoding. <br>
 outputs: Returns a string (regardless of whether the input was a string or BINARY). <br>
@@ -23,13 +23,13 @@ desc: Returns 0 if its argument is null; otherwise, returns its argument. <br>
 outputs: zero or the original arg <br> 
 
 
-seq4
+seq4 <br>
 inputs: (01) optional <br>
 desc: Returns a sequence of monotonically increasing integers, with wrap-around. Wrap-around occurs after the largest representable integer of the integer width (1, 2, 4, or 8 byte). <br>
 outputs: If the optional sign argument is 0, the sequence continues at 0 after wrap-around. If the optional sign argument is 1, the sequence continues at the smallest representable number based on the given integer width. The default sign argument is 0.
 <br>
 
-strok_to_array
+strok_to_array <br>
 inputs: string, delimiter (optional) <br>
 desc: Tokenizes the given string using the given set of delimiters and returns the tokens as an array. If either parameter is a NULL, a NULL is returned. An empty array is returned if tokenization produces no tokens. <br>
 outputs: The data type of the returned value is ARRAY. <br>
@@ -51,33 +51,33 @@ inout: date_or_time_part, value, date_or_time_expr <br>
 desc: Adds the specified value for the specified date or time part to a date, time, or timestamp. <br> 
 output: time/timestamp/date depending on the input <br> 
 
-dayname
+dayname <br>
 inputs: date_or_timestamp_expr <br>
 desc: Extracts the three-letter day-of-week name from the specified date or timestamp. <br>
 outputs: Extracts the three-letter day-of-week name from the specified date or timestamp. <br>
 
-timestampadd
+timestampadd <br>
 inputs: date_or_time_part, time_value, date_or_time_expr <br>
 desc: Adds the specified value for the specified date or time part to a date, time, or timestamp. <br>
 outputs: If date_or_time_expr is a time: The return data type is a time. If date_or_time_expr is a timestamp: The return data type is a timestamp. If date_or_time_expr is a date: If date_or_time_part is day or larger (e.g. month, year), the function returns a DATE value. If date_or_time_part is smaller than a day (e.g. hour, minute, second), the function returns a TIMESTAMP_NTZ value, with 00:00:00.000 as the starting time for the date. <br>
 
-week
+week <br>
 inputs: date_or_timestamp_expr <br>
 desc: Extracts the corresponding date part from a date or timestamp. <br>
 outputs: Extracts the corresponding date part from a date or timestamp. <br>
 
-timediff
+timediff <br>
 inputs: date_or_time_part, date_or_time_expr1, date_or_time_expr2  <br>
 desc: Calculates the difference between two date, time, or timestamp expressions based on the specified date or time part. The function returns the result of subtracting the second argument from the third argument. <br>
 outputs: Returns an integer representing the number of units (seconds, days, etc.) difference between date_or_time_expr2 and date_or_time_expr1. <br>
 
-date_from_parts
+date_from_parts <br>
 inputs: year, month, day <br>
 desc: Creates a date from individual numeric components that represent the year, month, and day of the month. <br>
 outputs: DATE_FROM_PARTS is typically used to handle values in “normal” ranges (e.g. months 1-12, days 1-31), but it also handles values from outside these ranges. This allows, for example, choosing the N-th day in a year, which can be used to simplify some computations.
 Year, month, and day values can be negative (e.g. to calculate a date N months prior to a specific date). The behavior of negative numbers is not entirely intuitive; see the Examples section for details. <br>
 
-monthname
+monthname <br>
 inputs: date_or_timestamp_expr <br>
 desc: Extracts the three-letter month name from the specified date or timestamp. <br>
 outputs: Extracts the three-letter month name from the specified date or timestamp. <br>
@@ -181,17 +181,17 @@ inputs: source_string_expr, target_data_type <br>
 desc: A special version of CAST , :: that is available for a subset of data type conversions. It performs the same operation (i.e. converts a value of one data type into another data type), but returns a NULL value instead of raising an error when the conversion can not be performed.
 outputs: returns the casted val, or null if it ca't be casted <br> 
 
-current_schema
+current_schema <br>
 inputs: n/a <br>
 desc: Returns the name of the schema in use by the current session. <br>
 outputs: current schema <br>
 
-ends_with
+ends_with <br>
 inputs: exp1, expr2 <br>
 desc: Returns TRUE if the first expression ends with second expression. Both expressions must be text or binary expressions. <br>
 outputs: Returns a BOOLEAN. The value is True if expr1 ends with expr2. Returns NULL if either input expression is NULL. Otherwise, returns False. <br>
 
-charindex
+charindex <br>
 inputs: expr1, expr2, start_pos (optional)<br>
 desc: Searches for the first occurrence of the first argument in the second argument and, if successful, returns the position (1-based) of the first argument in the second argument. <br>
 outputs: If any arguments are NULL, the function returns NULL.If the string or binary value is not found, the function returns 0. If the specified optional start_pos is beyond the end of the second argument (the string to search), the function returns 0. If the first argument is empty (e.g. an empty string), the function returns 1. The data types of the first two arguments should be the same; either both should be strings or both should be binary values. <br>
