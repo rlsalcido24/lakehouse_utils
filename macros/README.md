@@ -154,7 +154,7 @@ inputs: array1 <br>
 desc: Returns a compacted array with missing and null values removed, effectively converting sparse arrays into dense arrays.  <br> 
 outputs: dense array <br> 
 
-len
+len <br>
 inputs: expr <br>
 desc: Returns the length of an input string or binary value. For strings, the length is the number of characters, and UTF-8 characters are counted as a single character. For binary, the length is the number of bytes. <br>
 outputs: The returned data type is INTEGER (more precisely, NUMBER(18, 0)). <br>
@@ -164,7 +164,10 @@ inputs: expr1, expr2 <br>
 desc: Compares whether two expressions are equal. The function is NULL-safe, meaning it treats NULLs as known values for comparing equality. Note that this is different from the EQUAL comparison operator (=), which treats NULLs as unknown values. <br> 
 outputs: true/false boolean <br> 
 
-to_timestamp_ntz (todo)
+to_timestamp_ntz <br>
+inputs: expr1, format, scale <br> 
+desc: Converts an input expression into the corresponding timestamp <br> 
+outputs: The data type of the returned value is one of the TIMESTAMP data types. By default, the data type is TIMESTAMP_NTZ. You can change this by setting the session parameter TIMESTAMP_TYPE_MAPPING. <br> 
 
 contains <br> 
 input: expr1, expr2 <br> 
