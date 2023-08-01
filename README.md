@@ -92,10 +92,10 @@ This macro takes in an expression and optional format/precision/scale and return
 
 Arguments:
 
-a) Expr
-b) format (optional)
-c) precision (optional)
-d) scale (optional)
+a) Expr <br>
+b) format (optional) <br>
+c) precision (optional) <br>
+d) scale (optional) 
 
 ### timestampadd (source)
 
@@ -115,8 +115,8 @@ This macro takes in a time unit and adds the unit to an existing timestamp.
 
 Arguments:
 
-a) time unit
-b) measure (ie number of time units to add)
+a) time unit <br>
+b) measure (ie number of time units to add) <br>
 c) base timestamp
 
 ### timestampdiff (source)
@@ -144,8 +144,8 @@ This macro takes in two timestamps and calculates the difference by quantity of 
 
 Arguments:
 
-a) unit
-b) timestamp being subtracted
+a) unit <br>
+b) timestamp being subtracted <br>
 c) timesamp being subtracted from
 
 ### dayname (source)
