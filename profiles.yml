@@ -1,9 +1,9 @@
 sql_endpoints:
-  target: dev
+  target: snow
 
   outputs:
 
-    snowflake:
+    snow:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_TEST_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_TEST_USER') }}"
