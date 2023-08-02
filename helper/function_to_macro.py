@@ -78,6 +78,8 @@ def function_to_macro(content, function_name):
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 def dbt_project_functions_to_macros(repo_path):
+
+  results_set = []
   # Verify we are running in a dbt project
   try:
     dbutils.fs.ls(f'file:/Workspace/Repos/{repo_path}/dbt_project.yml')
@@ -94,12 +96,18 @@ def dbt_project_functions_to_macros(repo_path):
       for future in as_completed(futures_sql):
         data = future.result()
         if data:
+            results_set.append(data)
             print(f"Processed: {data}")
         else:
             print(f"Nothing to change: {data}")
 
   except:
       print("Not a valid dbt project")
+
+  column_names = ["Path","Converted functions"]
+  results_set_df = spark.createDataFrame(results_set, column_names)
+
+  return results_set_df    
 
 ## Function to asynchronously kick off: open each file, loop through every function, write results
 
@@ -118,7 +126,7 @@ def process_file(full_path, functions_list):
     file.write(content)
     file.truncate()
 
-  return ({full_path}, f'Converted functions: {converted_functions}') ## Return list of functions that converted
+  return (full_path, converted_functions) ## Return list of functions that converted
 
 # COMMAND ----------
 
@@ -139,6 +147,8 @@ input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schem
 input_functionspd = input_functionsql.toPandas()
 input_functions = input_functionspd["function_name"]
 
+# input_functions = ['st_intersects','is_integer','get','xmlget','contains','as_varchar','approx_top_k','regexp_count','week']
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -151,4 +161,10 @@ input_functions = input_functionspd["function_name"]
 
 repo_path = dbutils.widgets.get("repo_path")
 
-dbt_project_functions_to_macros(repo_path)
+output_df = dbt_project_functions_to_macros(repo_path)
+
+display(output_df)
+
+# COMMAND ----------
+
+
