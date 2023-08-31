@@ -1,3 +1,3 @@
 {% macro dlog1(expr) %}
-    ln({{stamp}})
+    ln({{expr}})
 {% endmacro %}
