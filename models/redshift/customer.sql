@@ -7,7 +7,7 @@
 
 
 select 
-    convet(string, c_custkey) as stringkey,
+    convert(string, c_custkey) as stringkey,
     c_name,
     c_address,
     c_nationkey,
