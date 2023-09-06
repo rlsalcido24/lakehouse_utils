@@ -1,5 +1,28 @@
--- macros/texttonumericalt.sql
+{% macro texttonumericalt(expr, format, precision, scale) %}
 
-{% macro texttonumericalt(input_string, precision, scale) %}
-  ROUND(CAST({{ input_string }} AS DECIMAL({{ precision }}, {{ scale }})), {{ scale }})
+
+{% if scale %}
+
+
+
+
+cast({{expr}} as decimal({{precision}}, {{scale}}))
+
+
+{% elif precision %}
+
+cast({{expr}} as decimal({{format}}, {{precision}}))
+
+
+{% elif format %}
+
+to_number({{expr}}, "{{format}}")
+
+
+{% else %}
+
+cast({{expr}} as decimal(38, 0))
+
+{% endif %}	
+
 {% endmacro %}
