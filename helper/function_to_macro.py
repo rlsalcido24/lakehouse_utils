@@ -17,6 +17,7 @@ import os
 import re
 
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
+dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
 
 # COMMAND ----------
 
@@ -135,7 +136,13 @@ dbutils.widgets.text("schema", "schema")
 
 catalog = dbutils.widgets.get("catalog")
 schema = dbutils.widgets.get("schema")
-input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
+targetdb = dbutils.widgets.get("targetdb")
+if targetdb == 'snowflake':
+  input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
+elif targetdb == 'redshift': 
+  input_functionsql = sql('select * from {}.{}.functionlistrs'.format(catalog, schema))
+else:
+  input_functionsql = sql ('select 1')   
 input_functionspd = input_functionsql.toPandas()
 input_functions = input_functionspd["function_name"]
 
