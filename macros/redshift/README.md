@@ -1,21 +1,11 @@
 #### For the most up to date list of supported functions, refrence the functionlist.csv in the seed directory.
 
-#### V1 supported string functions: 
+#### V1 supported functions: 
 
 convert <br>
 inputs: type, expression <br>
 desc: Like the CAST function, the CONVERT function converts one data type to another compatible data type. For instance, you can convert a string to a date, or a numeric type to a string. CONVERT performs a runtime conversion, which means that the conversion doesn't change a value's data type in a source table. It's changed only in the context of the query. <br>
 outputs: CONVERT returns the data type specified by the type argument. <br>
-
-HLL <br>
-inputs: aggregate_expression <br>
-desc: The HLL function returns the HyperLogLog cardinality of the input expression values. The HLL function works with any data types except the HLLSKETCH data type. The HLL function ignores NULL values. When there are no rows in a table or all rows are NULL, the resulting cardinality is 0. <br>
-outputs: BigInt <br>
-
-TEXT_TO_INT_ALT <br>
-inputs: expression, format <br>
-desc: TEXT_TO_INT_ALT converts a character string to an integer using Teradata-style formatting. Fraction digits in the result are truncated. <br>
-outputs: TEXT_TO_INT_ALT returns an INTEGER value. <br>
 
 TEXT_TO_NUMERIC_ALT <br>
 inputs: expresssion, format, precision, scale <br>
@@ -61,4 +51,16 @@ getdate <br>
 inputs: none <br>
 desc: GETDATE returns the current date and time in the current session time zone (UTC by default). It returns the start date or time of the current statement, even when it is within a transaction block. <br>
 outputs: The LN function returns the same type as the expression.
+
+#### V1 un-supported functions: 
+
+HLL <br>
+inputs: aggregate_expression <br>
+desc: The HLL function returns the HyperLogLog cardinality of the input expression values. The HLL function works with any data types except the HLLSKETCH data type. The HLL function ignores NULL values. When there are no rows in a table or all rows are NULL, the resulting cardinality is 0. <br>
+outputs: BigInt <br>
+
+TEXT_TO_INT_ALT <br>
+inputs: expression, format <br>
+desc: TEXT_TO_INT_ALT converts a character string to an integer using Teradata-style formatting. Fraction digits in the result are truncated. <br>
+outputs: TEXT_TO_INT_ALT returns an INTEGER value. <br>
 
