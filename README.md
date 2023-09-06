@@ -18,7 +18,7 @@ III) Execute dbt seed -- this project includes a CSV that must be seeded for aut
 
 ### Database support:
 
-This package has been tested on Snowflake and Databricks.
+This package has been tested on Snowflake, Redshift, and Databricks.
 
 ### Manual 'Hello World' CUJ:  
 
@@ -169,7 +169,5 @@ Arguments:
 a) date
 
 ### Next Steps: 
-
-I) Deploy this logic as a package in the dbt hub so it is simpler to interface with.
 
 Note that we gladly welcome contributions from the partners and from the community-- if intersted please submit a pull request! We can particularly use support with increasing our surface area of supported functions. When submitting a PR please include a unit test for each new macro added-- as long as any new unit tests pass, and existing tests continue to pass, we should be able to GTM (example pr template in .github directory). If you have a request to support a particular function please do log it as an enhancement in issues and happy building!!
