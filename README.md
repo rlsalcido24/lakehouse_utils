@@ -26,21 +26,21 @@ To get a quick sense of what this module offers, you can reference and run the m
 
 I) Insert the relevant values into the profiles.yml based on your warehouse and lakehouse credentials.
 
-II) Build the Snowflake models by executing dbt run --target snow 
+II) Build the Snowflake models by executing dbt run --target snow and the Redshift models by executing dbt run --target redshift.
 
-III) Build the Databricks models by temporarily updating the models_path key in profiles.yml to be tmp and executing dbt run --target databricks.
+III) Build the Databricks models by temporarily updating the models_path key in profiles.yml to be tmp/snowflake or tmp/redshift and executing dbt run --target databricks.
 
-IV) Observe that when when the models build on Databricks they transpile the Snowflake functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. Also note that manually 'migrating' these two models from scratch should take no longer than 5 mins-- it is just a matter of wrapping the relevant function in braces and wrapping the input parameters in quotes. 
+IV) Observe that when when the models build on Databricks they transpile the Snowflake/Redshift functions that invoke macros (wrapped in curly braces). Also observe that while syntax is slightly different in each system the end results are still the same. Also note that manually 'migrating' these two models from scratch should take no longer than 5 mins-- it is just a matter of wrapping the relevant function in braces and wrapping the input parameters in quotes. 
 
 ### Automated 'to the moon' CUJ 
 
-I) Create a seperate dev branch of your dbt project. Execute dbt seed (if you haven't already). Run the helper function_to_macro.py file on Databricks. Obvserve that all your Snowflake models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in Databricks.
+I) Create a seperate dev branch of your dbt project. Execute dbt seed (if you haven't already). Run the helper function_to_macro.py file on Databricks (easiest way is by importing as a repo). Obvserve that all your Snowflake/Redshift models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in Databricks.
 
 II) dbt run.
 
-III) Execute unit tests to ensure that the models built in Databricks match the models built on Snowflake.
+III) Execute unit tests to ensure that the models built in Databricks match the models built on Snowflake/Redshift.
 
-IV) Once you have sufficient confidence copy the directory from the models directory of the dev branch to the models directory of the main branch and name the directory something different to differentiate it from the Snowflake models (ie Snow and Databricks) 
+IV) Once you have sufficient confidence copy the directory from the models directory of the dev branch to the models directory of the main branch and name the directory something different to differentiate it from the Snowflake/Redshift models (ie Snow and Databricks) 
 
 V) Build models in both systems until sufficient confidence is instilled to run the models solely on one system.
 
