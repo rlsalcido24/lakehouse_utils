@@ -41,7 +41,7 @@ def get_dir_content(ls_path):
 def function_to_macro(content, function_name):
 
   pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-  replacement = r'{{\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
+  replacement = r'{{lakehouse_utils.\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
   
   check_preventDoubleReplace_pattern = r'({{{}\()([^)]+)\)'.format(function_name)
   check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
