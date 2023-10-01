@@ -58,9 +58,11 @@ HLL <br>
 inputs: aggregate_expression <br>
 desc: The HLL function returns the HyperLogLog cardinality of the input expression values. The HLL function works with any data types except the HLLSKETCH data type. The HLL function ignores NULL values. When there are no rows in a table or all rows are NULL, the resulting cardinality is 0. <br>
 outputs: BigInt <br>
+why no support: HLL can take in any expression whereas cardinality only takes in array/map expressions
 
 TEXT_TO_INT_ALT <br>
 inputs: expression, format <br>
 desc: TEXT_TO_INT_ALT converts a character string to an integer using Teradata-style formatting. Fraction digits in the result are truncated. <br>
 outputs: TEXT_TO_INT_ALT returns an INTEGER value. <br>
+why no support: incompatible formatting
 
