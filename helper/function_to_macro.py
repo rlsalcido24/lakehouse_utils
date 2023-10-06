@@ -32,9 +32,6 @@
 
 # COMMAND ----------
 
-import os
-import re
-
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
 dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
 
@@ -65,3 +62,7 @@ dbutils.widgets.text("schema", "schema")
 repo_path = dbutils.widgets.get("repo_path")
 
 dbt_project_functions_to_macros(repo_path)
+
+# COMMAND ----------
+
+

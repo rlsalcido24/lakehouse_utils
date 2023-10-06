@@ -1,4 +1,7 @@
 # Databricks notebook source
+import os
+import re
+
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
 dbutils.widgets.text("targetdb", "snowflake")
 
@@ -28,7 +31,7 @@ def get_dir_content(ls_path):
 def function_to_macro(content, function_name):
 
   pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-  replacement = r'{{lakehouse_utils.\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
+  replacement_doubleQuotes = r'{{lakehouse_utils.\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
   
   check_preventDoubleReplace_pattern = r'({{lakehouse_utils.{}\()([^)]+)\)'.format(function_name)
   check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
@@ -39,14 +42,30 @@ def function_to_macro(content, function_name):
       number_of_matches = len(re.findall(pattern, content))
     except:
       number_of_matches = 0
-    updated_content = re.sub(pattern, replacement, content)
+
+    updated_content = re.sub(pattern, replacement_doubleQuotes, content)
+
+    print(updated_content)
+
     matched_patterns = re.findall(pattern,updated_content) 
 
+    print(matched_patterns)
+
     for i in matched_patterns:
+      
+      # Substitute quotes around inner commas
+
       commas = r','
       quoted_commas = r'","'
       updated_match = re.sub(commas,quoted_commas,i[1])
       updated_content = updated_content.replace(i[1], updated_match)
+
+    # If we inadvertently surrounded a double-quoted string with more double-quotes, change these to be single quotes to prevent compatibility issues!
+
+    double_doubleQuotes_pattern = r'""([^"]*)""'
+    single_doubleQuotes_pattern = r"""'"\1"'"""
+    
+    updated_content = re.sub(double_doubleQuotes_pattern,single_doubleQuotes_pattern,updated_content)
 
   # If the previous check failed, continue unchanged
   else:
@@ -64,6 +83,25 @@ def function_to_macro(content, function_name):
 # COMMAND ----------
 
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+
+## Function to asynchronously kick off: open each file, loop through every function, write results
+
+def process_file(full_path, functions_list):
+
+  converted_functions = dict()
+  with open(full_path, 'r+') as file:
+    content = file.read()
+    for function_name in functions_list:
+      content, no_matches = function_to_macro(content, function_name)
+
+      if no_matches > 0:
+        converted_functions[function_name] = no_matches
+
+    file.seek(0)
+    file.write(content)
+    file.truncate()
+
+  return ({full_path}, f'Converted functions: {converted_functions}') ## Return list of functions that converted
 
 def dbt_project_functions_to_macros(repo_path):
   # Verify we are running in a dbt project
@@ -87,26 +125,7 @@ def dbt_project_functions_to_macros(repo_path):
             print(f"Nothing to change: {data}")
 
   except:
-      print("Not a valid dbt project")
-
-## Function to asynchronously kick off: open each file, loop through every function, write results
-
-def process_file(full_path, functions_list):
-
-  converted_functions = dict()
-  with open(full_path, 'r+') as file:
-    content = file.read()
-    for function_name in functions_list:
-      content, no_matches = function_to_macro(content, function_name)
-
-      if no_matches > 0:
-        converted_functions[function_name] = no_matches
-
-    file.seek(0)
-    file.write(content)
-    file.truncate()
-
-  return ({full_path}, f'Converted functions: {converted_functions}') ## Return list of functions that converted
+      print("Not a valid dbt project")  
 
 # COMMAND ----------
 
@@ -125,6 +144,7 @@ if targetdb == 'snowflake':
 elif targetdb == 'redshift': 
   input_functionsql = sql('select * from {}.{}.functionlistrs'.format(catalog, schema))
 else:
-  input_functionsql = sql ('select 1')   
+  input_functionsql = sql('select 1')
+
 input_functionspd = input_functionsql.toPandas()
 input_functions = input_functionspd["function_name"]
