@@ -39,6 +39,9 @@ dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
 dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
 dbutils.widgets.text("debugmode", "true")
+dbutils.widgets.text("parsemacro", "false")
+dbutils.widgets.text("subdir", "false")
+dbutils.widgets.text("subdirpath", "redshift")
 
 
 # COMMAND ----------
@@ -49,7 +52,7 @@ dbutils.widgets.text("debugmode", "true")
 
 # COMMAND ----------
 
-# MAGIC %run ./_resources/00-setup $targetdb=$targetdb $catalog=$catalog $schema=$schema $debugmode=$debugmode
+# MAGIC %run ./_resources/00-setup $targetdb=$targetdb $catalog=$catalog $schema=$schema $debugmode=$debugmode $parsemacro=$parsemacro $subdir=$subdir $subdirpath=$subdirpath
 
 # COMMAND ----------
 
@@ -64,7 +67,3 @@ dbutils.widgets.text("debugmode", "true")
 repo_path = dbutils.widgets.get("repo_path")
 
 dbt_project_functions_to_macros(repo_path)
-
-# COMMAND ----------
-
-
