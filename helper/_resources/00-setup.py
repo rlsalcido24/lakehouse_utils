@@ -10,7 +10,9 @@ dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
 
 debugmode = dbutils.widgets.get("debugmode")
-
+parsemacro = dbutils.widgets.get("parsemacro")
+subdir = dbutils.widgets.get("subdir")
+subdirpath = dbutils.widgets.get("subdirpath")
 
 # COMMAND ----------
 
@@ -115,7 +117,15 @@ def dbt_project_functions_to_macros(repo_path):
     print("Converting .sql files in the Models folder...")
 
     # List all sql files to be checked in a folder
-    paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')
+    if parsemacro == 'true':  
+      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/macros')
+
+    elif subdir == 'true':
+      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models/{subdirpath}')
+
+    else: 
+      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')        
+    
     sql_files = [i[5:] for i in paths if '.sql' in i]
 
     with ThreadPoolExecutor() as executor:
