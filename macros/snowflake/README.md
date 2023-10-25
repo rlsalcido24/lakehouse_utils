@@ -260,7 +260,7 @@ For source_tz and target_tz, you can specify a time zone name or a link name fro
 output: returns either timestamp_ntz (three args) or timestamp_tz (two args) <br> 
 blocker: we support the three arg veresion but not the two arg version due to limitation describe with in to_timestamp_tz
 
-to_timestamp_tz
+to_timestamp_tz <br> 
 inputs: varchar <br> 
 desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
 outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
@@ -285,99 +285,99 @@ desc: Returns true if its VARIANT argument is a JSON null value. <br>
 outputs: boolean  <br> 
 blocker: no analagous concept of json null value
 
-decrypt
+decrypt <br> 
 inputs: value, passphrase, aad, mode <br> 
 desc: Decrypts a BINARY value using a VARCHAR passphrase. <br> 
 outputs: Returns the decrypted value as a BINARY value. If the original value before encryption was VARCHAR, you must explicitly convert the returned BINARY back to VARCHAR. For example: <br> 
 blocker: aes_desrypt use binary key, not varchar passphrase. decrypt_raw can probably be transpiled <br>
 
 
-parse_json
+parse_json <br> 
 inputs: varchar <br> 
 desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
 outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
 blocker: databricks does not support variant type <br>
 
-last_query_id
+last_query_id <br> 
 inputs: num <br> 
 desc: Returns the ID of a specified query in the current session. If no query is specified, the most recently-executed query is returned. <br> 
 outputs: Return the ID for the most recently-executed query: <br> 
 blocker: no comparable databricks DQL <br>
 
-current_transaction
+current_transaction <br> 
 inputs: none <br> 
 desc: Returns the transaction id of an open transaction in the current session. <br> 
 outputs: This shows the transaction ID of the current transaction: <br> 
 blocker: no comparable databricks DQL <br>
 
-object_insert
+object_insert <br> 
 inputs: object, key, value <br> 
 desc: Returns an object consisting of the input object with a new key-value pair inserted (or an existing key updated with a new value). <br> 
 outputs: Insert a third key-value pair into an object containing two key-value pairs: <br> 
 blocker: no comparable databricks DQL <br>
 
-check_json
+check_json <br> 
 inputs: string/variant <br> 
 desc: Checks the validity of a JSON document. If the input string is a valid JSON document or a NULL, the output is NULL (i.e. no error). If the input cannot be translated to a valid JSON value, the output string contains the error message. <br> 
 outputs: Use the CHECK_JSON function to check the validity of potential JSON-compatible strings in a VARIANT column: <br> 
 blocker: no comparable databricks DQL <br>
 
-hll_export
+hll_export <br> 
 inputs: binaryexpr <br> 
 desc: Converts input in BINARY format to OBJECT format. <br> 
 outputs: Converts input in BINARY format to OBJECT format. <br> 
 blocker: no comparable databricks dql <br>
 
-get
+get <br> 
 inputs: internalstage <br> 
 desc: Downloads data files from one of the following Snowflake stages to a local directory/folder on a client machine:. <br> 
 outputs: N/A <br> 
 blocker: we dont have stages, we work directly against cloud storage. in databricks you can use dbutils copy for this use case. <br>
 
-current_region
+current_region <br> 
 inputs: na <br> 
 desc: Returns the name of the region for the account where the current user is logged in. <br> 
 outputs: Returns the name of the region for the account where the current user is logged in. <br> 
 blocker: no comparable DQL in databricks <br>
 
-get_ddl
+get_ddl <br> 
 inputs: objecttype, objectname <br> 
 desc: Returns a DDL statement that can be used to recreate the specified object. For databases and schemas, GET_DDL is recursive (i.e. it returns the DDL statements for recreating all supported objects within the specified database/schema). <br> 
 outputs: Returns a string (VARCHAR) containing the text of the DDL statement that created the object. <br> 
 blocker: we have show create table but wouldnt support the other objecttypes <br>
 
-try_parse_json
+try_parse_json <br> 
 inputs: varchar <br> 
 desc: A special version of PARSE_JSON that returns a NULL value if an error occurs during parsing. <br> 
 outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
 blocker: databricks does not support variant type <br>
 
-to_geography
+to_geography <br> 
 inputs: varchar <br> 
 desc: Parses an input and returns a value of type GEOGRAPHY. <br> 
 outputs: The function returns a value of type GEOGRAPHY. <br> 
 blocker: databricks does not support geography type <br>
 
-parse_xml
+parse_xml <br> 
 inputs: xmlstring <br> 
 desc: Interprets an input string as an XML document, producing an OBJECT value. If the input is NULL, the output is NULL <br> 
 outputs: The data type of the returned value is OBJECT. The OBJECT contains an internal representation of the XML. <br> 
 blocker: no comparable databricks dql <br>
 
-object_delete
+object_delete <br> 
 inputs: object, keystoremove <br> 
 desc: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
 outputs: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
 blocker: no comparable databricks DQL <br>
 
 
-get_path
+get_path <br> 
 inputs: column identifier, pathname <br> 
 desc: Extracts a value from semi-structured data using a path name. <br> 
 outputs: Extracts a value from semi-structured data using a path name. <br> 
 blocker: we can probably handle object/array but not variant inputs <br>
 
-st_intersects
+st_intersects <br> 
 inputs: expr1, expr2 <br> 
 desc: Returns TRUE if the two GEOGRAPHY objects or the two GEOMETRY objects intersect (i.e. share any portion of space). <br> 
 outputs: boolean <br> 
