@@ -340,17 +340,35 @@ outputs: The function returns a value of type GEOGRAPHY. <br>
 blocker: databricks does not support geography type <br>
 
 parse_xml
+inputs: xmlstring <br> 
+desc: Interprets an input string as an XML document, producing an OBJECT value. If the input is NULL, the output is NULL <br> 
+outputs: The data type of the returned value is OBJECT. The OBJECT contains an internal representation of the XML. <br> 
+blocker: no comparable databricks dql <br>
 
 object_delete
+inputs: object, keystoremove <br> 
+desc: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
+outputs: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
+blocker: TBD <br>
 
-standardize
 
 hll_estimate
+inputs: state <br> 
+desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+blocker: TBD <br>
 
 get_path
+inputs: column identifier, pathname <br> 
+desc: Extracts a value from semi-structured data using a path name. <br> 
+outputs: Extracts a value from semi-structured data using a path name. <br> 
+blocker: we can probably handle object/array but not variant inputs <br>
 
 st_intersects
-
+inputs: expr1, expr2 <br> 
+desc: Returns TRUE if the two GEOGRAPHY objects or the two GEOMETRY objects intersect (i.e. share any portion of space). <br> 
+outputs: boolean <br> 
+blocker: st_ functions are not yet supported in databricks <br>
 
 
 
