@@ -20,6 +20,7 @@ timeadd
 try_to_number
 try_to_numeric
 to_decimal
+to_numeric
 try_to_decimal
 to_boolean
 to_array
