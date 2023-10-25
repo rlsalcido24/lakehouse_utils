@@ -216,6 +216,20 @@ outputs: split up string <br>
 
 [regexp_like, regexp_substr, iff, median, regexp_instr, percentile_disc, regexp_count, percentile_cont, any_value]
 
+#### TODO:
+
+hll_estimate
+inputs: state <br> 
+desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+blocker: none!!, hll_sketch_estimate <br>
+
+array_to_string <br> 
+inputs: array, seperator_string <br> 
+desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
+outputs: The data type of the returned value is VARCHAR. <br> 
+blockers: none, array_join!
+
 
 #### Not yet supported functions:
 
@@ -224,6 +238,15 @@ inputs: expr (reqd), format (optional) <br>
 desc: Converts the input expression to a string. For NULL input, the output is NULL.
 outputs: For VARIANT, ARRAY, or OBJECT inputs, the output is the string containing a JSON document or JSON elementary value (unless VARIANT or OBJECT contains an XML tag, in which case the output is a string containing an XML document):A string stored in VARIANT is preserved as is (i.e. it is not converted to a JSON string).
 A JSON null value is converted to a string containing the word “null”. <br> 
+blocker: formatting differences btwn databricks and snowflake
+
+to_char  <br> 
+inputs: expr (reqd), format (optional) <br> 
+desc: Converts the input expression to a string. For NULL input, the output is NULL. <br> 
+outputs: For VARIANT, ARRAY, or OBJECT inputs, the output is the string containing a JSON document or JSON elementary value (unless VARIANT or OBJECT contains an XML tag, in which case the output is a string containing an XML document):A string stored in VARIANT is preserved as is (i.e. it is not converted to a JSON string). 
+A JSON null value is converted to a string containing the word “null”. <br> 
+blocker: formatting differences btwn databricks and snowflake
+
 
 convert_timezone <br> 
 inputs: source_tz, target_tz, source_tiemstamp_ntz or target_tz, source_timestamp <br> 
@@ -235,50 +258,38 @@ The source_timestamp argument is considered to include the time zone. If the val
 The return value is always of type TIMESTAMP_TZ.
 For source_tz and target_tz, you can specify a time zone name or a link name from release 2021a of the IANA Time Zone Database (e.g. America/Los_Angeles, Europe/London, UTC, Etc/GMT, etc.).
 output: returns either timestamp_ntz (three args) or timestamp_tz (two args) <br> 
+blocker: we support the three arg veresion but not the two arg version due to limitation describe with in to_timestamp_tz
 
-
-to_char  <br> 
-inputs: expr (reqd), format (optional) <br> 
-desc: Converts the input expression to a string. For NULL input, the output is NULL. <br> 
-outputs: For VARIANT, ARRAY, or OBJECT inputs, the output is the string containing a JSON document or JSON elementary value (unless VARIANT or OBJECT contains an XML tag, in which case the output is a string containing an XML document):A string stored in VARIANT is preserved as is (i.e. it is not converted to a JSON string). 
-A JSON null value is converted to a string containing the word “null”. <br> 
+to_timestamp_tz
+inputs: varchar <br> 
+desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
+outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
+blocker: when using to_timestamp databricks will apply the offset rather than persisting it. <br>
 
 array_construct <br> 
 inputs: kwarg expressions <br> 
 desc: Returns an array constructed from zero, one, or more inputs. <br> 
 outputs: array <br> 
+blocker: no way to pass in kwargs to macro. we could ask to pass in a list but that would require a bit of manual intervention.
 
 
 object_construct <br> 
 inputs: kwargs <br> 
 desc: Returns an OBJECT constructed from the arguments. <br> 
 outputs: instantiated object <br>  
+blocker: no way to pass in kwargs to macro. we could ask to pass in a list but that would require a bit of manual intervention.
 
 is_null_value <br> 
 inputs: variant <br> 
 desc: Returns true if its VARIANT argument is a JSON null value. <br> 
 outputs: boolean  <br> 
+blocker: no analagous concept of json null value
 
-array_to_string <br> 
-inputs: array, seperator_string <br> 
-desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
-outputs: The data type of the returned value is VARCHAR. <br> 
-
-to_timestamp_tz
-inputs: varchar <br> 
-desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
-outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
-blocker: we support timestamp for ntz... <br>
-
-hll_estimate
-inputs: state <br> 
-desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-blocker: none!!, hll_sketch_estimate <br>
-
-decrpt
-TBD
-
+decrypt
+inputs: value, passphrase, aad, mode <br> 
+desc: Decrypts a BINARY value using a VARCHAR passphrase. <br> 
+outputs: Returns the decrypted value as a BINARY value. If the original value before encryption was VARCHAR, you must explicitly convert the returned BINARY back to VARCHAR. For example: <br> 
+blocker: aes_desrypt use binary key, not varchar passphrase. decrypt_raw can probably be transpiled <br>
 
 
 parse_json
