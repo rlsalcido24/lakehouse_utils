@@ -270,6 +270,17 @@ desc: Interprets an input string as a JSON document, producing a VARIANT value. 
 outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
 blocker: we support timestamp for ntz... <br>
 
+hll_estimate
+inputs: state <br> 
+desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+blocker: none!!, hll_sketch_estimate <br>
+
+decrpt
+TBD
+
+
+
 parse_json
 inputs: varchar <br> 
 desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
@@ -292,22 +303,19 @@ object_insert
 inputs: object, key, value <br> 
 desc: Returns an object consisting of the input object with a new key-value pair inserted (or an existing key updated with a new value). <br> 
 outputs: Insert a third key-value pair into an object containing two key-value pairs: <br> 
-blocker: TBD <br>
+blocker: no comparable databricks DQL <br>
 
 check_json
 inputs: string/variant <br> 
 desc: Checks the validity of a JSON document. If the input string is a valid JSON document or a NULL, the output is NULL (i.e. no error). If the input cannot be translated to a valid JSON value, the output string contains the error message. <br> 
 outputs: Use the CHECK_JSON function to check the validity of potential JSON-compatible strings in a VARIANT column: <br> 
-blocker: TBD <br>
+blocker: no comparable databricks DQL <br>
 
 hll_export
 inputs: binaryexpr <br> 
 desc: Converts input in BINARY format to OBJECT format. <br> 
 outputs: Converts input in BINARY format to OBJECT format. <br> 
-blocker: TBD <br>
-
-decrpt
-TBD
+blocker: no comparable databricks dql <br>
 
 get
 inputs: internalstage <br> 
@@ -349,14 +357,8 @@ object_delete
 inputs: object, keystoremove <br> 
 desc: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
 outputs: Returns an object containing the contents of the input (i.e.source) object with one or more keys removed. <br> 
-blocker: TBD <br>
+blocker: no comparable databricks DQL <br>
 
-
-hll_estimate
-inputs: state <br> 
-desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-blocker: TBD <br>
 
 get_path
 inputs: column identifier, pathname <br> 
