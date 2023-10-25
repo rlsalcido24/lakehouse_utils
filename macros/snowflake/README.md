@@ -214,6 +214,8 @@ inputs: string, delimiter, partnumber <br>
 desc: Splits a given string at a specified character and returns the requested part. <br> 
 outputs: split up string <br> 
 
+[regexp_like, regexp_substr, iff, median, regexp_instr, percentile_disc, regexp_count, percentile_cont, any_value]
+
 
 #### Not yet supported functions:
 
@@ -261,5 +263,77 @@ array_to_string <br>
 inputs: array, seperator_string <br> 
 desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
 outputs: The data type of the returned value is VARCHAR. <br> 
+
+to_timestamp_tz
+inputs: varchar <br> 
+desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
+outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
+blocker: we support timestamp for ntz... <br>
+
+parse_json
+inputs: varchar <br> 
+desc: Interprets an input string as a JSON document, producing a VARIANT value. <br> 
+outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
+blocker: databricks does not support variant type <br>
+
+last_query_id
+inputs: num <br> 
+desc: Returns the ID of a specified query in the current session. If no query is specified, the most recently-executed query is returned. <br> 
+outputs: Return the ID for the most recently-executed query: <br> 
+blocker: no comparable databricks DQL <br>
+
+current_transaction
+inputs: none <br> 
+desc: Returns the transaction id of an open transaction in the current session. <br> 
+outputs: This shows the transaction ID of the current transaction: <br> 
+blocker: no comparable databricks DQL <br>
+
+object_insert
+inputs: object, key, value <br> 
+desc: Returns an object consisting of the input object with a new key-value pair inserted (or an existing key updated with a new value). <br> 
+outputs: Insert a third key-value pair into an object containing two key-value pairs: <br> 
+blocker: TBD <br>
+
+check_json
+inputs: string/variant <br> 
+desc: Checks the validity of a JSON document. If the input string is a valid JSON document or a NULL, the output is NULL (i.e. no error). If the input cannot be translated to a valid JSON value, the output string contains the error message. <br> 
+outputs: Use the CHECK_JSON function to check the validity of potential JSON-compatible strings in a VARIANT column: <br> 
+blocker: TBD <br>
+
+hll_export
+inputs: binaryexpr <br> 
+desc: Converts input in BINARY format to OBJECT format. <br> 
+outputs: Converts input in BINARY format to OBJECT format. <br> 
+blocker: TBD <br>
+
+decrpt
+TBD
+
+get
+
+current_region
+
+get_ddl
+
+try_parse_json
+
+to_geography
+
+parse_xml
+
+object_delete
+
+standardize
+
+hll_estimate
+
+get_path
+
+st_intersects
+
+
+
+
+
 
 
