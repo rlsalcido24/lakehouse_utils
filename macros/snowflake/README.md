@@ -310,14 +310,34 @@ decrpt
 TBD
 
 get
+inputs: internalstage <br> 
+desc: Downloads data files from one of the following Snowflake stages to a local directory/folder on a client machine:. <br> 
+outputs: N/A <br> 
+blocker: we dont have stages, we work directly against cloud storage. in databricks you can use dbutils copy for this use case. <br>
 
 current_region
+inputs: na <br> 
+desc: Returns the name of the region for the account where the current user is logged in. <br> 
+outputs: Returns the name of the region for the account where the current user is logged in. <br> 
+blocker: no comparable DQL in databricks <br>
 
 get_ddl
+inputs: objecttype, objectname <br> 
+desc: Returns a DDL statement that can be used to recreate the specified object. For databases and schemas, GET_DDL is recursive (i.e. it returns the DDL statements for recreating all supported objects within the specified database/schema). <br> 
+outputs: Returns a string (VARCHAR) containing the text of the DDL statement that created the object. <br> 
+blocker: we have show create table but wouldnt support the other objecttypes <br>
 
 try_parse_json
+inputs: varchar <br> 
+desc: A special version of PARSE_JSON that returns a NULL value if an error occurs during parsing. <br> 
+outputs: The returned value is of type VARIANT and contains a JSON document. <br> 
+blocker: databricks does not support variant type <br>
 
 to_geography
+inputs: varchar <br> 
+desc: Parses an input and returns a value of type GEOGRAPHY. <br> 
+outputs: The function returns a value of type GEOGRAPHY. <br> 
+blocker: databricks does not support geography type <br>
 
 parse_xml
 
