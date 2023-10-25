@@ -38,6 +38,8 @@ dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
+dbutils.widgets.text("debugmode", "true")
+
 
 # COMMAND ----------
 
@@ -47,7 +49,7 @@ dbutils.widgets.text("schema", "schema")
 
 # COMMAND ----------
 
-# MAGIC %run ./_resources/00-setup $targetdb=$targetdb $catalog=$catalog $schema=$schema
+# MAGIC %run ./_resources/00-setup $targetdb=$targetdb $catalog=$catalog $schema=$schema $debugmode=$debugmode
 
 # COMMAND ----------
 
