@@ -9,6 +9,9 @@ dbutils.widgets.text("targetdb", "snowflake")
 dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
 
+debugmode = dbutils.widgets.get("debugmode")
+
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -45,11 +48,11 @@ def function_to_macro(content, function_name):
 
     updated_content = re.sub(pattern, replacement_doubleQuotes, content)
 
-    print(updated_content)
+    #print(updated_content)
 
     matched_patterns = re.findall(pattern,updated_content) 
 
-    print(matched_patterns)
+    #print(matched_patterns)
 
     for i in matched_patterns:
       
@@ -101,7 +104,7 @@ def process_file(full_path, functions_list):
     file.write(content)
     file.truncate()
 
-  return ({full_path}, f'Converted functions: {converted_functions}') ## Return list of functions that converted
+  return (full_path, converted_functions) ## Return list of functions that converted
 
 def dbt_project_functions_to_macros(repo_path):
   # Verify we are running in a dbt project
@@ -120,9 +123,24 @@ def dbt_project_functions_to_macros(repo_path):
       for future in as_completed(futures_sql):
         data = future.result()
         if data:
-            print(f"Processed: {data}")
+            print(f"Processed: {data[0]} Converted Functions: {data[1]}")
+           
         else:
             print(f"Nothing to change: {data}")
+        
+        if debugmode == 'true':
+          if targetdb == 'redshift':
+            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/redshift/customerrs.sql":
+              assert len(data[1]) == 2
+              print('testpass, woohoo')
+          elif targetdb == 'snowflake':   
+            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/snow/lineitem.sql":
+              assert len(data[1]) == 3  
+              print('testpass, woohoo')
+            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/snow/customer.sql":
+              assert len(data[1]) == 2
+              print('testpass, woohoo')    
+            
 
   except:
       print("Not a valid dbt project")  
