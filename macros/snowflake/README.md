@@ -115,6 +115,11 @@ inputs: expr (reqd), format (optional), precision (optional), scale (optional) <
 desc: The function returns NUMBER(p,s), where p is the precision and s is the scale. If the precision is not specified, then it defaults to 38. If the scale is not specified, then it defaults to 0. <br>
 outputs: number(precision, scale) <br>
 
+to_numeric <br>
+inputs: expr (reqd), format (optional), precision (optional), scale (optional) <br>
+desc: The function returns NUMBER(p,s), where p is the precision and s is the scale. If the precision is not specified, then it defaults to 38. If the scale is not specified, then it defaults to 0. <br>
+outputs: number(precision, scale) <br>
+
 try_to_decimal <br> 
 inputs: string, format (optional), precision (optional), scale (optional) <br> 
 desc: <br> A special version of TO_DECIMAL , TO_NUMBER , TO_NUMERIC that performs the same operation (i.e. converts an input expression to a fixed-point number), but with error-handling support (i.e. if the conversion cannot be performed, it returns a NULL value instead of raising an error). 
