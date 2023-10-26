@@ -147,6 +147,18 @@ inputs: expr1, delimiter, expr2, orderby_clause <br>
 desc: Returns the concatenated input values, separated by the delimiter string. <br> 
 outputs: Returns a string that includes all of the non-NULL input values, separated by the delimiter. (Note that this does not return a “list” (e.g. it does not return an ARRAY; it returns a single string that contains all of the non-NULL input values.) <br> 
 
+hll_estimate
+inputs: state <br> 
+desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
+blocker: none!!, hll_sketch_estimate <br>
+
+array_to_string <br> 
+inputs: array, seperator_string <br> 
+desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
+outputs: The data type of the returned value is VARCHAR. <br> 
+blockers: none, array_join!
+
 #### Recently supported native functions: 
 
 to_binary <br> 
@@ -216,19 +228,6 @@ outputs: split up string <br>
 
 [regexp_like, regexp_substr, iff, median, regexp_instr, percentile_disc, regexp_count, percentile_cont, any_value]
 
-#### TODO:
-
-hll_estimate
-inputs: state <br> 
-desc: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-outputs: Returns the cardinality estimate for the given HyperLogLog state. <br> 
-blocker: none!!, hll_sketch_estimate <br>
-
-array_to_string <br> 
-inputs: array, seperator_string <br> 
-desc: Returns an input array converted to a string by casting all values to strings (using TO_VARCHAR) and concatenating them (using the string from the second argument to separate the elements). <br> 
-outputs: The data type of the returned value is VARCHAR. <br> 
-blockers: none, array_join!
 
 
 #### Not yet supported functions:
