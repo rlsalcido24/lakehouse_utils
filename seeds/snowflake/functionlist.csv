@@ -25,3 +25,5 @@ try_to_decimal
 to_boolean
 to_array
 listagg
+array_to_string
+hll_estimate
