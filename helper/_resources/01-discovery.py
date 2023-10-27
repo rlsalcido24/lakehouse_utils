@@ -177,9 +177,8 @@ def dbt_project_functions_to_macros(repo_path):
 catalog = dbutils.widgets.get("catalog")
 schema = dbutils.widgets.get("schema")
 targetdb = dbutils.widgets.get("targetdb")
-### change back to functionlist before committing!!
 if targetdb == 'snowflake':
-  input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
+  input_functionsql = sql('select * from {}.{}.blockedfunctionlist'.format(catalog, schema))
 
 
 input_functionspd = input_functionsql.toPandas()
