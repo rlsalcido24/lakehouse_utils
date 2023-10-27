@@ -1,0 +1,82 @@
+Snowflake Function,Spark SQL Function,SQL UDF
+convert_timezone,"from_utc_timestamp(timestamp, timezone)","CREATE OR REPLACE FUNCTION convert_timezone(source STRING, target STRING, stamp TIMESTAMP)
+ RETURNS TIMESTAMP
+ RETURN from_utc_timestamp(to_utc_timestamp(stamp, source), target);"
+to_varchar,,"CREATE OR REPLACE FUNCTION to_varchar(arg DOUBLE)
+  RETURNS STRING
+  RETURN CAST(arg AS STRING);"
+parse_json,"FROM_json(expr, [options])","(string) from_json(string, schema_of_json(string)) -- not supproted, we dont support variants-- would string be sufficient if they just want to query semi-structured data?"
+to_char,,"CREATE OR REPLACE FUNCTION to_char(arg DOUBLE)
+  RETURNS STRING
+  RETURN CAST(arg AS STRING);"
+last_query_id,,no databricks equivalent
+array_construct,array(expr),
+object_construct,,how do we make this kwargs? RS TODO
+is_null_value,,(string) isnull(string)
+current_transaction,,no databricks equivalent
+object_insert,,no databricks equivalent
+check_json,,no databricks equivalent
+hll_export,,no databricks equivalent
+decrypt,,no databricks equivalent
+get,,not supported 
+current_region,,no equivalent
+get_ddl,,further research needed
+try_parse_json,,no equivalent
+to_geography,,no equivalent
+parse_xml,,no equivalent 
+object_delete,,no equivalent
+standardize,,unable to find?
+hll_estimate,,no equivalent
+get_path,,
+st_intersects,,
+to_numeric,,"(arg, expr, p, s) to_number(arg, expr, p, s)"
+try_to_date,,no comparable databricks dql
+try_to_timestamp,,no comparable databricks dql
+as_varchar,,dbx does not recognize variant input
+as_char,,dbx does not recognize variant input
+to_timestamp_ltz,,when using to_timestamp databricks will apply the offset rather than persisting it.
+current_version,,no databricks equivalent dql
+minhash_combine,,no databricks equivalent dql
+truncate,,no databricks equivalent dql
+try_to_boolean,,no databricks equivalent dql
+try_to_timestamp_ntz,,no databricks equivalent dql
+current_role,,no databricks equivalent dql
+hll,,HLL can take in any expression whereas cardinality only takes in array/map expressions
+approximate_similarity,,no databricks equivalent dql
+objectagg,,dbx does not support objects or variants
+ratio_to_report,,no databricks equivalent dql
+is_role_in_session,,no databricks equivalent dql
+time_slice,,no databricks equivalent dql
+is_integer,,no databricks equivalent dql
+unicode,,no databricks equivalent dql
+to_variant,,dbx does not support variant
+xmlget,,no databricks equivalent dql
+try_to_time,,no databricks equivalent dql
+is_real,,no databricks equivalent dql
+minhash,,no databricks equivalent dql
+current_warehouse,,no databricks equivalent dql
+to_double,,no databricks equivalent dql
+to_object,,dbx does not support object
+md5_number_lower64,,no databricks equivalent dql
+encrypt,,"aes_encrypt use binary key, not varchar passphrase. encrypt_raw can probably be transpiled"
+object_keys,,json_object_keys
+current_client,,no databricks equivalent dql
+try_to_timestamp_tz,,dbx does not support timestamp_tz
+compress,,no databricks equivalent dql
+md5_number_upper64,,no databricks equivalent dql
+is_date,,no databricks equivalent dql
+array_construct_compact,,no way to pass in kwargs to macro. we could ask to pass in a list but that would require a bit of manual intervention.
+as_integer,,dbx does not support variant input
+enrich_placement_ad_type,,no databricks equivalent dql
+approximate_jaccard_index,,no databricks equivalent dql
+as_date,,dbx does not support variant input
+md5_hex,,no databricks equivalent dql
+randstr,,no databricks equivalent dql
+hash_agg,,no databricks equivalent dql
+hll_import,,no databricks equivalent dql
+is_boolean,,dbx does not take in variant args
+as_number,,dbx does not take in variant args
+hex_decode_binary,,no databricks equivalent dql
+last_transaction,,no databricks equivalent dql
+sha2_binary,,no databricks equivalent dql
+try_base64_decode_string,,no databricks equivalent dql
