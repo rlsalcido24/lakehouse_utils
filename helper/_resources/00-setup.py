@@ -35,11 +35,11 @@ def get_dir_content(ls_path):
 
 def function_to_macro(content, function_name):
 
-  pattern = r'({}\()([^)]+)\)'.format(function_name) #Look for functions of the format name(input1,input2)
+  pattern = r'({}\()([^)]*)\)'.format(function_name) #Look for functions of the format name(input1,input2)
   replacement_doubleQuotes = r'{{lakehouse_utils.\1"\2")}}' #Surround the expression with double curly braces, and quotes on either end
   
-  check_preventDoubleReplace_pattern = r'({{lakehouse_utils.{}\()([^)]+)\)'.format(function_name)
-  check_preventInnerReplace_pattern = r'(\w{}\()([^)]+)\)'.format(function_name)
+  check_preventDoubleReplace_pattern = r'({{lakehouse_utils.{}\()([^)]*)\)'.format(function_name)
+  check_preventInnerReplace_pattern = r'(\w{}\()([^)]*)\)'.format(function_name)
 
   # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
   if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
@@ -71,6 +71,13 @@ def function_to_macro(content, function_name):
     single_doubleQuotes_pattern = r"""'"\1"'"""
     
     updated_content = re.sub(double_doubleQuotes_pattern,single_doubleQuotes_pattern,updated_content)
+
+    # If we inadvertently added double-quotes to an empty input macro, remove these!
+
+    accidental_doubleQuotes_pattern = r'({{lakehouse_utils.{}\()""\)'.format(function_name)
+    fixed_noQuotes_pattern = r'\1)'
+    
+    updated_content = re.sub(accidental_doubleQuotes_pattern,fixed_noQuotes_pattern,updated_content)
 
   # If the previous check failed, continue unchanged
   else:
@@ -116,15 +123,17 @@ def dbt_project_functions_to_macros(repo_path):
     print("Valid dbt project!")
     print("Converting .sql files in the Models folder...")
 
-    # List all sql files to be checked in a folder
-    if parsemacro == 'true':  
-      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/macros')
+    paths = []
 
-    elif subdir == 'true':
+    if subdir == 'true':
       paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models/{subdirpath}')
 
     else: 
-      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')        
+      paths = get_dir_content(f'file:/Workspace/Repos/{repo_path}/models')       
+    
+    # List all sql files to be checked in a folder
+    if parsemacro == 'true':  
+      paths.append(get_dir_content(f'file:/Workspace/Repos/{repo_path}/macros'))
     
     sql_files = [i[5:] for i in paths if '.sql' in i]
 

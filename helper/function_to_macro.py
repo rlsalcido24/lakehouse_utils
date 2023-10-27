@@ -67,3 +67,7 @@ dbutils.widgets.text("subdirpath", "redshift")
 repo_path = dbutils.widgets.get("repo_path")
 
 dbt_project_functions_to_macros(repo_path)
+
+# COMMAND ----------
+
+
