@@ -14,7 +14,10 @@ select
     c_phone, 
     to_number(c_acctbal, 10, 5) as cleanacctbal,
     c_mktsegment,
-    c_comment
+    c_comment,
+    last_query_id() as lastquery,
+    current_transaction() as ct
+    
 
 
 
