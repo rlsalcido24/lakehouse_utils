@@ -1,6 +1,6 @@
 ### lakehouse_utils:
 
-The purpose of the lakehouse utils package is threefold 
+The purpose of the lakehouse utils package is threefold: 
 
 I) Expedite the time and level of effort for migrating pipelines from cloud data warehouses to the Lakehouse  (ie dbt + databricks). This is done by transpiling functions that are not natively available in spark sql to compatible spark sql functions that take in the same input(s) and render the same outputs. This is all done via DBT macros (feel free to reference the macros directory).  
 
