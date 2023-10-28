@@ -38,9 +38,9 @@ dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
-dbutils.widgets.text("debugmode", "true")
-dbutils.widgets.text("parsemacro", "false")
-dbutils.widgets.text("subdir", "false")
+dbutils.widgets.dropdown("debugmode", "false", ["true", "false"])
+dbutils.widgets.dropdown("parsemacro", "false", ["true", "false"])
+dbutils.widgets.dropdown("subdir", "false", ["true", "false"])
 dbutils.widgets.text("subdirpath", "redshift")
 
 
@@ -77,3 +77,17 @@ meltdf = df.melt()
 sumseries = meltdf["value"].sum()
 totaleffort = sumseries / 2
 print(f"Approximate Total effort: {totaleffort} hours")
+
+# COMMAND ----------
+
+if debugmode == 'true':
+  if targetdb == 'snowflake':
+    if subdir == 'true' and subdirpath == "snow":
+      assert totaleffort == 2.0
+      print('testpass, woohoo')
+    elif subdir == 'false' and parsemacro == 'false':   
+      assert totaleffort == 2.0  
+      print('testpass, woohoo')
+    else:
+      cow = 'moo'
+      print('no tests validate this time around!')    

@@ -149,18 +149,7 @@ def dbt_project_functions_to_macros(repo_path):
             print(f"Nothing to change: {data}")
 
         discovery_array.append(data[1])
-        if debugmode == 'true':
-          if targetdb == 'redshift':
-            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/redshift/customerrs.sql":
-              assert len(data[1]) == 2
-              print('testpass, woohoo')
-          elif targetdb == 'snowflake':   
-            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/snow/lineitem.sql":
-              assert len(data[1]) == 3  
-              print('testpass, woohoo')
-            if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/snow/customer.sql":
-              assert len(data[1]) == 2
-              print('testpass, woohoo')    
+          
             
     return discovery_array
   except:
