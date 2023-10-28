@@ -22,7 +22,9 @@ select
     dayname(l_commitdate) as daycommit,
     l_shipinstruct,
     l_shipmode,
-    l_comment
+    l_comment,
+    current_version() as cv,
+    get_ddl('table', 'snowflake_sample_data.tpch_sf1.lineitem') as ddl
    
 
 from
