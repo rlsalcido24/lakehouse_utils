@@ -88,6 +88,26 @@ def function_to_macro(content, function_name):
 
 # COMMAND ----------
 
+def convert_datatypes(content, datatype_input, datatype_output):
+
+  cast_pattern = r'(CAST\(\s*[^)]+\s+AS\s+){}(\s*\))'.format(datatype_input) #Look for functions of the format CAST( ... AS ...)
+  replacement_pattern = r'\1{}\2'.format(datatype_output) #Substitute in the new datatype
+
+  cast_pattern_2 = r'::{}'.format(datatype_input) #Look for functions of the format <col_name>::<data_type>
+  replacement_pattern_2 = r'::{}'.format(datatype_output) #Substitute in the new datatype
+
+  try:
+    number_of_matches = len(re.findall(cast_pattern, content)) + len(re.findall(cast_pattern_2, content))
+  except:
+    number_of_matches = 0
+
+  updated_content = re.sub(cast_pattern, replacement_pattern, content) #Replace CAST() instances
+  updated_content = re.sub(cast_pattern_2, replacement_pattern_2, updated_content) #Replace :: instances
+
+  return (updated_content, number_of_matches)  
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC
 # MAGIC ## Define function for all .sql files in the dbt repo
@@ -98,9 +118,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 ## Function to asynchronously kick off: open each file, loop through every function, write results
 
-def process_file(full_path, functions_list):
+def process_file(full_path, functions_list, datatypes_tuples):
 
   converted_functions = dict()
+  converted_datatypes = dict()
   with open(full_path, 'r+') as file:
     content = file.read()
     for function_name in functions_list:
@@ -109,11 +130,17 @@ def process_file(full_path, functions_list):
       if no_matches > 0:
         converted_functions[function_name] = no_matches
 
+    for datatype_input, datatype_output in datatypes_tuples:
+      content, no_datatype_matches = convert_datatypes(content, datatype_input, datatype_output)
+
+      if no_datatype_matches > 0:
+        converted_datatypes[datatype_input] = no_datatype_matches
+
     file.seek(0)
     file.write(content)
     file.truncate()
 
-  return (full_path, converted_functions) ## Return list of functions that converted
+  return (full_path, converted_functions, converted_datatypes) ## Return list of functions that converted
 
 def dbt_project_functions_to_macros(repo_path):
   # Verify we are running in a dbt project
@@ -138,11 +165,11 @@ def dbt_project_functions_to_macros(repo_path):
     sql_files = [i[5:] for i in paths if '.sql' in i]
 
     with ThreadPoolExecutor() as executor:
-      futures_sql = {executor.submit(process_file, p, input_functions): p for p in sql_files}
+      futures_sql = {executor.submit(process_file, p, input_functions, input_datatypes): p for p in sql_files}
       for future in as_completed(futures_sql):
         data = future.result()
         if data:
-            print(f"Processed: {data[0]} Converted Functions: {data[1]}")
+            print(f"Processed: {data[0]} Converted Functions: {data[1]} Converted Datatypes: {data[2]}")
            
         else:
             print(f"Nothing to change: {data}")
@@ -178,10 +205,15 @@ targetdb = dbutils.widgets.get("targetdb")
 
 if targetdb == 'snowflake':
   input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
+  input_datatypesql = sql('select * from {}.{}.datatypelist'.format(catalog, schema))
 elif targetdb == 'redshift': 
   input_functionsql = sql('select * from {}.{}.functionlistrs'.format(catalog, schema))
+  input_datatypesql = sql('select * from {}.{}.datatypelistrs'.format(catalog, schema))
 else:
   input_functionsql = sql('select 1')
 
 input_functionspd = input_functionsql.toPandas()
 input_functions = input_functionspd["function_name"]
+
+input_datatypespd = input_datatypesql.toPandas()
+input_datatypes = list(zip(input_datatypespd.datatype_input, input_datatypespd.datatype_output))
