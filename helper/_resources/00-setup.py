@@ -48,7 +48,7 @@ def function_to_macro(content, function_name):
     except:
       number_of_matches = 0
 
-    updated_content = re.sub(pattern, replacement_doubleQuotes, content)
+    updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
 
     #print(updated_content)
 
@@ -101,8 +101,8 @@ def convert_datatypes(content, datatype_input, datatype_output):
   except:
     number_of_matches = 0
 
-  updated_content = re.sub(cast_pattern, replacement_pattern, content) #Replace CAST() instances
-  updated_content = re.sub(cast_pattern_2, replacement_pattern_2, updated_content) #Replace :: instances
+  updated_content = re.sub(cast_pattern, replacement_pattern, content, flags=re.IGNORECASE) #Replace CAST() instances
+  updated_content = re.sub(cast_pattern_2, replacement_pattern_2, updated_content, flags=re.IGNORECASE) #Replace :: instances
 
   return (updated_content, number_of_matches)  
 
@@ -205,10 +205,10 @@ targetdb = dbutils.widgets.get("targetdb")
 
 if targetdb == 'snowflake':
   input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
-  input_datatypesql = sql('select * from {}.{}.datatypelist'.format(catalog, schema))
+  input_datatypesql = sql('select * from {}.{}.datatypeslist'.format(catalog, schema))
 elif targetdb == 'redshift': 
   input_functionsql = sql('select * from {}.{}.functionlistrs'.format(catalog, schema))
-  input_datatypesql = sql('select * from {}.{}.datatypelistrs'.format(catalog, schema))
+  input_datatypesql = sql('select * from {}.{}.datatypeslistrs'.format(catalog, schema))
 else:
   input_functionsql = sql('select 1')
 
