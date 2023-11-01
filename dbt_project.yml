@@ -4,7 +4,7 @@ config-version: 2
 require-dbt-version: ">=1.0.0"
 profile: 'lakehouse'
 
-model-paths: ["models"]
+model-paths: ["tmp/snow"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]
 seed-paths: ["seeds"]
