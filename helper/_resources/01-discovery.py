@@ -3,7 +3,7 @@ import os
 import re
 
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
-dbutils.widgets.text("targetdb", "snowflake")
+dbutils.widgets.text("sourcedb", "snowflake")
 
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
@@ -165,8 +165,8 @@ def dbt_project_functions_to_macros(repo_path):
 
 catalog = dbutils.widgets.get("catalog")
 schema = dbutils.widgets.get("schema")
-targetdb = dbutils.widgets.get("targetdb")
-if targetdb == 'snowflake':
+sourcedb = dbutils.widgets.get("sourcedb")
+if sourcedb == 'snowflake':
   input_functionsql = sql('select * from {}.{}.blockedfunctionlist'.format(catalog, schema))
 
 

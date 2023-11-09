@@ -33,14 +33,14 @@
 # COMMAND ----------
 
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
-dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
+dbutils.widgets.dropdown("sourcedb", "snowflake", ["snowflake", "redshift"])
 
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
 dbutils.widgets.text("schema", "schema")
-dbutils.widgets.text("debugmode", "true")
-dbutils.widgets.text("parsemacro", "false")
-dbutils.widgets.text("subdir", "false")
+dbutils.widgets.dropdown("debugmode", "false", ["true", "false"])
+dbutils.widgets.dropdown("parsemacro", "false", ["true", "false"])
+dbutils.widgets.dropdown("subdir", "false", ["true", "false"])
 dbutils.widgets.text("subdirpath", "redshift")
 
 
@@ -52,7 +52,7 @@ dbutils.widgets.text("subdirpath", "redshift")
 
 # COMMAND ----------
 
-# MAGIC %run ./_resources/00-setup $targetdb=$targetdb $catalog=$catalog $schema=$schema $debugmode=$debugmode $parsemacro=$parsemacro $subdir=$subdir $subdirpath=$subdirpath
+# MAGIC %run ./_resources/00-setup $sourcedb=$sourcedb $catalog=$catalog $schema=$schema $debugmode=$debugmode $parsemacro=$parsemacro $subdir=$subdir $subdirpath=$subdirpath
 
 # COMMAND ----------
 
