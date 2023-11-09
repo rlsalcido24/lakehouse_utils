@@ -3,7 +3,7 @@ import os
 import re
 
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
-dbutils.widgets.text("targetdb", "snowflake")
+dbutils.widgets.text("sourcedb", "snowflake")
 
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
@@ -133,7 +133,7 @@ def dbt_project_functions_to_macros(repo_path):
     
     # List all sql files to be checked in a folder
     if parsemacro == 'true':  
-      paths.append(get_dir_content(f'file:/Workspace/Repos/{repo_path}/macros'))
+      paths.extend(get_dir_content(f'file:/Workspace/Repos/{repo_path}/macros'))
     
     sql_files = [i[5:] for i in paths if '.sql' in i]
 
@@ -148,11 +148,11 @@ def dbt_project_functions_to_macros(repo_path):
             print(f"Nothing to change: {data}")
         
         if debugmode == 'true':
-          if targetdb == 'redshift':
+          if sourcedb == 'redshift':
             if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/redshift/customerrs.sql":
               assert len(data[1]) == 2
               print('testpass, woohoo')
-          elif targetdb == 'snowflake':   
+          elif sourcedb == 'snowflake':   
             if data[0] == "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models/snow/lineitem.sql":
               assert len(data[1]) == 3  
               print('testpass, woohoo')
@@ -174,11 +174,11 @@ def dbt_project_functions_to_macros(repo_path):
 
 catalog = dbutils.widgets.get("catalog")
 schema = dbutils.widgets.get("schema")
-targetdb = dbutils.widgets.get("targetdb")
+sourcedb = dbutils.widgets.get("sourcedb")
 
-if targetdb == 'snowflake':
+if sourcedb == 'snowflake':
   input_functionsql = sql('select * from {}.{}.functionlist'.format(catalog, schema))
-elif targetdb == 'redshift': 
+elif sourcedb == 'redshift': 
   input_functionsql = sql('select * from {}.{}.functionlistrs'.format(catalog, schema))
 else:
   input_functionsql = sql('select 1')

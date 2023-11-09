@@ -33,7 +33,7 @@
 # COMMAND ----------
 
 dbutils.widgets.text("repo_path", "<user-name>/<repo-path>")
-dbutils.widgets.dropdown("targetdb", "snowflake", ["snowflake", "redshift"])
+dbutils.widgets.dropdown("sourcedb", "snowflake", ["snowflake", "redshift"])
 
 #Catalog and schema targets from your dbt project profile
 dbutils.widgets.text("catalog", "catalog")
@@ -52,7 +52,7 @@ dbutils.widgets.text("subdirpath", "redshift")
 
 # COMMAND ----------
 
-# MAGIC %run ./_resources/01-discovery $targetdb=$targetdb $catalog=$catalog $schema=$schema $debugmode=$debugmode $parsemacro=$parsemacro $subdir=$subdir $subdirpath=$subdirpath
+# MAGIC %run ./_resources/01-discovery $sourcedb=$sourcedb $catalog=$catalog $schema=$schema $debugmode=$debugmode $parsemacro=$parsemacro $subdir=$subdir $subdirpath=$subdirpath
 
 # COMMAND ----------
 
@@ -81,7 +81,7 @@ print(f"Approximate Total effort: {totaleffort} hours")
 # COMMAND ----------
 
 if debugmode == 'true':
-  if targetdb == 'snowflake':
+  if sourcedb == 'snowflake':
     if subdir == 'true' and subdirpath == "snow":
       assert totaleffort == 2.0
       print('testpass, woohoo')
