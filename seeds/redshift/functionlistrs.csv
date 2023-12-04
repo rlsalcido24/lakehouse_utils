@@ -10,3 +10,8 @@ dlog10
 dlog1
 getdate
 strtol
+isnull
+sysdate
+datediff
+date_trunc
+date_part

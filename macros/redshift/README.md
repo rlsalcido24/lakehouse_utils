@@ -47,10 +47,20 @@ inputs: expression <br>
 desc: Returns the natural logarithm of the input parameter. Synonym of the DLOG1 function. <br>
 outputs: The LN function returns the same type as the expression. <br>
 
+isnull <br>
+inputs: value, value_is_null <br>
+desc: ISNULL in Redshift is just like a single COALESCE. This translates to COALESCE(value, value_is_null) <br>
+outputs: The LN function returns the same type as the expression. <br>
+
 getdate <br>
 inputs: none <br>
 desc: GETDATE returns the current date and time in the current session time zone (UTC by default). It returns the start date or time of the current statement, even when it is within a transaction block. <br>
-outputs: The LN function returns the same type as the expression.
+outputs: The LN function returns the same type as the expression. <br>
+
+sysdate <br>
+inputs: none <br>
+desc: SYSDATE returns the current date and time in the current session time zone (UTC by default).
+outputs: The LN function returns the same type as the expression. <br>
 
 #### V1 un-supported functions: 
 

@@ -31,7 +31,7 @@ def get_dir_content(ls_path):
   flat_subdir_paths = [p for subdir in subdir_paths for p in subdir]
   return list(map(lambda p: p.path, dir_paths)) + flat_subdir_paths
 
-## Function to convert Snowflake functions to dbt macros
+## Function to convert Snowflake/Redshift functions to dbt macros
 
 def function_to_macro(content, function_name):
 
@@ -44,15 +44,15 @@ def function_to_macro(content, function_name):
   # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
   if (re.search(check_preventDoubleReplace_pattern,content) is None) & (re.search(check_preventInnerReplace_pattern,content) is None):
     try:
-      number_of_matches = len(re.findall(pattern, content))
+      number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
     except:
       number_of_matches = 0
 
-    updated_content = re.sub(pattern, replacement_doubleQuotes, content)
+    updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
 
     #print(updated_content)
 
-    matched_patterns = re.findall(pattern,updated_content) 
+    matched_patterns = re.findall(pattern,updated_content, flags=re.IGNORECASE) 
 
     #print(matched_patterns)
 
@@ -70,14 +70,14 @@ def function_to_macro(content, function_name):
     double_doubleQuotes_pattern = r'""([^"]*)""'
     single_doubleQuotes_pattern = r"""'"\1"'"""
     
-    updated_content = re.sub(double_doubleQuotes_pattern,single_doubleQuotes_pattern,updated_content)
+    updated_content = re.sub(double_doubleQuotes_pattern,single_doubleQuotes_pattern,updated_content, flags=re.IGNORECASE)
 
     # If we inadvertently added double-quotes to an empty input macro, remove these!
 
     accidental_doubleQuotes_pattern = r'({{lakehouse_utils.{}\()""\)'.format(function_name)
     fixed_noQuotes_pattern = r'\1)'
     
-    updated_content = re.sub(accidental_doubleQuotes_pattern,fixed_noQuotes_pattern,updated_content)
+    updated_content = re.sub(accidental_doubleQuotes_pattern,fixed_noQuotes_pattern,updated_content, flags=re.IGNORECASE)
 
   # If the previous check failed, continue unchanged
   else:
@@ -161,8 +161,8 @@ def dbt_project_functions_to_macros(repo_path):
               print('testpass, woohoo')    
             
 
-  except:
-      print("Not a valid dbt project")  
+  except Exception as e:
+      print(f"ERROR: Not a valid dbt project or you need to switch to a single user Databricks Cluster: \n {str(e)}")  
 
 # COMMAND ----------
 

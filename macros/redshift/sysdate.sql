@@ -1,0 +1,3 @@
+{% macro sysdate() %}
+   now()
+{% endmacro %}
