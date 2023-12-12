@@ -1,0 +1,94 @@
+function_name,udf
+editdistance,"CREATE OR REPLACE FUNCTION editdistance(s1 STRING, s2 STRING)
+  RETURNS INT
+  RETURN levenshtein(s1, s2);
+
+CREATE OR REPLACE FUNCTION editdistance(s1 STRING, s2 STRING, max_length INT)
+  RETURNS INT
+  RETURN levenshtein(substr(s1,1,max_length), substr(s2,1,max_length));"
+uniform,"CREATE OR REPLACE FUNCTION uniform(min DOUBLE, max DOUBLE, rand DOUBLE)
+  RETURNS DOUBLE
+  RETURN min + (max - min) * rand;"
+div0,"CREATE OR REPLACE FUNCTION div0(arg1 DOUBLE, arg2 DOUBLE)
+  RETURNS DOUBLE
+  RETURN CASE WHEN arg2 = 0 THEN 0 ELSE arg1 / arg2 END;"
+square,"CREATE OR REPLACE FUNCTION square(arg DOUBLE)
+  RETURNS DOUBLE
+  RETURN arg * arg;"
+uuid_string,"CREATE OR REPLACE FUNCTION uuid_string()
+  RETURNS STRING
+  RETURNS uuid();"
+time,"  to_timestamp(expr, 'HH:mm:ss')"
+previous_day,"CREATE OR REPLACE FUNCTION previous_day(arg DATE, day STRING)
+  RETURNS DATE
+  RETURN CASE WHEN substr(dayname(arg), 1, 2) = substr(day, 1, 2) THEN arg - INTERVAL 7 DAY
+              ELSE next_day(arg, day) - INTERVAL 7 DAY END;"
+" to_number(arg, scale, precision) -- take scale, precision convert to format","(arg, scale, precision) to_number(num_expr, [scale|fmt]) -- if logic to gen expression"
+array_intersection,"CREATE OR REPLACE FUNCTION array_intersection (arg1 ARRAY, arg2 ARRAY)
+  RETURNS ARRAY
+  RETURN array_intersect(arg1, arg2);"
+sysdate,"CREATE OR REPLACE FUNCTION sysdate()
+  RETURNS TIMESTAMP
+  RETURN to_utc_timestamp(current_timestamp(), current_timezone());"
+sha2_hex,"CREATE OR REPLACE FUNCTION sha2_hex(arg BINARY, len INT)
+  RETURNS STRING
+  RETURN sha2(arg, len);"
+dayofweekiso,"CREATE OR REPLACE FUNCTION dayofweekiso(arg TIMESTAMP)
+  RETURNS INT
+  RETURN EXTRACT(DAYOFWEEK_ISO FROM arg);"
+nullifzero,"CREATE OR REPLACE FUNCTION nullifzero(arg DOUBLE)
+  RETURNS DOUBLE
+  RETURN nullif(arg, 0);"
+array_cat,"CREATE OR REPLACE FUNCTION array_cat(arg1 ARRAY, arg2 ARRAY)
+  RETURNS ARRAY
+  RETURN concat(arg1, arg2);"
+seq8,"CREATE OR REPLACE FUNCTION seq8()
+ RETURNS BIGINT
+ RETURN monotonically_increasing_id();"
+timestamp_from_parts,"CREATE OR REPLACE FUNCTION timestamp_from_parts(year INT, month INT, day INT, hour INT, minute INT, second DECIMAL(10, 6))
+  RETURNS TIMESTAMP
+  RETURN make_timestamp(year, month, day, hour, minute, second);"
+weekiso,"CREATE OR REPLACE FUNCTION weekiso(arg TIMESTAMP)
+  RETURNS TIMESTAMP
+  RETURN EXTRACT(WEEK FROM arg);"
+boolor_agg,bool_or
+yearofweekiso,"CREATE OR REPLACE FUNCTION yearofweekiso(arg TIMESTAMP)
+  RETURNS INT
+  RETURN EXTRACT(YEAROFWEEK FROM arg);"
+insert,"CREATE OR REPLACE FUNCTION insert(base STRING, pos INT, len INT, ins STRING)
+  RETURNS STRING
+  RETURN overlay(base, ins, pos, len);"
+array_slice,slice()
+current_time,parse subset of current_timestamp
+bitand,"CREATE OR REPLACE FUNCTION bitand(arg1 BIGINT, arg2 BIGINT)
+  RETURNS INT
+  RETURN arg1 & arg2;"
+timestamp_ntz_from_parts,check logic for date_from_parts
+base64_decode_string,"CREATE OR REPLACE FUNCTION base64_decode_string(arg STRING)
+  RETURNS STRING
+  RETURN unbase64(arg);"
+systimestamp,"CREATE OR REPLACE FUNCTION systimestamp()
+  RETURNS TIMESTAMP
+  RETURN current_timestamp();"
+hex_decode_string,"CREATE OR REPLACE FUNCTION hex_decode_string(arg1 STRING)
+  RETURNS STRING
+  RETURN decode(unhex(arg1), 'UTF-8');"
+variance_samp,var_samp
+seq2,"CREATE OR REPLACE FUNCTION seq2()
+ RETURNS SMALLINT
+ RETURN monotonically_increasing_id();"
+base64_decode_binary,"CREATE OR REPLACE FUNCTION base64_decode_binary(arg STRING)
+  RETURNS BINARY
+  RETURN unbase64(arg);"
+seq1,"CREATE OR REPLACE FUNCTION seq1()
+ RETURNS BYTE
+ RETURN monotonically_increasing_id();"
+yearofweek,"CREATE OR REPLACE FUNCTION yearofweek(arg TIMESTAMP)
+  RETURNS TIMESTAMP
+  RETURN EXTRACT(YEAROFWEEK FROM arg);"
+sha1_hex,"CREATE OR REPLACE FUNCTION sha1_hex(arg BINARY, len INT)
+  RETURNS STRING
+  RETURN sha1(arg, len);"
+strtok,"CREATE OR REPLACE FUNCTION strtok(arg STRING, delim STRING, part INT)
+  RETURNS STRING
+  RETURN element_at(split(arg, delim), part);  "

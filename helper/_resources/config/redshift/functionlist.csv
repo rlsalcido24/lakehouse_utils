@@ -1,0 +1,17 @@
+function_name
+convert
+text_to_numeric_alt
+hll_combine_sketches
+hll_combine
+hll_create_sketch
+hll_cardinality
+dexp
+dlog10
+dlog1
+getdate
+strtol
+isnull
+sysdate
+datediff
+date_trunc
+date_part

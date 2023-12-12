@@ -1,0 +1,8 @@
+{"first_value_ignore_nulls": {"source_pattern": "(first_value\\()([\\s\\S]*.?(?=ignore\\snulls))(\\s?ignore\\snulls\\s*.?(?=\\)))(\\))(\\s*over\\s*)",
+                              "target_pattern": "\\1\\2\\4 \\3 \\5"
+                            },
+"get_date_no_parents" : {"source_pattern": "getdate\\s",
+                         "target_pattern": "getdate() "
+                        }
+}
+        
