@@ -3,6 +3,9 @@
                             },
 "get_date_no_parents" : {"source_pattern": "getdate\\s",
                          "target_pattern": "getdate() "
-                        }
+                        },
+"isnull_to_coalesce" : {"source_pattern": "isnull",
+                        "target_pattern": "coalesce"
+                       }
 }
         

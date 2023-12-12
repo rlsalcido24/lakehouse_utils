@@ -5,10 +5,19 @@ Date:  12/6/2023
 
 Description: Local Model converter from Redshift / Snowflake models to Databricks
 
+Main Command Example: 
+python3 ./convert_to_databricks.py redshift --subdir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
+
 TO DO:
 1. Add rule to not replace anything in between 2 sets of double brackets - DONE - Cody Davis
+2. Add parameter to choose which parse mode goes first - syntax or functions - DONE - Cody Davis
+3. Add ability to not use macros at all, just replace the code with the databricks code - ensure parameters are in correct order for target system
+4. Add ability to add dynamic exclusionary rules (i.e. do not parse when text is in between double curly braces)
+5. Add ability to pass in list of file extensions you want to parse (i.e. sql,yml, etc.)
 
 """
+
+
 import os
 import re
 import json
@@ -16,6 +25,7 @@ import argparse
 from pathlib import Path
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+
 
 
 ## Function to find all sql files within a given directory
@@ -42,7 +52,7 @@ def function_to_macro(content: str, function_name: str):
 
   ## Pattern to exclude replacing things inside existing curly braces / macros
   pattern = r'({}\()([^)]*)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-  replacement_doubleQuotes = r'{{{{lakehouse_utils.{}("\2")}}}}'.format(function_name) #Surround the expression with double curly braces, and quotes on either end
+  replacement_doubleQuotes = r'{{{{lakehouse_utils.{}("\2")}}}} '.format(function_name) #Surround the expression with double curly braces, and quotes on either end
   
   ## Pattern to exclude replacing things inside existing curly braces / macros
   exclude_curlys_pattern = r'(?<!\{{\{{)\s\S*?({}\()([^)]*)\)\s\S*?(?!\}}\}})'.format(function_name)
@@ -50,7 +60,7 @@ def function_to_macro(content: str, function_name: str):
   check_preventDoubleReplace_pattern = r'({{lakehouse_utils\.{}\()([^)]*)\)'.format(function_name)
   check_preventInnerReplace_pattern = r'(\w{}\()([^)]*)\)'.format(function_name)
 
-  number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
+  number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
 
   ## TO DO: This assumes there is only 1 function per script - not a good assumption
   # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
@@ -63,7 +73,7 @@ def function_to_macro(content: str, function_name: str):
       if (re.search(exclude_curlys_pattern,content, flags=re.IGNORECASE) is not None):
         number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
       else:
-        number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
+        number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
 
     except Exception as e:
       number_of_matches = 0
@@ -71,10 +81,10 @@ def function_to_macro(content: str, function_name: str):
     if (re.search(exclude_curlys_pattern,content, flags=re.IGNORECASE) is not None):
       updated_content = re.sub(exclude_curlys_pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
     else:
-      updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
+      updated_content = re.sub(exclude_curlys_pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
     #print(updated_content)
 
-    matched_patterns = re.findall(pattern,updated_content, flags=re.IGNORECASE) 
+    matched_patterns = re.findall(exclude_curlys_pattern,updated_content, flags=re.IGNORECASE) 
 
     #print(matched_patterns)
 
@@ -121,6 +131,8 @@ def function_to_macro(content: str, function_name: str):
 ## Function to convert Snowflake/Redshift functions to dbt macros
 def convert_syntax_expressions(content: str, source_pattern: str, target_pattern: str):
   
+  ## '(?<!\{{\{{)\s\S*?({}\()([^)]*)\)\s\S*?(?!\}}\}})'
+
   source_pattern = source_pattern
   target_pattern = target_pattern
   num_matches = 0
@@ -143,7 +155,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
 ## Function to asynchronously kick off: open each file, loop through every function, write results
 ## Make new directory for new results
-def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functions', syntax_map : {str, str} = {}):
+def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functions', syntax_map : {str, str} = {}, parse_first='functions'):
 
   ## Steps 
   ## 1. If function mode or all mode - process the function conversions first
@@ -157,51 +169,66 @@ def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functi
 
   print(f"Converting SQL File: {full_path}")
 
+  ## private Function to convert functions
+  def functions_chunk(functions_list, content, results_dict = {}):
+
+    for function_name in functions_list:
+      content, num_matches = function_to_macro(content, function_name)
+      #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
+      if function_name in results_dict:
+        results_dict[function_name] += num_matches
+      else: 
+        results_dict[function_name] = num_matches
+
+    return content, results_dict
+  
+      
+  ## private Function to convert syntax
+  def syntax_chunk(syntax_map, content, results_dict = {}):
+    if len(syntax_map.keys()) > 0:
+        
+        for key, value in syntax_map.items():
+            
+            #print(f"Parsing syntax mapping: {key}")
+            source_pattern = value.get("source_pattern")
+            target_pattern = value.get("target_pattern")
+
+            content, num_matches = convert_syntax_expressions(content= content, source_pattern= source_pattern, target_pattern= target_pattern)
+
+            if key in results_dict:
+              results_dict[key] += num_matches
+            else: 
+              results_dict[key] = num_matches
+  
+    else:
+        print(f"No syntax values to parse: {syntax_map}. Skipping. ")
+    
+    return content, results_dict
+
+      
   with open(full_path, 'r+') as file:
     content = file.read()
-    
-    #print(f"READING CONTENT FROM {full_path}: {content}")
 
-    ## Parse and Convert the enabled functions for the source db to databricks
-    if parse_mode in ['functions', 'all']:
-       
-        for function_name in functions_list:
-            content, no_matches = function_to_macro(content, function_name)
-            #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
-            converted_functions[function_name] = no_matches
-    
+    if parse_mode in ['functions']:
+       content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
     ## Parse and convert syntax nuances with source and target regex expressions from sourcedb/syntax_mappings.json
-    if parse_mode in ['syntax', 'all']:
-       
-       if len(syntax_map.keys()) > 0:
-          
-          for key, value in syntax_map.items():
-             
-             #print(f"Parsing syntax mapping: {key}")
-             source_pattern = value.get("source_pattern")
-             target_pattern = value.get("target_pattern")
-
-             content, num_matches = convert_syntax_expressions(content= content, source_pattern= source_pattern, target_pattern= target_pattern)
-
-             ## Add to dicts
-             converted_syntax[key] = num_matches
-    
-       else:
-          print(f"No syntax values to parse: {syntax_map}. Skipping. ")
-
+    elif parse_mode in ['syntax']:
+       content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
+      
     ## If the syntax map changes functions that are recognized, then we need to go back through and check for functions as well
     if parse_mode == 'all':
-
-      for function_name in functions_list:
-
-        content, no_matches = function_to_macro(content, function_name)
-
-        if function_name in converted_functions:
-          converted_functions[function_name] += no_matches
-        else: 
-           converted_functions[function_name] = no_matches
-           
        
+       if parse_first == 'functions':
+          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+          content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
+          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+
+       elif parse_first == 'syntax':
+          content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
+          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+       else:
+          raise(NotImplementedError(f"Incorrect Parse First Parameter Provided {parse_first}. Shoudl be syntax or functions"))
+
 
     ## Instead of writing data in place, lets write it to a new model subfolder ./databricks/
     # Write content to the new file
@@ -225,7 +252,7 @@ def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functi
 
    
 
-def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}):
+def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
   # Verify we are running in a dbt project
 
   ### LOCAL VERSION - 2 options - running as a parent project, or running as a package in another project. 
@@ -253,7 +280,7 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
     print(f"SQL FILES: {sql_files}")
 
     with ThreadPoolExecutor() as executor:
-      futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map): p for p in sql_files}
+      futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in sql_files}
       for future in as_completed(futures_sql):
         data = future.result()
         if data:
@@ -396,6 +423,7 @@ if __name__ == '__main__':
     parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all.")
     parser.add_argument("--run_mode", type=str, default = 'standalone', help = "'package' or 'standalone' mode. package mode is running within another DBT project as an import package. standalone is running in a DBT project directly. ")
     parser.add_argument("--output_folder", type=str, default = 'databricks', help = "Name of output directory of converted functions. 'databricks' by default under the models folder. Takes name of source folder and name of target foler to create output folder for each folder.")
+    parser.add_argument("--parse_first", type=str, default = 'syntax', help = "parse mode to run first if mode is 'all")
 
     ### Script Arguments
     # Parse arguments
@@ -413,11 +441,17 @@ if __name__ == '__main__':
     else: 
       subdirpath = ""
     
-    ## Source Database
+    ## Parse Mode
     if str(args.parse_mode).lower() not in ["functions", "syntax", "all"]:
       raise(Exception("ERROR: Parse mode must be 'functions', 'syntax' or 'all'"))
     else: 
       parse_mode = str(args.parse_mode).lower()
+
+    ## Which parse mode to run first
+    if str(args.parse_first).lower() not in ["functions", "syntax"]:
+      raise(Exception("ERROR: Parse first must be 'functions' or 'syntax'"))
+    else: 
+      parse_first = str(args.parse_first).lower()
 
     ## Run as package mode or standalone
     run_mode = args.run_mode
@@ -459,9 +493,10 @@ if __name__ == '__main__':
     print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
 
     ## Now do project conversion
-    dbt_project_functions_to_macros(base_project_path=project_base_directory, 
-                                    input_functions=input_functions,
-                                    subdirpath=subdirpath, 
-                                    parse_mode = parse_mode,
-                                    syntax_map= syntax_map)
+    dbt_project_functions_to_macros(base_project_path= project_base_directory, 
+                                    input_functions= input_functions,
+                                    subdirpath= subdirpath, 
+                                    parse_mode= parse_mode,
+                                    syntax_map= syntax_map,
+                                    parse_first= parse_first)
 
