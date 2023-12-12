@@ -44,6 +44,21 @@ IV) Once you have sufficient confidence copy the directory from the models direc
 
 V) Build models in both systems until sufficient confidence is instilled to run the models solely on one system.
 
+### Local Version - Databricks Converter locally
+
+There is also a convert_to_databricks python file that can convert the models in place in a local environment. 
+
+This function also contains additional abilities such as:
+
+I) Ability to configure and inject arbitrary regex syntax mappings source_pattern --> target_pattern.
+II) Ability to write out converted results to separate folder
+III) Ability to run as a package or standalone locally
+IV) Ability execute locally without needing to connect or import into Databricks for conversion. 
+
+Example Command:
+python3 ./convert_to_databricks.py redshift --subdir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
+
+
 ## Macros:
 
 ### zeroifnull ([source](https://github.com/rlsalcido24/lakehouse_utils/blob/main/macros/zeroifnull.sql))

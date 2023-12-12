@@ -1,7 +1,7 @@
 function_name
 convert
-TEXT_TO_NUMERIC_ALT
-HLL_COMBINE_SKETCHES
+text_to_numeric_alt
+hll_combine_sketches
 hll_combine
 hll_create_sketch
 hll_cardinality
