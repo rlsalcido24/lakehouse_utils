@@ -6,7 +6,15 @@ Date:  12/6/2023
 Description: Local Model converter from Redshift / Snowflake models to Databricks
 
 Main Command Example: 
+Standalone Mode: 
 python3 ./convert_to_databricks.py redshift --subdir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
+
+
+Package Mode:
+python3 ./dbt_packages/lakehouse_utils/helper/convert_to_databricks.py redshift \
+--subdir_path 'example/' \
+--parse_mode 'all' \
+--run_mode 'package'
 
 TO DO:
 1. Add rule to not replace anything in between 2 sets of double brackets - DONE - Cody Davis
@@ -326,18 +334,19 @@ def find_dbt_project_file(start_path: str, run_mode: str = "standalone"):
        try:
             # Create a Path object for the current script and resolve to an absolute path
             current_path = Path(__file__).resolve()
-
-            # Navigate three levels up
-            three_levels_up = current_path.parents[2]
+            # Navigate three levels up from ./parent/dbt_packages/lakehouse_utils/helper/convert_to_databricks.py
+            three_levels_up = current_path.parents[3]
 
             # Path of the 'dbt_project.yml' file three levels up
             dbt_project_file = three_levels_up / 'dbt_project.yml'
 
             # Check if the file exists
             if dbt_project_file.is_file():
-                print(f"'dbt_project.yml' exists at {dbt_project_file}")
+                print(f"PROJECT STRUCTURE CHECK: SUCCESS: 'dbt_project.yml' exists at {dbt_project_file}")
+                return three_levels_up
+            
             else:
-                print(f"'dbt_project.yml' does not exist at {dbt_project_file}")
+                print(f"PROJECT STRUCTURE CHECK: FAIL: 'dbt_project.yml' does not exist at {dbt_project_file}")
 
             return None
        
