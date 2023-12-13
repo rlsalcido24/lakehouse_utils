@@ -10,7 +10,7 @@ III) Surface best practices around unit tests to instill confidence that the mac
 
 ### Installation instructions:
 
-I) Include this package in your packages.yml — check [here](https://github.com/rlsalcido24/lakehouse_utils/releases/tag/v1.0.0) for the latest version number.
+I) Include this package in your packages.yml — check [here](https://github.com/rlsalcido24/lakehouse_utils/releases/tag/v1.0.1) for the latest version number.
 
 II) Run dbt deps
 
