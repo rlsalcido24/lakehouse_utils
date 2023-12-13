@@ -68,7 +68,7 @@ def function_to_macro(content: str, function_name: str):
   check_preventDoubleReplace_pattern = r'({{lakehouse_utils\.{}\()([^)]*)\)'.format(function_name)
   check_preventInnerReplace_pattern = r'(\w{}\()([^)]*)\)'.format(function_name)
 
-  number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
+  number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
 
   ## TO DO: This assumes there is only 1 function per script - not a good assumption
   # If the function hasn't already been replaced with a macro AND isn't a subpart of another function name, then continue
@@ -78,23 +78,21 @@ def function_to_macro(content: str, function_name: str):
   ):
     try:
 
-      if (re.search(exclude_curlys_pattern,content, flags=re.IGNORECASE) is not None):
-        number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
+      if (re.search(pattern,content, flags=re.IGNORECASE) is not None):
+        number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
       else:
-        number_of_matches = len(re.findall(exclude_curlys_pattern, content, flags=re.IGNORECASE))
+        number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
 
     except Exception as e:
       number_of_matches = 0
 
-    if (re.search(exclude_curlys_pattern,content, flags=re.IGNORECASE) is not None):
-      updated_content = re.sub(exclude_curlys_pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
+    if (re.search(pattern,content, flags=re.IGNORECASE) is not None):
+      updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
     else:
-      updated_content = re.sub(exclude_curlys_pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
+      updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
     #print(updated_content)
 
-    matched_patterns = re.findall(exclude_curlys_pattern,updated_content, flags=re.IGNORECASE) 
-
-    #print(matched_patterns)
+    matched_patterns = re.findall(pattern,updated_content, flags=re.IGNORECASE) 
 
     for i in matched_patterns:
       
@@ -140,6 +138,7 @@ def function_to_macro(content: str, function_name: str):
 def convert_syntax_expressions(content: str, source_pattern: str, target_pattern: str):
   
   ## '(?<!\{{\{{)\s\S*?({}\()([^)]*)\)\s\S*?(?!\}}\}})'
+  #exclude_curlys_pattern = r'(?<!lakehouse_utils\.)({})\s*?(?!\}}\}})'.format(source_pattern)
 
   source_pattern = source_pattern
   target_pattern = target_pattern
@@ -157,6 +156,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     #print(matched_patterns)
 
+  print(updated_content)
   return (updated_content, num_matches)
 
 
