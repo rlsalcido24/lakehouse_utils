@@ -1,0 +1,18 @@
+{
+"convert": {"source_name": "convert", "macro_name": "convert"},
+"text_to_numeric_alt": {"source_name": "text_to_numeric_alt", "macro_name": "text_to_numeric_alt"},
+"hll_combine_sketches": {"source_name": "hll_combine_sketches", "macro_name": "hll_combine_sketches"},
+"hll_combine": {"source_name": "hll_combine", "macro_name": "hll_combine"},
+"hll_create_sketch": {"source_name": "hll_create_sketch", "macro_name": "hll_create_sketch"},
+"hll_cardinality": {"source_name": "hll_cardinality", "macro_name": "hll_cardinality"},
+"dexp": {"source_name": "dexp", "macro_name": "dexp"},
+"dlog10": {"source_name": "dlog10", "macro_name": "dlog10"},
+"dlog1": {"source_name": "dlog1", "macro_name": "dlog1"},
+"getdate": {"source_name": "getdate", "macro_name": "redshift_getdate"},
+"strtol": {"source_name": "strtol", "macro_name": "strtol"},
+"isnull": {"source_name": "isnull", "macro_name": "isnull"},
+"sysdate": {"source_name": "sysdate", "macro_name": "sysdate"},
+"datediff": {"source_name": "datediff", "macro_name": "datediff"},
+"date_trunc": {"source_name": "date_trunc", "macro_name": "date_trunc"},
+"date_part": {"source_name": "date_part", "macro_name": "date_part"}
+}
