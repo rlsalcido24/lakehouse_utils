@@ -56,17 +56,20 @@ def find_sql_files(directory:str):
 
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
-def function_to_macro(content: str, function_name: str):
+def function_to_macro(content: str, function_name: dict[str, str]):
+
+  raw_function_name = function_name.get("source_name")
+  target_macro_name = function_name.get("macro_name")
 
   ## Pattern to exclude replacing things inside existing curly braces / macros
-  pattern = r'({}\()([^)]*)\)'.format(function_name) #Look for functions of the format name(input1,input2)
-  replacement_doubleQuotes = r'{{{{lakehouse_utils.{}("\2")}}}} '.format(function_name) #Surround the expression with double curly braces, and quotes on either end
+  pattern = r'({}\()([^)]*)\)'.format(raw_function_name) #Look for functions of the format name(input1,input2)
+  replacement_doubleQuotes = r'{{{{lakehouse_utils.{}("\2")}}}} '.format(target_macro_name) #Surround the expression with double curly braces, and quotes on either end
   
   ## Pattern to exclude replacing things inside existing curly braces / macros
-  exclude_curlys_pattern = r'(?<!\{{\{{)\s\S*?({}\()([^)]*)\)\s\S*?(?!\}}\}})'.format(function_name)
+  exclude_curlys_pattern = r'(?<!\{{\{{)\s\S*?({}\()([^)]*)\)\s\S*?(?!\}}\}})'.format(raw_function_name)
 
-  check_preventDoubleReplace_pattern = r'({{lakehouse_utils\.{}\()([^)]*)\)'.format(function_name)
-  check_preventInnerReplace_pattern = r'(\w{}\()([^)]*)\)'.format(function_name)
+  check_preventDoubleReplace_pattern = r'({{lakehouse_utils\.{}\()([^)]*)\)'.format(raw_function_name)
+  check_preventInnerReplace_pattern = r'(\w{}\()([^)]*)\)'.format(raw_function_name)
 
   number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
 
@@ -79,16 +82,22 @@ def function_to_macro(content: str, function_name: str):
     try:
 
       if (re.search(pattern,content, flags=re.IGNORECASE) is not None):
+        
         number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
+      
       else:
+
         number_of_matches = len(re.findall(pattern, content, flags=re.IGNORECASE))
 
     except Exception as e:
       number_of_matches = 0
 
     if (re.search(pattern,content, flags=re.IGNORECASE) is not None):
+
       updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
+    
     else:
+
       updated_content = re.sub(pattern, replacement_doubleQuotes, content, flags=re.IGNORECASE)
     #print(updated_content)
 
@@ -112,7 +121,7 @@ def function_to_macro(content: str, function_name: str):
 
     # If we inadvertently added double-quotes to an empty input macro, remove these!
 
-    accidental_doubleQuotes_pattern = r'({{lakehouse_utils.{}\()""\)'.format(function_name)
+    accidental_doubleQuotes_pattern = r'({{lakehouse_utils.{}\()""\)'.format(target_macro_name)
     fixed_noQuotes_pattern = r'\1)'
     
     updated_content = re.sub(accidental_doubleQuotes_pattern,fixed_noQuotes_pattern,updated_content, flags=re.IGNORECASE)
@@ -163,7 +172,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
 ## Function to asynchronously kick off: open each file, loop through every function, write results
 ## Make new directory for new results
-def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functions', syntax_map : {str, str} = {}, parse_first='functions'):
+def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_mode:str = 'functions', syntax_map : {str, str} = {}, parse_first='functions'):
 
   ## Steps 
   ## 1. If function mode or all mode - process the function conversions first
@@ -178,10 +187,16 @@ def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functi
   print(f"Converting SQL File: {full_path}")
 
   ## private Function to convert functions
-  def functions_chunk(functions_list, content, results_dict = {}):
+  def functions_chunk(function_map, content, results_dict = {}):
+
+    ## v2.0.1 - make functions_list a json dict of soure and target names to allow for namespace resolution errors
+    functions_list = function_map.keys()
 
     for function_name in functions_list:
-      content, num_matches = function_to_macro(content, function_name)
+
+      current_function_map = function_map.get(function_name)
+
+      content, num_matches = function_to_macro(content, current_function_map)
       #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
       if function_name in results_dict:
         results_dict[function_name] += num_matches
@@ -218,7 +233,7 @@ def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functi
     content = file.read()
 
     if parse_mode in ['functions']:
-       content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+       content, converted_functions = functions_chunk(function_map=function_map, content=content, results_dict=converted_functions)
     ## Parse and convert syntax nuances with source and target regex expressions from sourcedb/syntax_mappings.json
     elif parse_mode in ['syntax']:
        content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
@@ -227,13 +242,13 @@ def process_file(full_path: str, functions_list: [str], parse_mode:str = 'functi
     if parse_mode == 'all':
        
        if parse_first == 'functions':
-          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+          content, converted_functions = functions_chunk(function_map=function_map, content=content, results_dict=converted_functions)
           content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
-          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+          content, converted_functions = functions_chunk(function_map=function_map, content=content, results_dict=converted_functions)
 
        elif parse_first == 'syntax':
           content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
-          content, converted_functions = functions_chunk(functions_list=functions_list, content=content, results_dict=converted_functions)
+          content, converted_functions = functions_chunk(function_map=function_map, content=content, results_dict=converted_functions)
        else:
           raise(NotImplementedError(f"Incorrect Parse First Parameter Provided {parse_first}. Shoudl be syntax or functions"))
 
@@ -381,23 +396,23 @@ def find_helper_directory(start_path):
 
 
 ## Function to load supported functions to convert from config folder
-def get_functions_list(sourcedb):
+def get_function_map(sourcedb):
 
     current_script = Path(__file__).resolve()
 
     parent_directory = current_script.parent
 
-    file_path = parent_directory / '_resources/config' / sourcedb / 'functionlist.csv'
+    file_path = parent_directory / '_resources/config' / sourcedb / 'function_mappings.json'
 
     print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
 
-    # Read the CSV file into a Pandas DataFrame
-    input_functionspd = pd.read_csv(file_path)
-    input_functions = input_functionspd["function_name"]
-    return input_functions
+    with open(file_path, 'r') as file:
+      input_functions_dict = json.load(file)
+
+      return input_functions_dict
 
 
 ## Function to load supported syntax maps to convert from config folder
@@ -494,7 +509,7 @@ if __name__ == '__main__':
 
 
     ## Load input functions from lakehouse utils file
-    input_functions = get_functions_list(sourcedb = sourcedb)
+    input_functions = get_function_map(sourcedb = sourcedb)
     print(f"\nConverting the following functions from {sourcedb} to Databricks Dialect: \n {input_functions}")
 
     ## Load syntax regex mappings
