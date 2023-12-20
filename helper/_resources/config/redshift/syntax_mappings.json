@@ -6,6 +6,10 @@
                         },
 "isnull_to_coalesce" : {"source_pattern": "isnull",
                         "target_pattern": "coalesce"
-                       }
+                       },
+"order_by_desc_nulls_first_to_last": {"source_pattern": "(ORDER BY)([\\w\\s,]+\\b)(DESC)(?=\\s*$|\\s*\\n*)",
+                                      "target_pattern": "\\1 \\2 \\3 NULLS FIRST"},
+"order_by_asc_nulls_last_to_first_w_keyword": {"source_pattern": "(ORDER BY)([\\w\\s,]+\\b)(ASC)(?=\\s*$|\\s*\\n*)",
+                                      "target_pattern": "\\1 \\2 \\3 NULLS LAST"}
 }
         

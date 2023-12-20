@@ -11,7 +11,7 @@
 "getdate": {"source_name": "getdate", "macro_name": "redshift_getdate"},
 "strtol": {"source_name": "strtol", "macro_name": "strtol"},
 "isnull": {"source_name": "isnull", "macro_name": "isnull"},
-"sysdate": {"source_name": "sysdate", "macro_name": "sysdate"},
+"sysdate": {"source_name": "sysdate", "macro_name": "redshift_sysdate"},
 "datediff": {"source_name": "datediff", "macro_name": "datediff"},
 "date_trunc": {"source_name": "date_trunc", "macro_name": "date_trunc"},
 "date_part": {"source_name": "date_part", "macro_name": "date_part"}
