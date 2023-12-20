@@ -36,3 +36,4 @@ select
         ) as test_syntax_change
 from
     redshift_sample_data.tpch_rs1.customer
+ORDER BY colC,colB DESC
