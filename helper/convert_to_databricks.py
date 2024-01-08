@@ -156,16 +156,46 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   #print(f"SOURCE PATTERN: {source_pattern}")
   #print(f"TARGET PATTERN: {target_pattern}")
 
-  matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+  if target_pattern == "\\1 \\2 \\3 NULLS FIRST": 
+  
+    source_patternng = "ORDER BY[\\w\\s,]+\\bDESC(?=\\s*$|\\s*\\n*)"
+
+    updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    updated_content = updated_contenttmp
+
+    for i in findall:
+      commas = ","
+      commareplace = " NULLS FIRST,"
+      updated_match = re.sub(commas,commareplace, i, flags=re.IGNORECASE)
+      updated_content = updated_content.replace(i, updated_match)
+
+  elif target_pattern == "\\1 \\2 \\3 NULLS LAST":
+    
+    source_patternng = "ORDER BY[\\w\\s,]+\\bASC(?=\\s*$|\\s*\\n*)"
+
+    updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    updated_content = updated_contenttmp
+
+    for i in findall:
+      commas = ","
+      commareplace = " NULLS LAST,"
+      updated_match = re.sub(commas,commareplace, i, flags=re.IGNORECASE)
+      updated_content = updated_content.replace(i, updated_match)
+
+  else:  
+
+    matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
 
   #print(f"MATCHED PATTERNS: {matched_patterns}")
 
-  num_matches = len(matched_patterns)
+    num_matches = len(matched_patterns)
 
-  updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     #print(matched_patterns)
 
-  print(updated_content)
+    print(updated_content)
   return (updated_content, num_matches)
 
 
