@@ -183,9 +183,24 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       commareplace = " NULLS LAST,"
       updated_match = re.sub(commas,commareplace, i, flags=re.IGNORECASE)
       updated_content = updated_content.replace(i, updated_match)
-
+  
+  elif target_pattern == "jsonextractpathplaceholder":
+    source_patternuno = source_pattern
+    inputsearch = re.search(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
+    inputinitstring = inputsearch.group(0)
+    inputarg = inputsearch.group(2)
+    source_patterntres = "'[^')]*'|\)"
+    findallargs = re.findall(source_patterntres, inputarg, flags= re.DOTALL | re.IGNORECASE)
+    initarg = findallargs[0]
+    removeinit = findallargs.pop(0)
+    jsonpatharg = '.'.join(findallargs)
+    jsonpathnq = jsonpatharg.replace("'","")
+    jsonpathfinal = "$."+ jsonpathnq
+    getjsonddl = "get_json_object({}, '{}')".format(initarg, jsonpathfinal)
+    updated_content = content.replace(inputinitstring,getjsonddl)
+    
   else:  
-
+    print(source_pattern)
     matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
 
   #print(f"MATCHED PATTERNS: {matched_patterns}")
@@ -460,7 +475,7 @@ def get_syntax_map(sourcedb):
         raise FileNotFoundError(f"File not found: {file_path}")
 
     with open(file_path, 'r') as file:
-        syntax_map = json.load(file)
+        syntax_map = json.load(file, strict=False)
 
         return syntax_map
 

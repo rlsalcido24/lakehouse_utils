@@ -10,6 +10,58 @@
 "order_by_desc_nulls_first_to_last": {"source_pattern": "(ORDER BY)([\\w\\s,]+\\b)(DESC)(?=\\s*$|\\s*\\n*)",
                                       "target_pattern": "\\1 \\2 \\3 NULLS FIRST"},
 "order_by_asc_nulls_last_to_first_w_keyword": {"source_pattern": "(ORDER BY)([\\w\\s,]+\\b)(ASC)(?=\\s*$|\\s*\\n*)",
-                                      "target_pattern": "\\1 \\2 \\3 NULLS LAST"}
+                                      "target_pattern": "\\1 \\2 \\3 NULLS LAST"},
+"dexp_to_power" : {"source_pattern": "(dexp\\()(\\w+)(\\))",
+                  "target_pattern": "power(2.71828, \\2)"
+                       },
+"dlog_to_ln" : {"source_pattern": "(dlog1\\()(\\w+)(\\))",
+                  "target_pattern": "ln(\\2)"
+                       },
+"dlog10_to_log10" : {"source_pattern": "(dlog10\\()(\\w+)(\\))",
+                  "target_pattern": "log10(\\2)"
+                       },
+"getdate_to_df" : {"source_pattern": "(getdate\\()(\\))",
+                  "target_pattern": "date_format(date_trunc('second', current_timestamp()), 'yyyy-MM-dd HH:mm:ss')"
+                       },
+"sysdate_to_df" : {"source_pattern": "(sysdate\\()(\\))",
+                  "target_pattern": "date_format(current_timestamp(), 'yyyy-MM-dd HH:mm:ss')"
+                       },                       
+"hll_to_cardinality" : {"source_pattern": "(hll\\()(\\w+)(\\))",
+                      "target_pattern": "cardinality(\\2)"
+                       },
+"hllcombine_to_union" : {"source_pattern": "(hll_combine\\()(\\w+)(\\))",
+                      "target_pattern": "hll_union_agg(\\2)"
+                       },
+"hllcombinesketches_to_union" : {"source_pattern": "(hll_combine_sketches\\()(\\w+)(\\W+)(\\w+)(\\))",
+                   "target_pattern": "hll_union(\\2, \\4)"
+                       },
+"hllcreatesketch_to_sketchagg" : {"source_pattern": "(hll_create_sketch\\()(\\w+)(\\))",
+                      "target_pattern": "hll_sketch_agg(\\2)"
+                       },
+"strtol_to_conv" : {"source_pattern": "(strtol\\()(\\w+)(\\W+)(\\w+)(\\))",
+                   "target_pattern": "conv(\\2, \\4, 10)"
+                       },                                                                                                                                                                                          
+"convert_to_cast" : {"source_pattern": "(convert\\()(\\w+)(\\W+)(\\w+)(\\))",
+                   "target_pattern": "cast(\\4 as \\2)"
+                       },
+"jsonextractpath_to_gjo" : {"source_pattern": "(json_extract_path_text\\()([^)]*)(\\))",
+                   "target_pattern": "jsonextractpathplaceholder"
+                       },
+"jsonal_to_arraysize" : {"source_pattern": "(json_array_length\\()(')([^']*)(')",
+                      "target_pattern": "array_size(\\3)"
+                       },
+
+"convert_to_cast" : {"source_pattern": "(convert\\()(\\w+)(\\W+)(\\w+)(\\))",
+                   "target_pattern": "cast(\\4 as \\2)"
+                       },                                             
+"datepart_to_casewhen" : {"source_pattern": "(date_part\\()(\\w+)(\\W+)([^)]+)(\\))",  "target_pattern": "CASE -- Millenia WHEN lower( \\2 ::string) IN ('millennium', 'millennia', 'mil', 'mils') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 1000)) -- Century WHEN lower( \\2 ::string) IN ('century', 'centuries',	'c', 'cent', 'cents') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 100)) -- Decade WHEN lower( \\2 ::string) IN ('decade', 'decades', 'dec', 'decs') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 10)) -- Years WHEN lower( \\2 ::string) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(date_part('YEAR', '\\4'::timestamp) / 1) -- Quarter WHEN lower( \\2 ::string) IN ('quarter', 'quarters', 'qtr', 'qtrs') THEN date_part('QUARTER', '\\4'::timestamp) -- Month WHEN lower( \\2 ::string) IN ('month', 'months', 'mon', 'mons') THEN date_part('MONTH', '\\4'::timestamp) -- Week WHEN lower( \\2 ::string) IN ('week', 'weeks', 'w') THEN date_part('WEEK', '\\4'::timestamp) -- Day of Week: in Redshift day of week is 0-6, starting with Sunday, Databricks is 1-7, starting with Sunday WHEN lower( \\2 ::string) IN ('day of week', 'dayofweek', 'dow', 'dw', 'weekday') THEN date_part('DAYOFWEEK', '\\4'::timestamp) - 1 -- Day WHEN lower( \\2 ::string) IN ('day', 'days', 'd') THEN date_part('DAY', '\\4'::timestamp) -- Hour WHEN lower( \\2 ::string) IN ('hour', 'hours',	'h', 'hr', 'hrs') THEN date_part('HOUR', '\\4'::timestamp) -- Minute WHEN lower( \\2 ::string) IN ('minute', 'minutes', 'm', 'min', 'mins') THEN date_part('MINUTE', '\\4'::timestamp) -- Second WHEN lower( \\2 ::string) IN ('second', 'seconds',	's', 'sec', 'secs') THEN date_part('SECOND', '\\4'::timestamp) -- Millisecond WHEN lower( \\2 ::string) IN ('millisecond', 'milliseconds',	'ms', 'msec', 'msecs', 'msecond', 'mseconds', 'millisec', 'millisecs', 'millisecon') THEN date_part('SECOND', '\\4'::timestamp)*1000 -- Microsecond WHEN lower( \\2 ::string) IN ('microsecond', 'microseconds',	'microsec', 'microsecs', 'microsecond', 'usecond', 'useconds', 'us', 'usec', 'usecs') THEN date_part('SECOND', '\\4'::timestamp)*1000000 -- Else just try to use the raw \\2 - let it fail if it doenst convert so users know ELSE NULL END"
+                       },
+"datetrunc_to_casewhen" : {"source_pattern": "(date_trunc\\()(\\w+)(\\W+)([^)]+)(\\))",
+                   "target_pattern": "CASE -- Millenia WHEN lower( \\2 ::string) IN ('millennium', 'millennia', 'mil', 'mils') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 1000)) -- Century WHEN lower( \\2 ::string) IN ('century', 'centuries',	'c', 'cent', 'cents') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 100)) -- Decade WHEN lower( \\2 ::string) IN ('decade', 'decades', 'dec', 'decs') THEN (CEILING((YEAR( ' \\4 '::timestamp ) - 1) / 10)) -- Years WHEN lower( \\2 ::string) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(date_part('YEAR', '\\4'::timestamp) / 1) -- Quarter WHEN lower( \\2 ::string) IN ('quarter', 'quarters', 'qtr', 'qtrs') THEN date_part('QUARTER', '\\4'::timestamp) -- Month WHEN lower( \\2 ::string) IN ('month', 'months', 'mon', 'mons') THEN date_part('MONTH', '\\4'::timestamp) -- Week WHEN lower( \\2 ::string) IN ('week', 'weeks', 'w') THEN date_part('WEEK', '\\4'::timestamp) -- Day of Week: in Redshift day of week is 0-6, starting with Sunday, Databricks is 1-7, starting with Sunday WHEN lower( \\2 ::string) IN ('day of week', 'dayofweek', 'dow', 'dw', 'weekday') THEN date_part('DAYOFWEEK', '\\4'::timestamp) - 1 -- Day WHEN lower( \\2 ::string) IN ('day', 'days', 'd') THEN date_part('DAY', '\\4'::timestamp) -- Hour WHEN lower( \\2 ::string) IN ('hour', 'hours',	'h', 'hr', 'hrs') THEN date_part('HOUR', '\\4'::timestamp) -- Minute WHEN lower( \\2 ::string) IN ('minute', 'minutes', 'm', 'min', 'mins') THEN date_part('MINUTE', '\\4'::timestamp) -- Second WHEN lower( \\2 ::string) IN ('second', 'seconds',	's', 'sec', 'secs') THEN date_part('SECOND', '\\4'::timestamp) -- Millisecond WHEN lower( \\2 ::string) IN ('millisecond', 'milliseconds',	'ms', 'msec', 'msecs', 'msecond', 'mseconds', 'millisec', 'millisecs', 'millisecon') THEN date_part('SECOND', '\\4'::timestamp)*1000 -- Microsecond WHEN lower( \\2 ::string) IN ('microsecond', 'microseconds',	'microsec', 'microsecs', 'microsecond', 'usecond', 'useconds', 'us', 'usec', 'usecs') THEN date_part('SECOND', '\\4'::timestamp)*1000000 -- Else just try to use the raw \\2 - let it fail if it doenst convert so users know ELSE NULL END"
+                       },
+"datediff_to_casewhen" : {"source_pattern": "(datediff\\()(\\w+)(\\W+)([^,]+)(\\,)([^)]+)(\\))",
+                   "target_pattern": "CASE -- Millenia WHEN lower( \\2 ::string) IN ('millennium', 'millennia', 'mil', 'mils') THEN FLOOR(timestampdiff(YEAR, '\\4'::timestamp, '\\6'::timestamp) / 1000) -- Century WHEN lower( \\2 ::string) IN ('century', 'centuries',	'c', 'cent', 'cents') THEN FLOOR(timestampdiff(YEAR, '\\4'::timestamp, '\\6'::timestamp) / 100) -- Decade WHEN lower( \\2 ::string) IN ('decade', 'decades', 'dec', 'decs') THEN FLOOR(timestampdiff(YEAR, '\\4'::timestamp, '\\6'::timestamp) / 10) -- Years WHEN lower( \\2 ::string) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(timestampdiff(YEAR, '\\4'::timestamp, '\\6'::timestamp) / 1) -- Quarter WHEN lower( \\2 ::string) IN ('quarter', 'quarters', 'qtr', 'qtrs') THEN timestampdiff(QUARTER, '\\4'::timestamp, '\\6'::timestamp) -- Month WHEN lower( \\2 ::string) IN ('month', 'months', 'mon', 'mons') THEN timestampdiff(MONTH, '\\4'::timestamp, '\\6'::timestamp) -- Week WHEN lower( \\2 ::string) IN ('week', 'weeks', 'w') THEN timestampdiff(WEEK, '\\4'::timestamp, '\\6'::timestamp) -- Day WHEN lower( \\2 ::string) IN ('day', 'days', 'd') THEN timestampdiff(DAY, '\\4'::timestamp, '\\6'::timestamp) -- Hour WHEN lower( \\2 ::string) IN ('hour', 'hours',	'h', 'hr', 'hrs') THEN timestampdiff(HOUR, '\\4'::timestamp, '\\6'::timestamp) -- Minute WHEN lower( \\2 ::string) IN ('minute', 'minutes', 'm', 'min', 'mins') THEN timestampdiff(MINUTE, '\\4'::timestamp, '\\6'::timestamp) -- Second WHEN lower( \\2 ::string) IN ('second', 'seconds',	's', 'sec', 'secs') THEN timestampdiff(SECOND, '\\4'::timestamp, '\\6'::timestamp) -- Millisecond WHEN lower( \\2 ::string) IN ('millisecond', 'milliseconds',	'ms', 'msec', 'msecs', 'msecond', 'mseconds', 'millisec', 'millisecs', 'millisecon') THEN timestampdiff(MILLISECOND, '\\4'::timestamp, '\\6'::timestamp) -- Microsecond WHEN lower( \\2 ::string) IN ('microsecond', 'microseconds',	'microsec', 'microsecs', 'microsecond', 'usecond', 'useconds', 'us', 'usec', 'usecs') THEN timestampdiff(MICROSECOND, '\\4'::timestamp, '\\6'::timestamp) -- Else just try to use the raw \\2 - let it fail if it doenst convert so users know ELSE NULL END"
+                       }
+                                                         
 }
         
