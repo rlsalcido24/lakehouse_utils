@@ -187,17 +187,20 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   elif target_pattern == "jsonextractpathplaceholder":
     source_patternuno = source_pattern
     inputsearch = re.search(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
-    inputinitstring = inputsearch.group(0)
-    inputarg = inputsearch.group(2)
-    source_patterntres = "'[^')]*'|\)"
-    findallargs = re.findall(source_patterntres, inputarg, flags= re.DOTALL | re.IGNORECASE)
-    initarg = findallargs[0]
-    removeinit = findallargs.pop(0)
-    jsonpatharg = '.'.join(findallargs)
-    jsonpathnq = jsonpatharg.replace("'","")
-    jsonpathfinal = "$."+ jsonpathnq
-    getjsonddl = "get_json_object({}, '{}')".format(initarg, jsonpathfinal)
-    updated_content = content.replace(inputinitstring,getjsonddl)
+    if inputsearch != None:
+      inputinitstring = inputsearch.group(0)
+      inputarg = inputsearch.group(2)
+      source_patterntres = "'[^')]*'|\)"
+      findallargs = re.findall(source_patterntres, inputarg, flags= re.DOTALL | re.IGNORECASE)
+      initarg = findallargs[0]
+      removeinit = findallargs.pop(0)
+      jsonpatharg = '.'.join(findallargs)
+      jsonpathnq = jsonpatharg.replace("'","")
+      jsonpathfinal = "$."+ jsonpathnq
+      getjsonddl = "get_json_object({}, '{}')".format(initarg, jsonpathfinal)
+      updated_content = content.replace(inputinitstring,getjsonddl)
+    else:
+      updated_content = content  
     
   else:  
     print(source_pattern)
