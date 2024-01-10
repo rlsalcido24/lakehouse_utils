@@ -41,9 +41,6 @@
 "strtol_to_conv" : {"source_pattern": "(strtol\\()(\\w+)(\\W+)(\\w+)(\\))",
                    "target_pattern": "conv(\\2, \\4, 10)"
                        },                                                                                                                                                                                          
-"convert_to_cast" : {"source_pattern": "(convert\\()(\\w+)(\\W+)(\\w+)(\\))",
-                   "target_pattern": "cast(\\4 as \\2)"
-                       },
 "jsonextractpath_to_gjo" : {"source_pattern": "(json_extract_path_text\\()([^)]*)(\\))",
                    "target_pattern": "jsonextractpathplaceholder"
                        },
