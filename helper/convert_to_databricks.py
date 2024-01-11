@@ -185,22 +185,26 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       updated_content = updated_content.replace(i, updated_match)
   
   elif target_pattern == "jsonextractpathplaceholder":
-    source_patternuno = source_pattern
-    inputsearch = re.search(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
-    if inputsearch != None:
-      inputinitstring = inputsearch.group(0)
-      inputarg = inputsearch.group(2)
-      source_patterntres = "'[^')]*'|\)"
-      findallargs = re.findall(source_patterntres, inputarg, flags= re.DOTALL | re.IGNORECASE)
+    source_patternuno = "json_extract_path_text\([^)]*\)"
+    inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
+    updated_content = content
+    for i in inputsearchinit:
+      source_patterndos = "(json_extract_path_text\()([^)]*)(\))"
+      inputsearchloop = re.search(source_patterndos, i, flags= re.DOTALL | re.IGNORECASE)
+      inputargs = inputsearchloop.group(2)
+      source_patterninitarg = "([^(]*?)(?=,[\W]*')"
+      findinitarg = re.search(source_patterninitarg, inputargs, flags= re.DOTALL | re.IGNORECASE)
+      source_patternotherargs = "'[^')]*'|\)"
+      findallargs = re.findall(source_patternotherargs, inputargs, flags= re.DOTALL | re.IGNORECASE)
       initarg = findallargs[0]
-      removeinit = findallargs.pop(0)
+      initargmatch = findinitarg.group(1)
+      if initargmatch == initarg:
+        removeinit = findallargs.pop(0)
       jsonpatharg = '.'.join(findallargs)
       jsonpathnq = jsonpatharg.replace("'","")
       jsonpathfinal = "$."+ jsonpathnq
-      getjsonddl = "get_json_object({}, '{}')".format(initarg, jsonpathfinal)
-      updated_content = content.replace(inputinitstring,getjsonddl)
-    else:
-      updated_content = content  
+      getjsonddl = "get_json_object({}, '{}')".format(findinitarg.group(1), jsonpathfinal)
+      updated_content = updated_content.replace(i, getjsonddl) 
     
   else:  
     print(source_pattern)
