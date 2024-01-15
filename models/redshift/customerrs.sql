@@ -27,6 +27,9 @@ select
     ISNULL(test, test_is_null) AS null_test_col_caps,
     ISNULL(test, test_is_null) AS null_test_col_caps,
     isnull(test, 'test_is_null') AS null_test_col,
+    date_part(year, date(origination_date)) || '-' || 'Q' || floor(
+            (date_part(month, date(origination_date)) - 1) / 3) + 1 as origination_quarter,
+    date_part(SECONDS, '2019-10-01 00:00:01.000001'::timestamp)
     first_value(
             case when colA = 2 then id2
             end ignore nulls
