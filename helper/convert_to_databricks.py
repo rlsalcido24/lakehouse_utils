@@ -207,17 +207,25 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       updated_content = updated_content.replace(i, getjsonddl) 
     
   else:  
-    print(source_pattern)
     matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
-
-  #print(f"MATCHED PATTERNS: {matched_patterns}")
-
     num_matches = len(matched_patterns)
-
-    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
-    #print(matched_patterns)
-
-    print(updated_content)
+    updated_content = content
+    for i in matched_patterns:
+      try:
+        secondarg = i[3]
+        numparen = secondarg.count('(')
+        parenappend = ')' * numparen
+        updatedsecondarg = "\\4" + parenappend
+        if source_pattern == "(date_part\\()(\\w+)(\\W+)([^)]+)(\\))":
+          presecondarg = i[2]
+          endparenbinary = presecondarg.endswith("'")
+          if endparenbinary == True:
+            updatedsecondarg = "'{}'".format(updatedsecondarg)
+        target_pattern = target_pattern.replace("\\4", updatedsecondarg)      
+        updated_content = re.sub(source_pattern, target_pattern, updated_content, 1, flags= re.DOTALL | re.IGNORECASE)
+      except: 
+        updated_content = re.sub(source_pattern, target_pattern, updated_content, flags= re.DOTALL | re.IGNORECASE)
+  #print(updated_content)    
   return (updated_content, num_matches)
 
 
