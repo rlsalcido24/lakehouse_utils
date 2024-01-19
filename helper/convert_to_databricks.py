@@ -37,7 +37,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 
 ## Function to find all sql files within a given directory
-def find_sql_files(directory:str):
+def find_files(directory:str, file_type: str, except_list: [str] = []):
     # Convert the input to a Path object
     path = Path(directory)
 
@@ -46,13 +46,20 @@ def find_sql_files(directory:str):
         raise NotADirectoryError(f"{directory} is not a directory.")
 
     # List to store all .sql file paths
-    sql_files = []
+    files = []
 
     # Use glob to find all .sql files recursively
-    for file in path.rglob('*.sql'):
-        sql_files.append(str(file))
+    for file in path.rglob('*.{}'.format(file_type)):
+        tmpfilestring = str(file)
+        filetypedot = ".{}".format(file_type)
+        sourceregex = "/\w*\{}".format(filetypedot)
+        filepath = re.findall(sourceregex, tmpfilestring)
+        filepathinit = filepath[0]
+        filepathreplace = filepathinit.replace("/", "") 
+        if except_list.count(filepathreplace) == 0: 
+          files.append(str(file))
 
-    return sql_files
+    return files
 
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
@@ -327,7 +334,6 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
     # Define the new file path
     new_file_path = new_dir / original_path.name
-
     with open(new_file_path, 'w') as file:
         file.write(content)
 
@@ -335,24 +341,38 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
    
 
-def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
+def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
   # Verify we are running in a dbt project
 
   ### LOCAL VERSION - 2 options - running as a parent project, or running as a package in another project. 
   ## Checks for a parent project first under the following directory assumption: /project_folder/dbt_project.yml.
   ## The package version assumes the utility helper lives under /project_folder/packages/lakehouse_utils/helper/. So it looks 3 levels up for a dbt_project file and uses that as the base directory
-  try:
+  
+  if dir_mode == 'dbt':
+  
+    try:
 
-    dbt_file = base_project_path / 'dbt_project.yml'
-    if dbt_file.is_file():
-        print("Valid dbt project!")
-        print("Converting .sql files in the Models folder...")
+      dbt_file = base_project_path / 'dbt_project.yml'
+      if dbt_file.is_file():
+          print("Valid dbt project!")
+          print("Converting .sql files in the Models folder...")
+      else:
+        raise(FileNotFoundError("Cannot find DBT project file. Please check the project structure and run in the correct mode (standalone vs packages.)"))
+
+      paths = []
+      if len(except_list) > 0:
+        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql", except_list)
+      else:
+        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql")   
+    
+    except Exception as e:
+      raise(e)    
+
+  else: 
+    if len(except_list) > 0:
+      files = find_files(subdirpath, file_type, except_list)
     else:
-       raise(FileNotFoundError("Cannot find DBT project file. Please check the project structure and run in the correct mode (standalone vs packages.)"))
-
-    paths = []
-
-    sql_files = find_sql_files(f'{base_project_path}/models/{subdirpath}')
+      files = find_files(subdirpath, file_type)  
 
     
     # List all sql files to be checked in a folder
@@ -360,21 +380,18 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
     #if parsemacro == 'true':  
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
 
-    print(f"SQL FILES: {sql_files}")
+  print(f"FILES: {files}")
 
-    with ThreadPoolExecutor() as executor:
-      futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in sql_files}
-      for future in as_completed(futures_sql):
-        data = future.result()
-        if data:
-            print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
+  with ThreadPoolExecutor() as executor:
+    futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
+    for future in as_completed(futures_sql):
+      data = future.result()
+      if data:
+          print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
            
-        else:
-            print(f"Nothing to change: {data}")
+      else:
+          print(f"Nothing to change: {data}")
             
-
-  except Exception as e:
-      raise(e)  
 
 
 
@@ -499,16 +516,23 @@ def get_syntax_map(sourcedb):
 
 if __name__ == '__main__':
 
+    def list_of_strings(arg):
+      return arg.split(',')
+
     # Create the parser 
     parser = argparse.ArgumentParser(description='Local DBT to Databricks SQL Tranpiler')
 
-    parser.add_argument("sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
-    parser.add_argument("--subdir_path", type=str, default = "", help="A sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed")
+    parser.add_argument("--dir_mode", type=str, default = "dbt", help='Binary-- select dbt if you are parsing a dbt project, otherwise state anything else such as nondbt')
+    parser.add_argument("--sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
+    parser.add_argument("--dir_path", type=str, default = "", help="If dbt mode, a sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed. If non-dbt mode, include root path that contains all the files you want to be parsed. To indicate files you dont want to be parsed, leverage except list var.")
     parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all.")
     parser.add_argument("--run_mode", type=str, default = 'standalone', help = "'package' or 'standalone' mode. package mode is running within another DBT project as an import package. standalone is running in a DBT project directly. ")
     parser.add_argument("--output_folder", type=str, default = 'databricks', help = "Name of output directory of converted functions. 'databricks' by default under the models folder. Takes name of source folder and name of target foler to create output folder for each folder.")
     parser.add_argument("--parse_first", type=str, default = 'syntax', help = "parse mode to run first if mode is 'all")
+    parser.add_argument("--file_type", type=str, default = 'sql', help = "indicate file type that you want to parse. defaul is sql")
+    parser.add_argument("--except_list", type=list_of_strings, default = [str], help = "list of files of file_type under dir_path that you want to exclude from parsing")
 
+    
     ### Script Arguments
     # Parse arguments
     args = parser.parse_args()
@@ -520,8 +544,8 @@ if __name__ == '__main__':
       sourcedb = str(args.sourcedb).lower()
 
     ## Sub Model Path (or None)
-    if len(args.subdir_path) > 1:
-      subdirpath = str(args.subdir_path)
+    if len(args.dir_path) > 1:
+      subdirpath = str(args.dir_path)
     else: 
       subdirpath = ""
     
@@ -539,27 +563,32 @@ if __name__ == '__main__':
 
     ## Run as package mode or standalone
     run_mode = args.run_mode
+    dir_mode = args.dir_mode
+    file_type = args.file_type
+    except_list = args.except_list
+    print(except_list)
 
 
-    print(f"\nDBT TRANSPILER: Transpiling to Databricks Macros from {sourcedb} functions... with run mode {run_mode}.\n")
-    if len(subdirpath) > 1:
-      print(f"Processing only the following model subdirectory {subdirpath}. \n")
-    else:
-      print(f"Processing all models under models folder. \n")
+
+    if dir_mode == "dbt":
+      print(f"\nDBT TRANSPILER: Transpiling to Databricks Macros from {sourcedb} functions... with run mode {run_mode}.\n")
+      if len(subdirpath) > 1:
+        print(f"Processing only the following model subdirectory {subdirpath}. \n")
+      else:
+        print(f"Processing all models under models folder. \n")
 
 
     # Start from the current script's directory
-    project_base_directory = find_dbt_project_file(__file__, run_mode = run_mode)
-
-    ## Load location of helper directory for library configs
-    migration_utility_base_directory = find_helper_directory(__file__)
-
-
-    if project_base_directory:
+      project_base_directory = find_dbt_project_file(__file__, run_mode = run_mode)
+      if project_base_directory:
         print(f"Found 'dbt_project.yml' in: {project_base_directory}")
         # You can now use base_directory as your base path for further navigation
-    else:
+      else:
         raise("dbt_project.yml not found in any parent directories. Something is wrong with this project setup.")
+
+    ## Load location of helper directory for library configs
+    project_base_directory = ''
+    migration_utility_base_directory = find_helper_directory(__file__)
 
     if migration_utility_base_directory:
         print(f"Found Migration Utility Folder {migration_utility_base_directory}")
@@ -582,5 +611,8 @@ if __name__ == '__main__':
                                     subdirpath= subdirpath, 
                                     parse_mode= parse_mode,
                                     syntax_map= syntax_map,
-                                    parse_first= parse_first)
+                                    parse_first= parse_first,
+                                    dir_mode = dir_mode,
+                                    file_type = file_type,
+                                    except_list = except_list )
 
