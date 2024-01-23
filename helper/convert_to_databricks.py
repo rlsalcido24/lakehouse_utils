@@ -34,7 +34,210 @@ from pathlib import Path
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
+def findargs (contentstring, sourcepatterninit):
 
+  content = contentstring
+  source_patterninit = sourcepatterninit
+  initlistraw = []
+  initlistgold = []
+  findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
+  
+  funlength = len(findfunction)
+  if funlength > 0:
+    for i in range(funlength):
+      leftparen = findfunction[i].count("(")
+      rightparen = findfunction[i].count(")")
+      init = 1
+      initfunc = findfunction[i]
+      if leftparen != rightparen:
+        while leftparen != rightparen:
+          sourceappend = "[^)]*?)"
+          if init == 1:
+            updatedregex = initfunc + sourceappend
+          else:  
+            updatedregex = findfunction[0] + sourceappend
+          udpatedregexescapeuno = updatedregex.replace("(", "\(")
+          udpatedregexescapedos = udpatedregexescapeuno.replace(")", "\)")
+          findfunction = re.findall(udpatedregexescapedos, content)
+          leftparen = findfunction[0].count("(")
+          rightparen = findfunction[0].count(")")
+          latestdict = {"leftparen": leftparen, "rightparen": rightparen, "funcstring": findfunction[0]}
+          initlistraw.append(latestdict)
+          if len(findfunction) == 0:
+            break
+          init = 0
+      else: 
+        latestdict = {"leftparen": 0, "rightparen": 0, "funcstring": initfunc}
+        initlistraw.append(latestdict)  
+
+      listlength = len(initlistraw)
+      lastelement = initlistraw[listlength - 1]
+      lastleftparen = lastelement['leftparen'] 
+      lastrightparen = lastelement['rightparen']
+      lastfuncstring = lastelement['funcstring']
+      parendiff = leftparen - rightparen
+      parenappend = parendiff * (")") 
+      funcstring = lastfuncstring + parenappend
+      uniquekey = i
+      args = []
+      funcdict = {"funcstring": funcstring, "uniquekey": uniquekey}
+      #print(funcdict)
+      initlistgold.append(funcdict)
+      #print(initlistgold)
+      findfunction = re.findall(source_patterninit, content)   
+  return initlistgold  
+
+def parsestrings(fullargs):
+  ## to do--make dynamic to support when double args are first
+  initlistgold = fullargs
+  initlistsilver = []
+  for gold in initlistgold:
+    findfirstparen = gold["funcstring"].find("(")
+    strlength = len(gold["funcstring"])
+    extractarg = gold["funcstring"][findfirstparen + 1:strlength - 1]
+    stringargregex = "'[^']*?'"
+    findstringargs = re.findall(stringargregex, extractarg)
+    #print(findstringargs)
+    localsilverlist = []
+    #print(findstringargs)
+    for stringarg in findstringargs:
+      commaph = "#tmpcommaplaceholder"
+      stringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+      escapedq = stringargreplace.replace("\"", "\\\"")
+      removecomma = extractarg.replace(stringarg, escapedq)
+      extractarg = removecomma
+      localsilverlist.append(removecomma)
+    llave = gold["uniquekey"]  
+    listlengthsilver = len(localsilverlist)
+    if listlengthsilver > 0: 
+      lastelementsilver = localsilverlist[listlengthsilver - 1]
+      silverdict = {"target_string": lastelementsilver, "uniquekey": llave }
+      initlistsilver.append(silverdict)
+    else:
+      silverdict = {"target_string": extractarg, "uniquekey": llave }
+      initlistsilver.append(silverdict)
+  return initlistsilver
+
+def parseparens(parsedstrings):
+  initlistsilver = parsedstrings
+  initlistplatiunum = []
+  for silver in initlistsilver:
+    
+    findleftparen = silver["target_string"].find("(", 0)
+    findleftparenlist = []
+    findrightparen = silver["target_string"].find(")", 0)
+    findrightparenlist = []
+    startindexlist = []
+    indexdflist = []
+    silverstring = silver["target_string"]
+    while findleftparen != -1:
+      findleftparenlist.append(findleftparen)
+      findleftparen = silver["target_string"].find("(", findleftparen + 1) 
+    while findrightparen != -1:
+      findrightparenlist.append(findrightparen)
+      findrightparen = silver["target_string"].find(")", findrightparen + 1)
+    for rightparen in findrightparenlist:
+        lenleftparen = len(findleftparenlist)
+        if lenleftparen > 0:
+          lowervals= [i for i in findleftparenlist if i < rightparen]
+          lowervalsort = lowervals.sort(reverse=True)
+          toplowerval = lowervals[0]
+          startindexlist.append(toplowerval)
+          findleftparenlist.remove(toplowerval)
+    indexdict = {"startindex": startindexlist, "endindex": findrightparenlist }
+    indexdf = pd.DataFrame(indexdict)
+    for start, end in zip(indexdf["startindex"], indexdf["endindex"]):
+      substring = silverstring[start:end + 1]
+      indexdflist.append(substring)
+    tmpindexlist = []
+    for stringarg in indexdflist:
+      commaph = "#tmpcommaplaceholder"
+      substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+      removecomma = silverstring.replace(stringarg, substringargreplace)
+      silverstring = removecomma
+      tmpindexlist.append(removecomma)
+    llave = silver["uniquekey"]  
+    listlengthindex = len(tmpindexlist)
+    if listlengthindex > 0: 
+      lastelementindex = tmpindexlist[listlengthindex - 1]
+      platinumdict = {"target_string": lastelementindex, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+    else:
+      platinumdict = {"target_string": silverstring, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+  return initlistplatiunum 
+
+def splitargs(finalparsedstrings):
+  initlistplatinum = finalparsedstrings
+  secondlistsilver = []
+  for platinum in initlistplatinum:
+    splitstringlist = platinum["target_string"].split(",")
+    returnofcomma = [i.replace("#tmpcommaplaceholder", ",") for i in splitstringlist]
+    llavesplatinum = platinum["uniquekey"]
+    secondsilverdict = {"args": returnofcomma, "uniquekey": llavesplatinum}
+    secondlistsilver.append(secondsilverdict)
+
+  golddf = pd.DataFrame(initlistgold)
+  silverdf = pd.DataFrame(secondlistsilver)
+  finaldf = pd.merge(silverdf, golddf, on="uniquekey")
+  return(finaldf)
+
+def splitargstuple(finalparsedstrings, golden):
+  initlistplatinum = finalparsedstrings
+  platinumreplace = ''
+  secondlistsilver = []
+  initlistgold = golden
+  for platinum in initlistplatinum:
+    initsq = platinum["target_string"].find("'")
+    initdq = platinum["target_string"].find('"')
+    if initsq == -1 and initdq == -1 :
+      platinumparens = "'" + platinum["target_string"] + ",'"
+      platinumreplace = platinumparens.replace(",", "','")
+    elif initsq != -1 and initdq == -1:
+      platinumparens = '"' + platinum["target_string"] + ',"'
+      platinumreplace = platinumparens.replace(",", '","')
+    elif initsq != -1 and initdq != -1 and initsq < initdq:
+      platinumparens = '"' + platinum["target_string"] + ',"'
+      platinumreplace = platinumparens.replace(",", '","') 
+    elif initdq != -1 and initsq == -1:
+      platinumparens = "'" + platinum["target_string"] + ",'"
+      platinumreplace = platinumparens.replace(",", "','")
+    elif initdq != -1 and initsq != -1 and initdq < initsq:     
+      platinumparens = "'" + platinum["target_string"] + ",'"
+      platinumreplace = platinumparens.replace(",", "','")
+    else:
+      print('how did we arrive here? red alert!')
+    #print(platinumreplace)  
+    platinumtuple = eval(platinumreplace)
+    #print(platinumtuple)
+    #print(type(platinumtuple[0]))
+    llavesplatinum = platinum["uniquekey"]
+    secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
+    secondlistsilver.append(secondsilverdict)
+
+  golddf = pd.DataFrame(initlistgold)
+  silverdf = pd.DataFrame(secondlistsilver)
+  finaldf = pd.merge(silverdf, golddf, on="uniquekey")
+  return(finaldf)
+
+def finalcountdown(finaldf, contentstring, targetstring):
+  updated_content = contentstring
+  targetstringlist = []
+  for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
+    targetstringlocal = targetstring
+    counter = 0
+    #print(args)
+    for arg in args:
+      counterstring = str(counter)
+      fullcounter = "#arg"+counterstring
+      targetstringlocal = targetstringlocal.replace(fullcounter, arg.replace("#tmpcommaplaceholder", ","))
+      counter = counter + 1
+      targetstringlist.append(targetstringlocal)
+    targetstringlength = len(targetstringlist)
+    lastarget = targetstringlist[targetstringlength - 1] 
+    updated_content = updated_content.replace(sourcesting, lastarget) 
+    
+  return(updated_content)  
 
 ## Function to find all sql files within a given directory
 def find_files(directory:str, file_type: str, except_list: [str] = []):
@@ -63,10 +266,14 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
 
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
+
+
 def function_to_macro(content: str, function_name: dict[str, str]):
 
   raw_function_name = function_name.get("source_name")
   target_macro_name = function_name.get("macro_name")
+
+  
 
   ## Pattern to exclude replacing things inside existing curly braces / macros
   pattern = r'({}\()([^)]*)\)'.format(raw_function_name) #Look for functions of the format name(input1,input2)
@@ -169,6 +376,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
     updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    num_matches = len(findall)
     updated_content = updated_contenttmp
 
     for i in findall:
@@ -183,6 +391,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
     updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    num_matches = len(findall)
     updated_content = updated_contenttmp
 
     for i in findall:
@@ -194,6 +403,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   elif target_pattern == "jsonextractpathplaceholder":
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(inputsearchinit)
     updated_content = content
     for i in inputsearchinit:
       source_patterndos = "(json_extract_path_text\()([^)]*)(\))"
@@ -211,28 +421,46 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       jsonpathnq = jsonpatharg.replace("'","")
       jsonpathfinal = "$."+ jsonpathnq
       getjsonddl = "get_json_object({}, '{}')".format(findinitarg.group(1), jsonpathfinal)
-      updated_content = updated_content.replace(i, getjsonddl) 
+      updated_content = updated_content.replace(i, getjsonddl)
+
+  elif source_pattern == 'getdate\\s':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == 'isnull':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == 'getdate\\(\\)':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == "sysdate\\(\\)":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+
+  elif target_pattern == "\\1\\2\\4 \\3 \\5":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)          
     
-  else:  
-    matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
-    num_matches = len(matched_patterns)
-    updated_content = content
-    for i in matched_patterns:
-      try:
-        secondarg = i[3]
-        numparen = secondarg.count('(')
-        parenappend = ')' * numparen
-        updatedsecondarg = "\\4" + parenappend
-        if source_pattern == "(date_part\\()(\\w+)(\\W+)([^)]+)(\\))":
-          presecondarg = i[2]
-          endparenbinary = presecondarg.endswith("'")
-          if endparenbinary == True:
-            updatedsecondarg = "'{}'".format(updatedsecondarg)
-        target_pattern = target_pattern.replace("\\4", updatedsecondarg)      
-        updated_content = re.sub(source_pattern, target_pattern, updated_content, 1, flags= re.DOTALL | re.IGNORECASE)
-      except: 
-        updated_content = re.sub(source_pattern, target_pattern, updated_content, flags= re.DOTALL | re.IGNORECASE)
-  #print(updated_content)    
+  else:
+      gold = findargs(content, source_pattern)
+      num_matches = len(gold)
+      if len(gold) > 0: 
+        silver = parsestrings(gold)
+        #print(silver)
+        platinum = parseparens(silver)
+        secondsilver = splitargstuple(platinum, gold)
+        finalcontent = finalcountdown(secondsilver, content, target_pattern)
+        updated_content = finalcontent
+      else:
+        updated_content = content
+    
   return (updated_content, num_matches)
 
 
@@ -522,7 +750,7 @@ if __name__ == '__main__':
     # Create the parser 
     parser = argparse.ArgumentParser(description='Local DBT to Databricks SQL Tranpiler')
 
-    parser.add_argument("--dir_mode", type=str, default = "dbt", help='Binary-- select dbt if you are parsing a dbt project, otherwise state anything else such as nondbt')
+    parser.add_argument("--dir_mode", type=str, default = 'dbt', help='Binary-- select dbt if you are parsing a dbt project, otherwise state anything else such as nondbt')
     parser.add_argument("--sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
     parser.add_argument("--dir_path", type=str, default = "", help="If dbt mode, a sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed. If non-dbt mode, include root path that contains all the files you want to be parsed. To indicate files you dont want to be parsed, leverage except list var.")
     parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all.")
@@ -585,9 +813,10 @@ if __name__ == '__main__':
         # You can now use base_directory as your base path for further navigation
       else:
         raise("dbt_project.yml not found in any parent directories. Something is wrong with this project setup.")
+    else:
+       project_base_directory = '' 
 
     ## Load location of helper directory for library configs
-    project_base_directory = ''
     migration_utility_base_directory = find_helper_directory(__file__)
 
     if migration_utility_base_directory:
