@@ -41,7 +41,6 @@ def findargs (contentstring, sourcepatterninit):
   initlistraw = []
   initlistgold = []
   findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
-  
   funlength = len(findfunction)
   if funlength > 0:
     for i in range(funlength):
@@ -84,7 +83,7 @@ def findargs (contentstring, sourcepatterninit):
       #print(funcdict)
       initlistgold.append(funcdict)
       #print(initlistgold)
-      findfunction = re.findall(source_patterninit, content)   
+      findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
   return initlistgold  
 
 def parsestrings(fullargs):
@@ -182,7 +181,7 @@ def splitargs(finalparsedstrings):
   finaldf = pd.merge(silverdf, golddf, on="uniquekey")
   return(finaldf)
 
-def splitargstuple(finalparsedstrings, golden):
+def splitargstuple(finalparsedstrings, golden, flag):
   initlistplatinum = finalparsedstrings
   platinumreplace = ''
   secondlistsilver = []
@@ -191,29 +190,49 @@ def splitargstuple(finalparsedstrings, golden):
     initsq = platinum["target_string"].find("'")
     initdq = platinum["target_string"].find('"')
     if initsq == -1 and initdq == -1 :
-      platinumparens = "'" + platinum["target_string"] + ",'"
+      if flag == 'syntax':
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
     elif initsq != -1 and initdq == -1:
-      platinumparens = '"' + platinum["target_string"] + ',"'
+      if flag == 'syntax':
+        platinumparens = '"' + platinum["target_string"] + ',"'
+      else: 
+        platinumparens = '"' + platinum["target_string"] + '"'
       platinumreplace = platinumparens.replace(",", '","')
     elif initsq != -1 and initdq != -1 and initsq < initdq:
-      platinumparens = '"' + platinum["target_string"] + ',"'
+      if flag == 'syntax':
+        platinumparens = '"' + platinum["target_string"] + ',"'
+      else:
+        platinumparens = '"' + platinum["target_string"] + '"'  
       platinumreplace = platinumparens.replace(",", '","') 
     elif initdq != -1 and initsq == -1:
-      platinumparens = "'" + platinum["target_string"] + ",'"
+      if flag == 'syntax':
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
-    elif initdq != -1 and initsq != -1 and initdq < initsq:     
-      platinumparens = "'" + platinum["target_string"] + ",'"
+    elif initdq != -1 and initsq != -1 and initdq < initsq:
+      if flag == 'syntax':     
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
     else:
       print('how did we arrive here? red alert!')
-    #print(platinumreplace)  
-    platinumtuple = eval(platinumreplace)
-    #print(platinumtuple)
-    #print(type(platinumtuple[0]))
-    llavesplatinum = platinum["uniquekey"]
-    secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
-    secondlistsilver.append(secondsilverdict)
+    #print(platinumreplace)
+    if flag == 'syntax':  
+      platinumtuple = eval(platinumreplace)
+      llavesplatinum = platinum["uniquekey"]
+      secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
+      secondlistsilver.append(secondsilverdict)
+    elif flag == 'function':
+      llavesplatinum = platinum["uniquekey"]
+      secondsilverdict = {"args": platinumreplace, "uniquekey": llavesplatinum}
+      secondlistsilver.append(secondsilverdict)
+    else:
+      print('how did we arrive here? red alert!')    
 
   golddf = pd.DataFrame(initlistgold)
   silverdf = pd.DataFrame(secondlistsilver)
@@ -235,9 +254,19 @@ def finalcountdown(finaldf, contentstring, targetstring):
       targetstringlist.append(targetstringlocal)
     targetstringlength = len(targetstringlist)
     lastarget = targetstringlist[targetstringlength - 1] 
-    updated_content = updated_content.replace(sourcesting, lastarget) 
-    
-  return(updated_content)  
+    updated_content = updated_content.replace(sourcesting, lastarget)
+  return(updated_content)    
+
+def finalcountdowndbt(finaldf, contentstring):
+
+  ## parse through source strings-- do lakehouseutils + (look for first (, take that substring) + modifiedtuple + ) , updated_content = contentstring, updated_content = updated_content.replace(sourcesting, lastarget) 
+  updated_content = contentstring
+  for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
+    findfirstparen = sourcesting.find("(")
+    substring = sourcesting[0:findfirstparen + 1]
+    enrichedargs = "{{lakehouse_utils." + substring + args + ")}}"
+    updated_content = updated_content.replace(sourcesting, enrichedargs)
+  return(updated_content)    
 
 ## Function to find all sql files within a given directory
 def find_files(directory:str, file_type: str, except_list: [str] = []):
@@ -268,7 +297,7 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
 ## Function to convert Snowflake/Redshift functions to dbt macros
 
 
-def function_to_macro(content: str, function_name: dict[str, str]):
+def function_to_macroprod(content: str, function_name: dict[str, str]):
 
   raw_function_name = function_name.get("source_name")
   target_macro_name = function_name.get("macro_name")
@@ -356,6 +385,26 @@ def function_to_macro(content: str, function_name: dict[str, str]):
   return (updated_content, number_of_matches)
 
 
+def function_to_macrodev(content: str, function_name: dict[str, str]):
+  num_matches = 0
+  raw_function_name = function_name.get("source_name")
+  target_macro_name = function_name.get("macro_name")
+  spappend = "\\([^)]*?\\)"
+  source_pattern = raw_function_name + spappend
+
+  initargs = findargs(content, source_pattern)
+  ## add logic to eliminate matches prepended by lakehousedev 
+  num_matches = len(initargs)
+  if len(initargs) > 0: 
+    stringdelim = parsestrings(initargs)
+    parendelim = parseparens(stringdelim)
+    gentuple = splitargstuple(parendelim, initargs, "function")
+    finalcontent = finalcountdowndbt(gentuple, content)
+    updated_content = finalcontent
+  else:
+    updated_content = content
+  
+  return (updated_content, num_matches)
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
 def convert_syntax_expressions(content: str, source_pattern: str, target_pattern: str):
@@ -449,14 +498,14 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
     updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)          
     
   else:
-      gold = findargs(content, source_pattern)
-      num_matches = len(gold)
-      if len(gold) > 0: 
-        silver = parsestrings(gold)
+      initargs = findargs(content, source_pattern)
+      num_matches = len(initargs)
+      if len(initargs) > 0: 
+        stringdelim = parsestrings(initargs)
         #print(silver)
-        platinum = parseparens(silver)
-        secondsilver = splitargstuple(platinum, gold)
-        finalcontent = finalcountdown(secondsilver, content, target_pattern)
+        parendelim = parseparens(stringdelim)
+        gentuple = splitargstuple(parendelim, initargs, "syntax")
+        finalcontent = finalcountdown(gentuple, content, target_pattern)
         updated_content = finalcontent
       else:
         updated_content = content
@@ -491,7 +540,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
       current_function_map = function_map.get(function_name)
 
-      content, num_matches = function_to_macro(content, current_function_map)
+      content, num_matches = function_to_macrodev(content, current_function_map)
       #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
       if function_name in results_dict:
         results_dict[function_name] += num_matches
