@@ -259,7 +259,6 @@ def finalcountdown(finaldf, contentstring, targetstring):
 
 def finalcountdowndbt(finaldf, contentstring):
 
-  ## parse through source strings-- do lakehouseutils + (look for first (, take that substring) + modifiedtuple + ) , updated_content = contentstring, updated_content = updated_content.replace(sourcesting, lastarget) 
   updated_content = contentstring
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
     findfirstparen = sourcesting.find("(")
@@ -393,7 +392,7 @@ def function_to_macrodev(content: str, function_name: dict[str, str]):
   source_pattern = raw_function_name + spappend
 
   initargs = findargs(content, source_pattern)
-  ## add logic to eliminate matches prepended by lakehousedev 
+  ## todo add logic to eliminate matches prepended by lakehouseutils 
   num_matches = len(initargs)
   if len(initargs) > 0: 
     stringdelim = parsestrings(initargs)
@@ -450,6 +449,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       updated_content = updated_content.replace(i, updated_match)
   
   elif target_pattern == "jsonextractpathplaceholder":
+    # todo eliminate some of this custom logic
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
     num_matches = len(inputsearchinit)
