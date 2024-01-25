@@ -34,10 +34,242 @@ from pathlib import Path
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
+def findargs (contentstring, sourcepatterninit):
 
+  content = contentstring
+  source_patterninit = sourcepatterninit
+  initlistraw = []
+  initlistgold = []
+  findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
+  funlength = len(findfunction)
+  if funlength > 0:
+    for i in range(funlength):
+      leftparen = findfunction[i].count("(")
+      rightparen = findfunction[i].count(")")
+      init = 1
+      initfunc = findfunction[i]
+      if leftparen != rightparen:
+        while leftparen != rightparen:
+          sourceappend = "[^)]*?)"
+          if init == 1:
+            updatedregex = initfunc + sourceappend
+          else:  
+            updatedregex = findfunction[0] + sourceappend
+          udpatedregexescapeuno = updatedregex.replace("(", "\(")
+          udpatedregexescapedos = udpatedregexescapeuno.replace(")", "\)")
+          findfunction = re.findall(udpatedregexescapedos, content)
+          leftparen = findfunction[0].count("(")
+          rightparen = findfunction[0].count(")")
+          latestdict = {"leftparen": leftparen, "rightparen": rightparen, "funcstring": findfunction[0]}
+          initlistraw.append(latestdict)
+          if len(findfunction) == 0:
+            break
+          init = 0
+      else: 
+        latestdict = {"leftparen": 0, "rightparen": 0, "funcstring": initfunc}
+        initlistraw.append(latestdict)  
+
+      listlength = len(initlistraw)
+      lastelement = initlistraw[listlength - 1]
+      lastleftparen = lastelement['leftparen'] 
+      lastrightparen = lastelement['rightparen']
+      lastfuncstring = lastelement['funcstring']
+      parendiff = leftparen - rightparen
+      parenappend = parendiff * (")") 
+      funcstring = lastfuncstring + parenappend
+      uniquekey = i
+      args = []
+      funcdict = {"funcstring": funcstring, "uniquekey": uniquekey}
+      #print(funcdict)
+      initlistgold.append(funcdict)
+      #print(initlistgold)
+      findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
+  return initlistgold  
+
+def parsestrings(fullargs):
+  ## to do--make dynamic to support when double args are first
+  initlistgold = fullargs
+  initlistsilver = []
+  for gold in initlistgold:
+    findfirstparen = gold["funcstring"].find("(")
+    strlength = len(gold["funcstring"])
+    extractarg = gold["funcstring"][findfirstparen + 1:strlength - 1]
+    stringargregex = "'[^']*?'"
+    findstringargs = re.findall(stringargregex, extractarg)
+    #print(findstringargs)
+    localsilverlist = []
+    #print(findstringargs)
+    for stringarg in findstringargs:
+      commaph = "#tmpcommaplaceholder"
+      stringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+      escapedq = stringargreplace.replace("\"", "\\\"")
+      removecomma = extractarg.replace(stringarg, escapedq)
+      extractarg = removecomma
+      localsilverlist.append(removecomma)
+    llave = gold["uniquekey"]  
+    listlengthsilver = len(localsilverlist)
+    if listlengthsilver > 0: 
+      lastelementsilver = localsilverlist[listlengthsilver - 1]
+      silverdict = {"target_string": lastelementsilver, "uniquekey": llave }
+      initlistsilver.append(silverdict)
+    else:
+      silverdict = {"target_string": extractarg, "uniquekey": llave }
+      initlistsilver.append(silverdict)
+  return initlistsilver
+
+def parseparens(parsedstrings):
+  initlistsilver = parsedstrings
+  initlistplatiunum = []
+  for silver in initlistsilver:
+    
+    findleftparen = silver["target_string"].find("(", 0)
+    findleftparenlist = []
+    findrightparen = silver["target_string"].find(")", 0)
+    findrightparenlist = []
+    startindexlist = []
+    indexdflist = []
+    silverstring = silver["target_string"]
+    while findleftparen != -1:
+      findleftparenlist.append(findleftparen)
+      findleftparen = silver["target_string"].find("(", findleftparen + 1) 
+    while findrightparen != -1:
+      findrightparenlist.append(findrightparen)
+      findrightparen = silver["target_string"].find(")", findrightparen + 1)
+    for rightparen in findrightparenlist:
+        lenleftparen = len(findleftparenlist)
+        if lenleftparen > 0:
+          lowervals= [i for i in findleftparenlist if i < rightparen]
+          lowervalsort = lowervals.sort(reverse=True)
+          toplowerval = lowervals[0]
+          startindexlist.append(toplowerval)
+          findleftparenlist.remove(toplowerval)
+    indexdict = {"startindex": startindexlist, "endindex": findrightparenlist }
+    indexdf = pd.DataFrame(indexdict)
+    for start, end in zip(indexdf["startindex"], indexdf["endindex"]):
+      substring = silverstring[start:end + 1]
+      indexdflist.append(substring)
+    tmpindexlist = []
+    for stringarg in indexdflist:
+      commaph = "#tmpcommaplaceholder"
+      substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+      removecomma = silverstring.replace(stringarg, substringargreplace)
+      silverstring = removecomma
+      tmpindexlist.append(removecomma)
+    llave = silver["uniquekey"]  
+    listlengthindex = len(tmpindexlist)
+    if listlengthindex > 0: 
+      lastelementindex = tmpindexlist[listlengthindex - 1]
+      platinumdict = {"target_string": lastelementindex, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+    else:
+      platinumdict = {"target_string": silverstring, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+  return initlistplatiunum 
+
+def splitargs(finalparsedstrings):
+  initlistplatinum = finalparsedstrings
+  secondlistsilver = []
+  for platinum in initlistplatinum:
+    splitstringlist = platinum["target_string"].split(",")
+    returnofcomma = [i.replace("#tmpcommaplaceholder", ",") for i in splitstringlist]
+    llavesplatinum = platinum["uniquekey"]
+    secondsilverdict = {"args": returnofcomma, "uniquekey": llavesplatinum}
+    secondlistsilver.append(secondsilverdict)
+
+  golddf = pd.DataFrame(initlistgold)
+  silverdf = pd.DataFrame(secondlistsilver)
+  finaldf = pd.merge(silverdf, golddf, on="uniquekey")
+  return(finaldf)
+
+def splitargstuple(finalparsedstrings, golden, flag):
+  initlistplatinum = finalparsedstrings
+  platinumreplace = ''
+  secondlistsilver = []
+  initlistgold = golden
+  for platinum in initlistplatinum:
+    initsq = platinum["target_string"].find("'")
+    initdq = platinum["target_string"].find('"')
+    if initsq == -1 and initdq == -1 :
+      if flag == 'syntax':
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
+      platinumreplace = platinumparens.replace(",", "','")
+    elif initsq != -1 and initdq == -1:
+      if flag == 'syntax':
+        platinumparens = '"' + platinum["target_string"] + ',"'
+      else: 
+        platinumparens = '"' + platinum["target_string"] + '"'
+      platinumreplace = platinumparens.replace(",", '","')
+    elif initsq != -1 and initdq != -1 and initsq < initdq:
+      if flag == 'syntax':
+        platinumparens = '"' + platinum["target_string"] + ',"'
+      else:
+        platinumparens = '"' + platinum["target_string"] + '"'  
+      platinumreplace = platinumparens.replace(",", '","') 
+    elif initdq != -1 and initsq == -1:
+      if flag == 'syntax':
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
+      platinumreplace = platinumparens.replace(",", "','")
+    elif initdq != -1 and initsq != -1 and initdq < initsq:
+      if flag == 'syntax':     
+        platinumparens = "'" + platinum["target_string"] + ",'"
+      else:
+        platinumparens = "'" + platinum["target_string"] + "'"  
+      platinumreplace = platinumparens.replace(",", "','")
+    else:
+      print('how did we arrive here? red alert!')
+    #print(platinumreplace)
+    if flag == 'syntax':  
+      platinumtuple = eval(platinumreplace)
+      llavesplatinum = platinum["uniquekey"]
+      secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
+      secondlistsilver.append(secondsilverdict)
+    elif flag == 'function':
+      llavesplatinum = platinum["uniquekey"]
+      secondsilverdict = {"args": platinumreplace, "uniquekey": llavesplatinum}
+      secondlistsilver.append(secondsilverdict)
+    else:
+      print('how did we arrive here? red alert!')    
+
+  golddf = pd.DataFrame(initlistgold)
+  silverdf = pd.DataFrame(secondlistsilver)
+  finaldf = pd.merge(silverdf, golddf, on="uniquekey")
+  return(finaldf)
+
+def finalcountdown(finaldf, contentstring, targetstring):
+  updated_content = contentstring
+  targetstringlist = []
+  for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
+    targetstringlocal = targetstring
+    counter = 0
+    #print(args)
+    for arg in args:
+      counterstring = str(counter)
+      fullcounter = "#arg"+counterstring
+      targetstringlocal = targetstringlocal.replace(fullcounter, arg.replace("#tmpcommaplaceholder", ","))
+      counter = counter + 1
+      targetstringlist.append(targetstringlocal)
+    targetstringlength = len(targetstringlist)
+    lastarget = targetstringlist[targetstringlength - 1] 
+    updated_content = updated_content.replace(sourcesting, lastarget)
+  return(updated_content)    
+
+def finalcountdowndbt(finaldf, contentstring):
+
+  ## parse through source strings-- do lakehouseutils + (look for first (, take that substring) + modifiedtuple + ) , updated_content = contentstring, updated_content = updated_content.replace(sourcesting, lastarget) 
+  updated_content = contentstring
+  for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
+    findfirstparen = sourcesting.find("(")
+    substring = sourcesting[0:findfirstparen + 1]
+    enrichedargs = "{{lakehouse_utils." + substring + args + ")}}"
+    updated_content = updated_content.replace(sourcesting, enrichedargs)
+  return(updated_content)    
 
 ## Function to find all sql files within a given directory
-def find_sql_files(directory:str):
+def find_files(directory:str, file_type: str, except_list: [str] = []):
     # Convert the input to a Path object
     path = Path(directory)
 
@@ -46,20 +278,31 @@ def find_sql_files(directory:str):
         raise NotADirectoryError(f"{directory} is not a directory.")
 
     # List to store all .sql file paths
-    sql_files = []
+    files = []
 
     # Use glob to find all .sql files recursively
-    for file in path.rglob('*.sql'):
-        sql_files.append(str(file))
+    for file in path.rglob('*.{}'.format(file_type)):
+        tmpfilestring = str(file)
+        filetypedot = ".{}".format(file_type)
+        sourceregex = "/\w*\{}".format(filetypedot)
+        filepath = re.findall(sourceregex, tmpfilestring)
+        filepathinit = filepath[0]
+        filepathreplace = filepathinit.replace("/", "") 
+        if except_list.count(filepathreplace) == 0: 
+          files.append(str(file))
 
-    return sql_files
+    return files
 
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
-def function_to_macro(content: str, function_name: dict[str, str]):
+
+
+def function_to_macroprod(content: str, function_name: dict[str, str]):
 
   raw_function_name = function_name.get("source_name")
   target_macro_name = function_name.get("macro_name")
+
+  
 
   ## Pattern to exclude replacing things inside existing curly braces / macros
   pattern = r'({}\()([^)]*)\)'.format(raw_function_name) #Look for functions of the format name(input1,input2)
@@ -142,6 +385,26 @@ def function_to_macro(content: str, function_name: dict[str, str]):
   return (updated_content, number_of_matches)
 
 
+def function_to_macrodev(content: str, function_name: dict[str, str]):
+  num_matches = 0
+  raw_function_name = function_name.get("source_name")
+  target_macro_name = function_name.get("macro_name")
+  spappend = "\\([^)]*?\\)"
+  source_pattern = raw_function_name + spappend
+
+  initargs = findargs(content, source_pattern)
+  ## add logic to eliminate matches prepended by lakehousedev 
+  num_matches = len(initargs)
+  if len(initargs) > 0: 
+    stringdelim = parsestrings(initargs)
+    parendelim = parseparens(stringdelim)
+    gentuple = splitargstuple(parendelim, initargs, "function")
+    finalcontent = finalcountdowndbt(gentuple, content)
+    updated_content = finalcontent
+  else:
+    updated_content = content
+  
+  return (updated_content, num_matches)
 
 ## Function to convert Snowflake/Redshift functions to dbt macros
 def convert_syntax_expressions(content: str, source_pattern: str, target_pattern: str):
@@ -162,6 +425,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
     updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    num_matches = len(findall)
     updated_content = updated_contenttmp
 
     for i in findall:
@@ -176,6 +440,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
     updated_contenttmp = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     findall = re.findall(source_patternng, updated_contenttmp, flags=re.IGNORECASE)
+    num_matches = len(findall)
     updated_content = updated_contenttmp
 
     for i in findall:
@@ -187,6 +452,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   elif target_pattern == "jsonextractpathplaceholder":
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(inputsearchinit)
     updated_content = content
     for i in inputsearchinit:
       source_patterndos = "(json_extract_path_text\()([^)]*)(\))"
@@ -204,28 +470,46 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       jsonpathnq = jsonpatharg.replace("'","")
       jsonpathfinal = "$."+ jsonpathnq
       getjsonddl = "get_json_object({}, '{}')".format(findinitarg.group(1), jsonpathfinal)
-      updated_content = updated_content.replace(i, getjsonddl) 
+      updated_content = updated_content.replace(i, getjsonddl)
+
+  elif source_pattern == 'getdate\\s':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == 'isnull':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == 'getdate\\(\\)':
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
+
+  elif source_pattern == "sysdate\\(\\)":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+
+  elif target_pattern == "\\1\\2\\4 \\3 \\5":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)          
     
-  else:  
-    matched_patterns = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE) 
-    num_matches = len(matched_patterns)
-    updated_content = content
-    for i in matched_patterns:
-      try:
-        secondarg = i[3]
-        numparen = secondarg.count('(')
-        parenappend = ')' * numparen
-        updatedsecondarg = "\\4" + parenappend
-        if source_pattern == "(date_part\\()(\\w+)(\\W+)([^)]+)(\\))":
-          presecondarg = i[2]
-          endparenbinary = presecondarg.endswith("'")
-          if endparenbinary == True:
-            updatedsecondarg = "'{}'".format(updatedsecondarg)
-        target_pattern = target_pattern.replace("\\4", updatedsecondarg)      
-        updated_content = re.sub(source_pattern, target_pattern, updated_content, 1, flags= re.DOTALL | re.IGNORECASE)
-      except: 
-        updated_content = re.sub(source_pattern, target_pattern, updated_content, flags= re.DOTALL | re.IGNORECASE)
-  #print(updated_content)    
+  else:
+      initargs = findargs(content, source_pattern)
+      num_matches = len(initargs)
+      if len(initargs) > 0: 
+        stringdelim = parsestrings(initargs)
+        #print(silver)
+        parendelim = parseparens(stringdelim)
+        gentuple = splitargstuple(parendelim, initargs, "syntax")
+        finalcontent = finalcountdown(gentuple, content, target_pattern)
+        updated_content = finalcontent
+      else:
+        updated_content = content
+    
   return (updated_content, num_matches)
 
 
@@ -256,7 +540,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
       current_function_map = function_map.get(function_name)
 
-      content, num_matches = function_to_macro(content, current_function_map)
+      content, num_matches = function_to_macrodev(content, current_function_map)
       #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
       if function_name in results_dict:
         results_dict[function_name] += num_matches
@@ -327,7 +611,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
     # Define the new file path
     new_file_path = new_dir / original_path.name
-
+    print(f"FILE PATH: {new_file_path}")
     with open(new_file_path, 'w') as file:
         file.write(content)
 
@@ -335,24 +619,38 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
    
 
-def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
+def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
   # Verify we are running in a dbt project
 
   ### LOCAL VERSION - 2 options - running as a parent project, or running as a package in another project. 
   ## Checks for a parent project first under the following directory assumption: /project_folder/dbt_project.yml.
   ## The package version assumes the utility helper lives under /project_folder/packages/lakehouse_utils/helper/. So it looks 3 levels up for a dbt_project file and uses that as the base directory
-  try:
+  
+  if dir_mode == 'dbt':
+  
+    try:
 
-    dbt_file = base_project_path / 'dbt_project.yml'
-    if dbt_file.is_file():
-        print("Valid dbt project!")
-        print("Converting .sql files in the Models folder...")
+      dbt_file = base_project_path / 'dbt_project.yml'
+      if dbt_file.is_file():
+          print("Valid dbt project!")
+          print("Converting .sql files in the Models folder...")
+      else:
+        raise(FileNotFoundError("Cannot find DBT project file. Please check the project structure and run in the correct mode (standalone vs packages.)"))
+
+      paths = []
+      if len(except_list) > 0:
+        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql", except_list)
+      else:
+        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql")   
+    
+    except Exception as e:
+      raise(e)    
+
+  else: 
+    if len(except_list) > 0:
+      files = find_files(subdirpath, file_type, except_list)
     else:
-       raise(FileNotFoundError("Cannot find DBT project file. Please check the project structure and run in the correct mode (standalone vs packages.)"))
-
-    paths = []
-
-    sql_files = find_sql_files(f'{base_project_path}/models/{subdirpath}')
+      files = find_files(subdirpath, file_type)  
 
     
     # List all sql files to be checked in a folder
@@ -360,21 +658,18 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
     #if parsemacro == 'true':  
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
 
-    print(f"SQL FILES: {sql_files}")
+  print(f"FILES: {files}")
 
-    with ThreadPoolExecutor() as executor:
-      futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in sql_files}
-      for future in as_completed(futures_sql):
-        data = future.result()
-        if data:
-            print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
+  with ThreadPoolExecutor() as executor:
+    futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
+    for future in as_completed(futures_sql):
+      data = future.result()
+      if data:
+          print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
            
-        else:
-            print(f"Nothing to change: {data}")
+      else:
+          print(f"Nothing to change: {data}")
             
-
-  except Exception as e:
-      raise(e)  
 
 
 
@@ -499,16 +794,23 @@ def get_syntax_map(sourcedb):
 
 if __name__ == '__main__':
 
+    def list_of_strings(arg):
+      return arg.split(',')
+
     # Create the parser 
     parser = argparse.ArgumentParser(description='Local DBT to Databricks SQL Tranpiler')
 
-    parser.add_argument("sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
-    parser.add_argument("--subdir_path", type=str, default = "", help="A sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed")
+    parser.add_argument("--dir_mode", type=str, default = 'dbt', help='Binary-- select dbt if you are parsing a dbt project, otherwise state anything else such as nondbt')
+    parser.add_argument("--sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
+    parser.add_argument("--dir_path", type=str, default = "", help="If dbt mode, a sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed. If non-dbt mode, include root path that contains all the files you want to be parsed. To indicate files you dont want to be parsed, leverage except list var.")
     parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all.")
     parser.add_argument("--run_mode", type=str, default = 'standalone', help = "'package' or 'standalone' mode. package mode is running within another DBT project as an import package. standalone is running in a DBT project directly. ")
     parser.add_argument("--output_folder", type=str, default = 'databricks', help = "Name of output directory of converted functions. 'databricks' by default under the models folder. Takes name of source folder and name of target foler to create output folder for each folder.")
     parser.add_argument("--parse_first", type=str, default = 'syntax', help = "parse mode to run first if mode is 'all")
+    parser.add_argument("--file_type", type=str, default = 'sql', help = "indicate file type that you want to parse. defaul is sql")
+    parser.add_argument("--except_list", type=list_of_strings, default = [str], help = "list of files of file_type under dir_path that you want to exclude from parsing")
 
+    
     ### Script Arguments
     # Parse arguments
     args = parser.parse_args()
@@ -520,8 +822,8 @@ if __name__ == '__main__':
       sourcedb = str(args.sourcedb).lower()
 
     ## Sub Model Path (or None)
-    if len(args.subdir_path) > 1:
-      subdirpath = str(args.subdir_path)
+    if len(args.dir_path) > 1:
+      subdirpath = str(args.dir_path)
     else: 
       subdirpath = ""
     
@@ -539,27 +841,33 @@ if __name__ == '__main__':
 
     ## Run as package mode or standalone
     run_mode = args.run_mode
+    dir_mode = args.dir_mode
+    file_type = args.file_type
+    except_list = args.except_list
+    print(except_list)
 
 
-    print(f"\nDBT TRANSPILER: Transpiling to Databricks Macros from {sourcedb} functions... with run mode {run_mode}.\n")
-    if len(subdirpath) > 1:
-      print(f"Processing only the following model subdirectory {subdirpath}. \n")
-    else:
-      print(f"Processing all models under models folder. \n")
+
+    if dir_mode == "dbt":
+      print(f"\nDBT TRANSPILER: Transpiling to Databricks Macros from {sourcedb} functions... with run mode {run_mode}.\n")
+      if len(subdirpath) > 1:
+        print(f"Processing only the following model subdirectory {subdirpath}. \n")
+      else:
+        print(f"Processing all models under models folder. \n")
 
 
     # Start from the current script's directory
-    project_base_directory = find_dbt_project_file(__file__, run_mode = run_mode)
+      project_base_directory = find_dbt_project_file(__file__, run_mode = run_mode)
+      if project_base_directory:
+        print(f"Found 'dbt_project.yml' in: {project_base_directory}")
+        # You can now use base_directory as your base path for further navigation
+      else:
+        raise("dbt_project.yml not found in any parent directories. Something is wrong with this project setup.")
+    else:
+       project_base_directory = '' 
 
     ## Load location of helper directory for library configs
     migration_utility_base_directory = find_helper_directory(__file__)
-
-
-    if project_base_directory:
-        print(f"Found 'dbt_project.yml' in: {project_base_directory}")
-        # You can now use base_directory as your base path for further navigation
-    else:
-        raise("dbt_project.yml not found in any parent directories. Something is wrong with this project setup.")
 
     if migration_utility_base_directory:
         print(f"Found Migration Utility Folder {migration_utility_base_directory}")
@@ -582,5 +890,8 @@ if __name__ == '__main__':
                                     subdirpath= subdirpath, 
                                     parse_mode= parse_mode,
                                     syntax_map= syntax_map,
-                                    parse_first= parse_first)
+                                    parse_first= parse_first,
+                                    dir_mode = dir_mode,
+                                    file_type = file_type,
+                                    except_list = except_list )
 
