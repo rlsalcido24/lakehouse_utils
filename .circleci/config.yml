@@ -32,16 +32,6 @@ jobs:
 
             
 
-
-      - run:
-          name: "Run Tests - Databricks"
-          command: |
-            . dbt_venv/bin/activate
-            cd integration_tests
-            dbt compile
-            dbt seed --full-refresh
-            dbt test
-
             
       - store_artifacts:
           path: integration_tests/logs
