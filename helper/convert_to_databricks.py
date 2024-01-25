@@ -611,7 +611,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
     # Define the new file path
     new_file_path = new_dir / original_path.name
-    print(new_file_path)
+    print(f"FILE PATH: {new_file_path}")
     with open(new_file_path, 'w') as file:
         file.write(content)
 
