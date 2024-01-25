@@ -17,7 +17,7 @@ with open(lookerakpath, 'r+') as file:
 with open(pyakpath, 'r+') as file:
     pyak = file.read()
 
-os.chdir("redshift_to_databricks") 
+os.chdir("models/redshift_to_databricks") 
 syntaxgenpath = 'customerrs.sql'
 
 with open(syntaxgenpath, 'r+') as file:
