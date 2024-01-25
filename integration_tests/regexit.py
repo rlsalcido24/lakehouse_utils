@@ -1,5 +1,5 @@
 import os
-os.chdir("lakehouse_utils/integration_tests")
+os.chdir("integration_tests")
 syntaxakpath = 'syntaxak.sql' 
 #functionakpath = 'functionak.sql' 
 pyakpath = 'tresak.py' 
@@ -17,13 +17,13 @@ with open(lookerakpath, 'r+') as file:
 with open(pyakpath, 'r+') as file:
     pyak = file.read()
 
-os.chdir("lakehouse_utils/models/redshift_to_databricks") 
+os.chdir("redshift_to_databricks") 
 syntaxgenpath = 'customerrs.sql'
 
 with open(syntaxgenpath, 'r+') as file:
     syntaxgen = file.read()
 
-os.chdir("lakehouse_utils/beyondsqltest")
+os.chdir("beyondsqltest")
 pygenpath = "testpyfiles_to_databricks/tres.py"
 lookergenpath = "testlookmlfiles_to_databricks/uno.lkml"   
 
