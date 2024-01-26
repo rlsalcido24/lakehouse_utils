@@ -797,7 +797,7 @@ def get_function_map(sourcedb):
 
 
 ## Function to load supported syntax maps to convert from config folder
-def get_syntax_map(sourcedb):
+def get_syntax_map(sourcedb, customdp):
 
     current_script = Path(__file__).resolve()
 
@@ -812,7 +812,10 @@ def get_syntax_map(sourcedb):
 
     with open(file_path, 'r') as file:
         syntax_map = json.load(file, strict=False)
-
+        if customdp == 'true':
+          syntax_map.pop("datepart_to_casewhen")
+        else:
+          syntax_map.pop("customdatepart")
         return syntax_map
 
 
@@ -835,6 +838,7 @@ if __name__ == '__main__':
     parser.add_argument("--parse_first", type=str, default = 'syntax', help = "parse mode to run first if mode is 'all")
     parser.add_argument("--file_type", type=str, default = 'sql', help = "indicate file type that you want to parse. defaul is sql")
     parser.add_argument("--except_list", type=list_of_strings, default = [str], help = "list of files of file_type under dir_path that you want to exclude from parsing")
+    parser.add_argument("--customdp", type=str, default = 'false', help = "set this to true to leverage custom date part target pattern logic")
 
     
     ### Script Arguments
@@ -870,7 +874,7 @@ if __name__ == '__main__':
     dir_mode = args.dir_mode
     file_type = args.file_type
     except_list = args.except_list
-    print(except_list)
+    customdp = args.customdp
 
 
 
@@ -907,7 +911,7 @@ if __name__ == '__main__':
     print(f"\nConverting the following functions from {sourcedb} to Databricks Dialect: \n {input_functions}")
 
     ## Load syntax regex mappings
-    syntax_map = get_syntax_map(sourcedb= sourcedb)
+    syntax_map = get_syntax_map(sourcedb= sourcedb, customdp = customdp)
     print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
 
     ## Now do project conversion
