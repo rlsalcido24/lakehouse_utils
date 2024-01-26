@@ -60,7 +60,10 @@
                        },
 "customdatepart" : {"source_pattern": "date_part\\([^)]*?\\)",
                       "target_pattern": "date_part(#arg0, #arg1)"
-                       }                                          
+                       },
+"customdatetrunc" : {"source_pattern": "date_trunc\\([^)]*?\\)",
+                      "target_pattern": "date_trunc(#arg0, #arg1)"
+                       }                                                                   
 
 }
         

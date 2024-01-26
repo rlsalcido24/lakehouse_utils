@@ -814,8 +814,10 @@ def get_syntax_map(sourcedb, customdp):
         syntax_map = json.load(file, strict=False)
         if customdp == 'true':
           syntax_map.pop("datepart_to_casewhen")
+          syntax_map.pop("datetrunc_to_casewhen")
         else:
           syntax_map.pop("customdatepart")
+          syntax_map.pop("customdatetrunc")
         return syntax_map
 
 
