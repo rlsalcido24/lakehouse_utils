@@ -24,4 +24,28 @@
 
 # COMMAND ----------
 
+string = ""'SECONDS'", '2019-10-11 10:10:11'::timestamp"
 
+# COMMAND ----------
+
+stringuno = 'SECONDS'", '2019-10-11 10:10:11'::timestamp"
+
+# COMMAND ----------
+
+stringdos = ""'SECONDS'", '2019-10-11 10:10:11'::timestamp"
+
+# COMMAND ----------
+
+print(stringdos)
+
+# COMMAND ----------
+
+stringtres = "'SECONDS'", "'2019-10-01 00:00:01.000001'::timestamp"
+
+# COMMAND ----------
+
+stringfour = '"SECONDS'"," '2019-10-01 00:00:01.000001'::timestamp"
+
+# COMMAND ----------
+
+stringfive = "'SECONDS'", "'2019-10-01 00:00:01.000001'::timestamp"

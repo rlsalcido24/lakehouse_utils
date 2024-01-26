@@ -87,7 +87,7 @@ def findargs (contentstring, sourcepatterninit):
   return initlistgold  
 
 def parsestrings(fullargs):
-  ## to do--make dynamic to support when double args are first
+  ## todo--make dynamic to support when double args are first
   initlistgold = fullargs
   initlistsilver = []
   for gold in initlistgold:
@@ -181,53 +181,80 @@ def splitargs(finalparsedstrings):
   finaldf = pd.merge(silverdf, golddf, on="uniquekey")
   return(finaldf)
 
-def splitargstuple(finalparsedstrings, golden, flag):
+def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
   initlistplatinum = finalparsedstrings
   platinumreplace = ''
   secondlistsilver = []
-  initlistgold = golden
+  initlistgold = goldenargs
+  initpattern = sourcepattern
   for platinum in initlistplatinum:
     initsq = platinum["target_string"].find("'")
     initdq = platinum["target_string"].find('"')
+    commacounter = platinum["target_string"].count(',')
     if initsq == -1 and initdq == -1 :
       if flag == 'syntax':
-        platinumparens = "'" + platinum["target_string"] + ",'"
+        platinumparens = "'" + platinum["target_string"] + "'"
       else:
         platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
+      if commacounter < 1:
+        platinumreplace = platinumreplace + ","
     elif initsq != -1 and initdq == -1:
       if flag == 'syntax':
-        platinumparens = '"' + platinum["target_string"] + ',"'
+        platinumparens = '"' + platinum["target_string"] + '"'
       else: 
         platinumparens = '"' + platinum["target_string"] + '"'
       platinumreplace = platinumparens.replace(",", '","')
+      if commacounter < 1:
+        platinumreplace = platinumreplace + ","
     elif initsq != -1 and initdq != -1 and initsq < initdq:
       if flag == 'syntax':
-        platinumparens = '"' + platinum["target_string"] + ',"'
+        platinumparens = '"' + platinum["target_string"] + '"'
       else:
         platinumparens = '"' + platinum["target_string"] + '"'  
-      platinumreplace = platinumparens.replace(",", '","') 
+      platinumreplace = platinumparens.replace(",", '","')
+      if commacounter < 1:
+        platinumreplace = platinumreplace + "," 
     elif initdq != -1 and initsq == -1:
       if flag == 'syntax':
-        platinumparens = "'" + platinum["target_string"] + ",'"
+        platinumparens = "'" + platinum["target_string"] + "'"
       else:
         platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
+      if commacounter < 1:
+        platinumreplace = platinumreplace + ","
     elif initdq != -1 and initsq != -1 and initdq < initsq:
       if flag == 'syntax':     
-        platinumparens = "'" + platinum["target_string"] + ",'"
+        platinumparens = "'" + platinum["target_string"] + "'"
       else:
         platinumparens = "'" + platinum["target_string"] + "'"  
       platinumreplace = platinumparens.replace(",", "','")
+      if commacounter < 1:
+        platinumreplace = platinumreplace + ","
     else:
       print('how did we arrive here? red alert!')
     #print(platinumreplace)
-    if flag == 'syntax':  
+    if flag == 'syntax':
+      if initpattern == "date_part\\([^)]*?\\)":
+        firstcomma = platinumreplace.find(",")
+        timearg = platinumreplace[0:firstcomma]
+        #print(f" Tiempo is equal to {timearg}")
+        timeargquoteflag = timearg.find("'")
+        timeargquoteflagdq = timearg.find('"')
+        if timeargquoteflag == -1:
+          timeargslice = timearg[1:firstcomma - 1]
+          timeargquotes = "'" + timeargslice + "'"
+          platinumreplace = platinumreplace.replace(timeargslice, timeargquotes)
+        elif timeargquoteflagdq == -1:
+          timeargslice = timearg[1:firstcomma - 1]
+          timeargquotes = '"' + timeargslice + '"'
+          platinumreplace = platinumreplace.replace(timeargslice, timeargquotes)
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
       secondlistsilver.append(secondsilverdict)
     elif flag == 'function':
+      ## todo add datapartlogic like above
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumreplace, "uniquekey": llavesplatinum}
       secondlistsilver.append(secondsilverdict)
@@ -245,7 +272,6 @@ def finalcountdown(finaldf, contentstring, targetstring):
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
     targetstringlocal = targetstring
     counter = 0
-    #print(args)
     for arg in args:
       counterstring = str(counter)
       fullcounter = "#arg"+counterstring
@@ -504,7 +530,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
         stringdelim = parsestrings(initargs)
         #print(silver)
         parendelim = parseparens(stringdelim)
-        gentuple = splitargstuple(parendelim, initargs, "syntax")
+        gentuple = splitargstuple(parendelim, initargs, "syntax", source_pattern)
         finalcontent = finalcountdown(gentuple, content, target_pattern)
         updated_content = finalcontent
       else:
