@@ -23,7 +23,7 @@ syntaxgenpath = 'customerrs.sql'
 with open(syntaxgenpath, 'r+') as file:
     syntaxgen = file.read()
 
-os.chdir("/home/circleci/project/beyondsqltest")
+os.chdir("/home/circleci/project/tmp/beyondsqltest")
 pygenpath = "testpyfiles_to_databricks/tres.py"
 lookergenpath = "testlookmlfiles_to_databricks/uno.lkml"   
 
