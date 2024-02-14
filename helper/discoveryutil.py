@@ -922,7 +922,7 @@ if __name__ == '__main__':
     syntax_map = get_syntax_map(sourcedb= sourcedb, customdp = customdp)
     print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
 
-    ## Now do project conversion
+    ## Now do project conversion-- todo change input functions
     dbt_project_functions_to_macros(base_project_path= project_base_directory, 
                                     input_functions= input_functions,
                                     subdirpath= subdirpath, 
