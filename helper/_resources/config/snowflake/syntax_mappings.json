@@ -1,1 +1,170 @@
-{}
+{
+"array_cat" : {"source_pattern": "array_cat\\([^)]*?\\)",
+                   "target_pattern": "concat(#arg0, #arg1)"
+                       },
+"array_intersection" : {"source_pattern": "array_intersection\\([^)]*?\\)",
+                      "target_pattern": "array_intersect(#arg0, #arg1)"
+                       },
+"array_size" : {"source_pattern": "array_size\\([^)]*?\\)",
+                   "target_pattern": "size(#arg0)"
+                       },
+"array_slice" : {"source_pattern": "array_slice\\([^)]*?\\)",
+                      "target_pattern": "slice(#arg0, #arg2, #arg2 - #arg1)"
+                       },
+"base64_decode_string" : {"source_pattern": "base64_decode_string\\([^)]*?\\)",
+                   "target_pattern": "unbase(#arg0)"
+                       },
+"booland_agg" : {"source_pattern": "booland_agg\\([^)]*?\\)",
+                   "target_pattern": "booland(#arg0)"
+                       },
+"base64_decode_binary" : {"source_pattern": "base64_decode_binary\\([^)]*?\\)",
+                      "target_pattern": "unbase64(#arg0)"
+                       },
+"base64_encode" : {"source_pattern": "base64_encode\\([^)]*?\\)",
+                   "target_pattern": "base64(#arg0)"
+                       },
+"bitand" : {"source_pattern": "bitand\\([^)]*?\\)",
+                      "target_pattern": "bit_and(#arg0)"
+                       },
+"boolor_agg" : {"source_pattern": "boolor_agg\\([^)]*?\\)",
+                   "target_pattern": "bool_or(#arg0)"
+                       },
+"date_from_parts" : {"source_pattern": "date_from_parts\\([^)]*?\\)",
+                   "target_pattern": "make_date(#arg0,#arg1, #arg2 )"
+                       },
+"dayname" : {"source_pattern": "dayname\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 0 THEN 'Sun' WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 1 THEN 'Mon' WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 2 THEN 'Tue' WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 3 THEN 'Wed' WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 4 THEN 'Thu' WHEN datediff(CAST(#arg0 AS DATE), DATE'1799-12-29') % 7 = 5 THEN 'Fri' ELSE 'Sat' END"
+                       },
+"dayofweekiso" : {"source_pattern": "dayofweekiso\\([^)]*?\\)",
+                      "target_pattern": "EXTRACT(DAYOFWEEK_ISO FROM #arg0))"
+                       },
+"div0" : {"source_pattern": "div0\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN #arg1 = 0 THEN 0 ELSE #arg0 / #arg1 END;"
+                       },
+"endswith" : {"source_pattern": "endswith\\([^)]*?\\)",
+                      "target_pattern": "substr(#arg0, -length(#arg1), length(#arg1)) = #arg1"
+                       },
+"from_utc_timestamp" : {"source_pattern": "from_utc_timestamp\\([^)]*?\\)",
+                   "target_pattern": "from_utc_timestamp(to_utc_timestamp(#arg2, #arg0), #arg1)"
+                       },
+"getdate" : {"source_pattern": "getdate\\([^)]*?\\)",
+                      "target_pattern": "current_timestamp"
+                       },
+"hex_decode_string" : {"source_pattern": "hex_decode_string\\([^)]*?\\)",
+                   "target_pattern": "decode(unhex(#arg0), 'UTF-8')"
+                       },
+"hll_estimate" : {"source_pattern": "hll_estimate\\([^)]*?\\)",
+                      "target_pattern": "hll_sketch_estimate(#arg0)"
+                       },
+"insert" : {"source_pattern": "insert\\([^)]*?\\)",
+                   "target_pattern": "overlay(#arg0, #arg3, #arg1, #arg2)"
+                       },
+"json_extract_path_text" : {"source_pattern": "json_extract_path_text\\([^)]*?\\)",
+                      "target_pattern": "get_json_object(#arg0, '$.#arg1') "
+                       },
+"listagg" : {"source_pattern": "listagg\\([^)]*?\\)",
+                   "target_pattern": "array_join(sort_array(collect_list(#arg0)), '#arg1')"
+                       },
+"md5_binary" : {"source_pattern": "md5_binary\\([^)]*?\\)",
+                      "target_pattern": "md5(#arg0)"
+                       },
+"nullifzero" : {"source_pattern": "nullifzero\\([^)]*?\\)",
+                   "target_pattern": "nullif(#arg0, 0)"
+                       },
+"monthname" : {"source_pattern": "monthname\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN EXTRACT(MONTH FROM #arg0) = 1 THEN 'Jan' WHEN EXTRACT(MONTH FROM #arg0) = 2 THEN 'Feb' WHEN EXTRACT(MONTH FROM #arg0) = 3 THEN 'Mar' WHEN EXTRACT(MONTH FROM #arg0) = 4 THEN 'Apr' WHEN EXTRACT(MONTH FROM #arg0) = 5 THEN 'May' WHEN EXTRACT(MONTH FROM #arg0) = 6 THEN 'Jun' WHEN EXTRACT(MONTH FROM #arg0) = 7 THEN 'Jul' WHEN EXTRACT(MONTH FROM #arg0) = 8 THEN 'Aug' WHEN EXTRACT(MONTH FROM #arg0) = 9 THEN 'Sep' WHEN EXTRACT(MONTH FROM #arg0) = 10 THEN 'Oct' WHEN EXTRACT(MONTH FROM #arg0) = 11 THEN 'Nov' ELSE 'Dec' END"
+                       },
+"previous_day" : {"source_pattern": "previous_day\\([^)]*?\\)",
+                      "target_pattern": "CASE WHEN substr(dayname(#arg0), 1, 2) = substr(#arg1, 1, 2) THEN #arg0 - INTERVAL 7 DAY ELSE next_day(#arg0, #arg1) - INTERVAL 7 DAY END"
+                       },
+"seq1" : {"source_pattern": "seq1\\([^)]*?\\)",
+                   "target_pattern": "monotonically_increasing_id()"
+                       },
+"seq2" : {"source_pattern": "seq2\\([^)]*?\\)",
+                   "target_pattern": "monotonically_increasing_id()"
+                       },
+"seq4" : {"source_pattern": "seq4\\([^)]*?\\)",
+                   "target_pattern": "monotonically_increasing_id()"
+                       },
+"seq8" : {"source_pattern": "seq8\\([^)]*?\\)",
+                   "target_pattern": "monotonically_increasing_id()"
+                       },                                              
+"sha1_hex" : {"source_pattern": "sha1_hex\\([^)]*?\\)",
+                      "target_pattern": "sha1(#arg0, #arg1)"
+                       },
+"sha2_hex" : {"source_pattern": "sha2_hex\\([^)]*?\\)",
+                   "target_pattern": "sha2(#arg0, #arg1)"
+                       },
+"square" : {"source_pattern": "square\\([^)]*?\\)",
+                   "target_pattern": "#arg0 * #arg0"
+                       },
+"strtok" : {"source_pattern": "strtok\\([^)]*?\\)",
+                      "target_pattern": "element_at(split(#arg0, #arg1), #arg2) "
+                       },
+"strtok_to_array" : {"source_pattern": "strtok_to_array\\([^)]*?\\)",
+                   "target_pattern": "split(#arg0, concat('[', #arg1, ']'))"
+                       },
+"sysdate" : {"source_pattern": "sysdate\\([^)]*?\\)",
+                      "target_pattern": "to_utc_timestamp(current_timestamp(), current_timezone())"
+                       },
+"systimestamp" : {"source_pattern": "systimestamp\\([^)]*?\\)",
+                   "target_pattern": "current_timestamp()"
+                       },
+"timestamp_from_parts" : {"source_pattern": "timestamp_from_parts\\([^)]*?\\)",
+                   "target_pattern": "make_timestamp(#arg0, #arg1, #arg2, #arg3, #arg4, #arg5)"
+                       },
+"timestamp_ntz_from_parts" : {"source_pattern": "timestamp_ntz_from_parts\\([^)]*?\\)",
+                      "target_pattern": "cast((make_timestamp(#arg0, #arg1, #arg2, #arg3, #arg4, #arg5)as timestamp_ntz)" 
+                       },
+"timediff" : {"source_pattern": "timediff\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN EXTRACT(YEAR FROM #arg2) - EXTRACT(YEAR FROM #arg1) WHEN lower(#arg0) = 'month'  THEN (EXTRACT(YEAR FROM #arg2) * 12 + EXTRACT(MONTH FROM #arg2)) - (EXTRACT(YEAR FROM #arg1) * 12 + EXTRACT(MONTH FROM #arg1)) WHEN lower(#arg0) = 'day'    THEN datediff(CAST(#arg2 AS DATE), CAST(#arg1 AS DATE)) WHEN lower(#arg0) = 'hour'   THEN EXTRACT(HOUR FROM #arg2) - EXTRACT(HOUR FROM #arg1) WHEN lower(#arg0) = 'minute' THEN (EXTRACT(HOUR FROM #arg2) * 60 + EXTRACT(MINUTE FROM #arg2)) - (EXTRACT(HOURs FROM #arg1) * 60 + EXTRACT(MINUTE FROM #arg1)) WHEN lower(#arg0) = 'second' THEN (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) - (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) END"
+                       },
+"timestampadd" : {"source_pattern": "timestampadd\\([^)]*?\\)",
+                      "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN #arg2 + make_interval(#arg1) WHEN lower(#arg0) = 'month'  THEN #arg2 + make_interval(0, #arg1) WHEN lower(#arg0) = 'day'    THEN #arg2 + make_interval(0, 0, 0, #arg1) WHEN lower(#arg0) = 'hour'   THEN #arg2 + make_interval(0, 0, 0, 0, #arg1) WHEN lower(#arg0) = 'minute' THEN #arg2 + make_interval(0, 0, 0, 0, 0, #arg1) WHEN lower(#arg0) = 'second' THEN #arg2 + make_interval(0, 0, 0, 0, 0, 0, #arg1) END"
+                       },
+"timestampdiff" : {"source_pattern": "timestampdiff\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN EXTRACT(YEAR FROM #arg2) - EXTRACT(YEAR FROM #arg1) WHEN lower(#arg0) = 'month'  THEN (EXTRACT(YEAR FROM #arg2) * 12 + EXTRACT(MONTH FROM #arg2)) - (EXTRACT(YEAR FROM #arg1) * 12 + EXTRACT(MONTH FROM #arg1)) WHEN lower(#arg0) = 'day'    THEN datediff(CAST(#arg2 AS DATE), CAST(#arg1 AS DATE)) WHEN lower(#arg0) = 'hour'   THEN EXTRACT(HOUR FROM #arg2) - EXTRACT(HOUR FROM #arg1) WHEN lower(#arg0) = 'minute' THEN (EXTRACT(HOUR FROM #arg2) * 60 + EXTRACT(MINUTE FROM #arg2)) - (EXTRACT(HOUR FROM #arg1) * 60 + EXTRACT(MINUTE FROM #arg1)) WHEN lower(#arg0) = 'second' THEN (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) - (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) END"
+                       },
+"to_array" : {"source_pattern": "to_array\\([^)]*?\\)",
+                   "target_pattern": "array(#arg0)"
+                       },
+"to_binary" : {"source_pattern": "to_binary\\([^)]*?\\)",
+                      "target_pattern": "unhex(#arg0)"
+                       },
+"to_boolean" : {"source_pattern": "to_boolean\\([^)]*?\\)",
+                   "target_pattern": "CASE WHEN lower(#arg0) = 'false' THEN FALSE WHEN lower(#arg0) = 'f' THEN FALSE WHEN lower(#arg0) =  'no' THEN FALSE WHEN lower(#arg0) = 'n' THEN FALSE WHEN lower(#arg0) = 'off' THEN FALSE WHEN lower(#arg0) = '0' THEN FALSE WHEN lower(#arg0) = 'true' THEN TRUE WHEN lower(#arg0) = 't' THEN TRUE WHEN lower(#arg0) =  'yes' THEN TRUE WHEN lower(#arg0) = 'y' THEN TRUE WHEN lower(#arg0) = 'on' THEN TRUE WHEN lower(#arg0) = '1' THEN TRUE ELSE NULL END"
+                       },
+"try_cast" : {"source_pattern": "try_cast\\([^)]*?\\)",
+                      "target_pattern": "cast(#arg0 as string)"
+                       },
+"to_time" : {"source_pattern": "to_time\\([^)]*?\\)",
+                   "target_pattern": "to_timestamp(#arg0, 'HH:mm:ss')"
+                       },
+"to_timestamp_ntz" : {"source_pattern": "to_timestamp_ntz\\([^)]*?\\)",
+                   "target_pattern": "cast(to_timestamp(#arg0)) as timestamp_ntz"
+                       },
+"uniform" : {"source_pattern": "uniform\\([^)]*?\\)",
+                      "target_pattern": "#arg0 + (#arg1 - #arg1) * #arg2"
+                       },
+"uuid_string" : {"source_pattern": "uuid_string\\([^)]*?\\)",
+                      "target_pattern": "uuid()"
+                       },
+"variance_samp" : {"source_pattern": "variance_samp\\([^)]*?\\)",
+                   "target_pattern": "var_samp(#arg0)"
+                       },
+"week" : {"source_pattern": "week\\([^)]*?\\)",
+                   "target_pattern": "EXTRACT(WEEK FROM #arg0)"
+                       },
+"weekiso" : {"source_pattern": "weekiso\\([^)]*?\\)",
+                      "target_pattern": " extract (week from #arg0)"
+                       },
+"yearofweek" : {"source_pattern": "yearofweek\\([^)]*?\\)",
+                   "target_pattern": "extract(year from #arg0)"
+                       },
+"yearofweekiso" : {"source_pattern": "yearofweekiso\\([^)]*?\\)",
+                   "target_pattern": "extract(year from #arg0)"
+                       },
+"zeroifnull" : {"source_pattern": "zeroifnull\\([^)]*?\\)",
+                      "target_pattern": "nvl(#arg0, 0)"
+                       }                                                                
+}
