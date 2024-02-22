@@ -2,7 +2,7 @@
 
 The purpose of the lakehouse utils package is threefold: 
 
-I) Expedite the time and level of effort for migrating pipelines from cloud data warehouses to the Lakehouse  (ie dbt + databricks). This is done by transpiling functions that are not natively available in spark sql to compatible spark sql functions that take in the same input(s) and render the same outputs. This is all done via DBT macros (feel free to reference the macros directory).  
+I) Expedite the time and level of effort for migrating pipelines from cloud data warehouses to the Lakehouse  (ie dbt + databricks). This is done by transpiling functions that are not natively available in spark sql to compatible spark sql functions that take in the same input(s) and render the same outputs. This is done via either DBT macros (feel free to reference the macros directory) or in place regex conversions.  
 
 II) Be a centralized source of truth for warehouse function mapping to Databricks function mapping. Also surface instances where certain functions can not be automated and manual intervention is required. You can find the full list of supported functions in the functionlist.csv in the seed directory; you can also find further information in the read.me in the macros directory.  
 
@@ -34,13 +34,13 @@ IV) Observe that when when the models build on Databricks they transpile the Sno
 
 ### Automated 'to the moon' CUJ 
 
-I) Create a seperate dev branch of your dbt project. Execute dbt seed (if you haven't already). Run the helper function_to_macro.py file on Databricks (easiest way is by importing as a repo). Obvserve that all your Snowflake/Redshift models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in Databricks.
+I) Create a seperate dev branch of your dbt project. Execute dbt seed (if you haven't already). Run the helper convert_to_databricks.py file (either locally or within Databricks). Obvserve that all your Snowflake/Redshift models have now been automatically refactored to reference relevant macros, therefore making it possible to build these models in Databricks.
 
 II) dbt run.
 
 III) Execute unit tests to ensure that the models built in Databricks match the models built on Snowflake/Redshift.
 
-IV) Once you have sufficient confidence copy the directory from the models directory of the dev branch to the models directory of the main branch and name the directory something different to differentiate it from the Snowflake/Redshift models (ie Snow and Databricks) 
+IV) Once you have sufficient confidence merge the dev branch into master and update your dbt run to refrence the transpiled logic. 
 
 V) Build models in both systems until sufficient confidence is instilled to run the models solely on one system.
 
@@ -57,6 +57,8 @@ IV) Ability execute locally without needing to connect or import into Databricks
 
 Example Command:
 python3 ./convert_to_databricks.py redshift --subdir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
+
+For the full list of avail vars, use the --h flag or look at the code base. Other examples also exist in the pierunner doc in the helper directory as well!
 
 
 ## Macros:
