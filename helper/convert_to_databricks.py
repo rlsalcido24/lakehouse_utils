@@ -429,7 +429,7 @@ def function_to_macrodev(content: str, function_name: dict[str, str]):
   if len(initargs) > 0: 
     stringdelim = parsestrings(initargs)
     parendelim = parseparens(stringdelim)
-    gentuple = splitargstuple(parendelim, initargs, "function")
+    gentuple = splitargstuple(parendelim, initargs, "function", source_pattern)
     finalcontent = finalcountdowndbt(gentuple, content)
     updated_content = finalcontent
   else:
