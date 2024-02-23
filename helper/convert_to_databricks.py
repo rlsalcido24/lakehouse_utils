@@ -302,6 +302,7 @@ def finalcountdowndbt(finaldf, contentstring):
 def find_files(directory:str, file_type: str, except_list: [str] = []):
     # Convert the input to a Path object
     path = Path(directory)
+    print(f"Path to glob: {path}")
 
     # Check if the provided path is a directory
     if not path.is_dir():
@@ -312,6 +313,7 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
 
     # Use glob to find all .sql files recursively
     for file in path.rglob('*.{}'.format(file_type)):
+        print(f"File to glob: {file}")
         tmpfilestring = str(file)
         filetypedot = ".{}".format(file_type)
         sourceregex = "/\w*\{}".format(filetypedot)

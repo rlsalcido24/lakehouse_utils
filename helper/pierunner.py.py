@@ -31,3 +31,18 @@
 
 # MAGIC %sh
 # MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/tmp/beyondsqltest/testlookmlfiles" --parse_mode 'syntax' --parse_first 'syntax' --dir_mode 'lookml' --file_type 'lkml' --except_list 'dos.lkml','tres.lkml'
+
+# COMMAND ----------
+
+from pathlib import Path
+
+dirpath = "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/models"
+path = Path(dirpath)
+print(f"Path to glob: {path}")
+globs = path.rglob('*.sql')
+for file in globs:
+  print(file)
+
+# COMMAND ----------
+
+
