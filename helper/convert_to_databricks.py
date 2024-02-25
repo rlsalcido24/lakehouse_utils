@@ -302,7 +302,8 @@ def finalcountdowndbt(finaldf, contentstring):
 def find_files(directory:str, file_type: str, except_list: [str] = []):
     # Convert the input to a Path object
     path = Path(directory)
-    print(f"Path to glob: {path}")
+    if noisylogs == 'true':
+      print(f"Path to glob: {path}")
 
     # Check if the provided path is a directory
     if not path.is_dir():
@@ -313,10 +314,15 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
 
     # Use glob to find all .sql files recursively
     for file in path.rglob('*.{}'.format(file_type)):
-        print(f"File to glob: {file}")
+        if noisylogs == 'true':
+          print(f"File to glob: {file}")
         tmpfilestring = str(file)
+        if noisylogs == 'true':
+          print(f"tmpfilestring: {tmpfilestring}")
         filetypedot = ".{}".format(file_type)
         sourceregex = "/\w*\{}".format(filetypedot)
+        if noisylogs == 'true':
+          print(f"sourceregex: {sourceregex}")
         filepath = re.findall(sourceregex, tmpfilestring)
         filepathinit = filepath[0]
         filepathreplace = filepathinit.replace("/", "") 
@@ -645,7 +651,8 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
     # Define the new file path
     new_file_path = new_dir / original_path.name
-    print(f"FILE PATH: {new_file_path}")
+    if noisylogs == 'true':
+      print(f"FILE PATH: {new_file_path}")
     with open(new_file_path, 'w') as file:
         file.write(content)
 
@@ -653,7 +660,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
    
 
-def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
+def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, dbtmodelroot : str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
   # Verify we are running in a dbt project
 
   ### LOCAL VERSION - 2 options - running as a parent project, or running as a package in another project. 
@@ -673,9 +680,9 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
 
       paths = []
       if len(except_list) > 0:
-        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql", except_list)
+        files = find_files(f'{base_project_path}/{dbtmodelroot}/{subdirpath}', "sql", except_list)
       else:
-        files = find_files(f'{base_project_path}/models/{subdirpath}', "sql")   
+        files = find_files(f'{base_project_path}/{dbtmodelroot}/{subdirpath}', "sql")   
     
     except Exception as e:
       raise(e)    
@@ -691,8 +698,8 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
     ## TBD: Do not parse macros until we can dynamically handle the package/or standalone structure. We dont want to edit and parse the macros that this utility relies on
     #if parsemacro == 'true':  
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
-
-  print(f"FILES: {files}")
+  if noisylogs == 'true':
+    print(f"FILES: {files}")
 
   with ThreadPoolExecutor() as executor:
     futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
@@ -792,8 +799,8 @@ def get_function_map(sourcedb):
     parent_directory = current_script.parent
 
     file_path = parent_directory / '_resources/config' / sourcedb / 'function_mappings.json'
-
-    print(f"FILE PATH: {file_path}")
+    if noisylogs == 'true':
+      print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -812,8 +819,8 @@ def get_syntax_map(sourcedb, customdp):
     parent_directory = current_script.parent
 
     file_path = parent_directory / '_resources/config' / sourcedb / 'syntax_mappings.json'
-
-    print(f"FILE PATH: {file_path}")
+    if noisylogs == 'true':
+      print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -850,6 +857,8 @@ if __name__ == '__main__':
     parser.add_argument("--file_type", type=str, default = 'sql', help = "indicate file type that you want to parse. defaul is sql")
     parser.add_argument("--except_list", type=list_of_strings, default = [str], help = "list of files of file_type under dir_path that you want to exclude from parsing")
     parser.add_argument("--customdp", type=str, default = 'false', help = "set this to true to leverage custom date part target pattern logic")
+    parser.add_argument("--noisylogs", type=str, default = 'false', help = "set this to true to output additional logs for debugging")
+    parser.add_argument("--dbtmodelroot", type=str, default = 'models', help = "modify this config if dbt model root is not models/ directory")
 
     
     ### Script Arguments
@@ -886,7 +895,8 @@ if __name__ == '__main__':
     file_type = args.file_type
     except_list = args.except_list
     customdp = args.customdp
-
+    noisylogs = args.noisylogs
+    dbtmodelroot = args.dbtmodelroot
 
 
     if dir_mode == "dbt":
@@ -919,11 +929,13 @@ if __name__ == '__main__':
 
     ## Load input functions from lakehouse utils file
     input_functions = get_function_map(sourcedb = sourcedb)
-    print(f"\nConverting the following functions from {sourcedb} to Databricks Dialect: \n {input_functions}")
+    if noisylogs == 'true':
+      print(f"\nConverting the following functions from {sourcedb} to Databricks Dialect: \n {input_functions}")
 
     ## Load syntax regex mappings
     syntax_map = get_syntax_map(sourcedb= sourcedb, customdp = customdp)
-    print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
+    if noisylogs == 'true':
+      print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
 
     ## Now do project conversion
     dbt_project_functions_to_macros(base_project_path= project_base_directory, 
@@ -934,5 +946,6 @@ if __name__ == '__main__':
                                     parse_first= parse_first,
                                     dir_mode = dir_mode,
                                     file_type = file_type,
-                                    except_list = except_list )
+                                    except_list = except_list,
+                                    dbtmodelroot = dbtmodelroot )
 
