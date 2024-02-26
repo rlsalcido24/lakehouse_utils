@@ -320,14 +320,17 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
         if noisylogs == 'true':
           print(f"tmpfilestring: {tmpfilestring}")
         filetypedot = ".{}".format(file_type)
-        sourceregex = "/\w*\{}".format(filetypedot)
+        sourceregex = "\w*\{}".format(filetypedot)
         if noisylogs == 'true':
           print(f"sourceregex: {sourceregex}")
-        filepath = re.findall(sourceregex, tmpfilestring)
-        filepathinit = filepath[0]
-        filepathreplace = filepathinit.replace("/", "") 
-        if except_list.count(filepathreplace) == 0: 
-          files.append(str(file))
+        if len(except_list) > 0:  
+          filepath = re.findall(sourceregex, tmpfilestring)
+          filepathinit = filepath[0]
+          filepathreplace = filepathinit.replace("/", "") 
+          if except_list.count(filepathreplace) == 0: 
+            files.append(str(file))
+        else:
+          files.append(str(file))    
 
     return files
 
