@@ -323,7 +323,9 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
         sourceregex = "\w*\{}".format(filetypedot)
         if noisylogs == 'true':
           print(f"sourceregex: {sourceregex}")
-        if len(except_list) > 0:  
+          lenel = len(except_list)
+          print(f"lenel: {lenel}")
+        if len(except_list) > 1:  
           filepath = re.findall(sourceregex, tmpfilestring)
           filepathinit = filepath[0]
           filepathreplace = filepathinit.replace("/", "") 
