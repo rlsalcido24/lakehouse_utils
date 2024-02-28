@@ -294,7 +294,16 @@ def finalcountdowndbt(finaldf, contentstring):
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
     findfirstparen = sourcesting.find("(")
     substring = sourcesting[0:findfirstparen + 1]
-    enrichedargs = "{{lakehouse_utils." + substring + args + ")}}"
+    lowersubstring = substring.lower()
+    lowerargs = args.lower()
+    enrichedargs = "{{lakehouse_utils." + lowersubstring + lowerargs + ")}}"
+    lenarg = len(lowerargs)
+    lastcomma = lowerargs.rfind(",")
+    if lowerargs == "'',":
+      enrichedargs = "{{lakehouse_utils." + lowersubstring + ")}}"
+    elif lenarg == lastcomma + 1:
+      nocommarg = lowerargs[0:lenarg - 1]
+      enrichedargs = "{{lakehouse_utils." + lowersubstring + nocommarg + ")}}"  
     updated_content = updated_content.replace(sourcesting, enrichedargs)
   return(updated_content)    
 
