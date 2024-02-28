@@ -288,12 +288,12 @@ def finalcountdown(finaldf, contentstring, targetstring):
     updated_content = updated_content.replace(sourcesting, lastarget)
   return(updated_content)    
 
-def finalcountdowndbt(finaldf, contentstring):
+def finalcountdowndbt(finaldf, contentstring, targetmacroname):
 
   updated_content = contentstring
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
-    findfirstparen = sourcesting.find("(")
-    substring = sourcesting[0:findfirstparen + 1]
+    #findfirstparen = sourcesting.find("(")
+    substring = targetmacroname + "("
     lowersubstring = substring.lower()
     lowerargs = args.lower()
     enrichedargs = "{{lakehouse_utils." + lowersubstring + lowerargs + ")}}"
@@ -452,7 +452,7 @@ def function_to_macrodev(content: str, function_name: dict[str, str]):
     stringdelim = parsestrings(initargs)
     parendelim = parseparens(stringdelim)
     gentuple = splitargstuple(parendelim, initargs, "function", source_pattern)
-    finalcontent = finalcountdowndbt(gentuple, content)
+    finalcontent = finalcountdowndbt(gentuple, content, target_macro_name)
     updated_content = finalcontent
   else:
     updated_content = content
