@@ -253,6 +253,11 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
           timeargslice = timearg[1:firstcomma - 1]
           timeargquotes = '"' + timeargslice + '"'
           platinumreplace = platinumreplace.replace(timeargslice, timeargquotes)
+      elif initpattern == "dateadd\\([^)]*?\\)":
+        firstcomma = platinumreplace.find(",")
+        timeargslice = platinumreplace[0:firstcomma]
+        timeargnoquotes = platinumreplace[1:firstcomma-1]
+        platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)    
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
@@ -845,9 +850,11 @@ def get_syntax_map(sourcedb, customdp):
           if customdp == 'true':
             syntax_map.pop("datepart_to_casewhen")
             syntax_map.pop("datetrunc_to_casewhen")
+            syntax_map.pop("datediff_to_casewhen")
           else:
             syntax_map.pop("customdatepart")
             syntax_map.pop("customdatetrunc")
+            syntax_map.pop("customdateadd")
         return syntax_map
 
 
