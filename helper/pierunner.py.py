@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'functions' --parse_first 'functions' 
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'functions' --parse_first 'functions' --customdp 'true' 
 
 # COMMAND ----------
 
@@ -10,7 +10,7 @@
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax' --noisylogs 'true'
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax'
 
 # COMMAND ----------
 
