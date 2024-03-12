@@ -15,6 +15,8 @@ select
     datediff(days, getdate(), getdate()) as days_since_oldest_unpaid_due_date,
     date_trunc('months', getdate()),
     dateadd('day', -1, getdate()),
+    case when 'organictest' ~ 'organic|email' then 'match' else 'no match' end as regexmatch,
+    case when 'organictest' !~ 'organic|email' then 'antimatch' else 'antino match' end as antiregexmatch
     dlog10(c_acctbal) as actbalbaseten,
     dlog10(c_acctbal) as actbalbaseten,
     JSON_EXTRACT_PATH_TEXT('{"f2":{"f3":1},"f4":{"f5":99,"f6":"star"}}','f4', 'f6'),
