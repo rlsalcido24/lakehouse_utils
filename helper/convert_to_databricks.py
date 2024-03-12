@@ -554,7 +554,17 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   elif target_pattern == "\\1\\2\\4 \\3 \\5":
     encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
     num_matches = len(encontrar)
-    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)          
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+
+  elif target_pattern == "rlike":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+
+  elif target_pattern == "not rlike":
+    encontrar = re.findall(source_pattern, content, flags= re.DOTALL | re.IGNORECASE)
+    num_matches = len(encontrar)
+    updated_content = re.sub(source_pattern, target_pattern, content, flags= re.DOTALL | re.IGNORECASE)              
     
   else:
       initargs = findargs(content, source_pattern)
@@ -851,6 +861,7 @@ def get_syntax_map(sourcedb, customdp):
             syntax_map.pop("datepart_to_casewhen")
             syntax_map.pop("datetrunc_to_casewhen")
             syntax_map.pop("datediff_to_casewhen")
+            syntax_map.pop("getdate_to_df")
           else:
             syntax_map.pop("customdatepart")
             syntax_map.pop("customdatetrunc")

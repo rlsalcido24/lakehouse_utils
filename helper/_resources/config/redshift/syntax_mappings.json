@@ -59,14 +59,20 @@
                       "target_pattern": "date_part(#arg0, #arg1)"
                        },
 "customdatetrunc" : {"source_pattern": "date_trunc\\([^)]*?\\)",
-                      "target_pattern": "CASE WHEN lower( #arg0) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1) WHEN lower( #arg0) IN ('month', 'months', 'mon', 'mons') THEN timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)  WHEN lower( #arg0) IN ('week', 'weeks', 'w') THEN timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)   WHEN lower( #arg0) IN ('day', 'days', 'd') THEN timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp) ELSE NULL END"
+                      "target_pattern": "CASE WHEN lower( #arg0) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(date_part('YEAR', #arg1::timestamp) / 1) WHEN lower( #arg0) IN ('month', 'months', 'mon', 'mons') THEN date_part('MONTH', #arg1::timestamp)  WHEN lower( #arg0) IN ('week', 'weeks', 'w') THEN date_part('WEEK', #arg1::timestamp) WHEN lower( #arg0) IN ('day', 'days', 'd') THEN date_part('DAY', #arg1::timestamp) ELSE NULL END"
                        },
 "customdatediff" : {"source_pattern": "datediff\\([^)]*?\\)",
-                      "target_pattern": "CASE WHEN lower( #arg0) IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1) WHEN lower( #arg0) IN ('month', 'months', 'mon', 'mons') THEN timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)  WHEN lower( #arg0) IN ('week', 'weeks', 'w') THEN timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)   WHEN lower( #arg0) IN ('day', 'days', 'd') THEN timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp)"
+                      "target_pattern": "CASE WHEN lower( '#arg0') IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1) WHEN lower( '#arg0') IN ('month', 'months', 'mon', 'mons') THEN timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)  WHEN lower( '#arg0') IN ('week', 'weeks', 'w') THEN timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)   WHEN lower( '#arg0') IN ('day', 'days', 'd') THEN timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp) ELSE NULL END"
                        },
 "customdateadd" : {"source_pattern": "dateadd\\([^)]*?\\)",
                       "target_pattern": "dateadd(#arg0, #arg1, #arg2)"
-                       },                                              
+                       },
+"customposix" : {"source_pattern": "[^!]~",
+                      "target_pattern": " rlike"
+                       },
+"customnoposix" : {"source_pattern": "!~",
+                      "target_pattern": "not rlike"
+                       },                                                                                         
 "getdate_to_df" : {"source_pattern": "getdate\\(\\)",
                   "target_pattern": "date_format(date_trunc('second', current_timestamp()), 'yyyy-MM-dd HH:mm:ss')"
                        }                                                                                                             
