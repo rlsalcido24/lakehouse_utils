@@ -280,17 +280,35 @@ def finalcountdown(finaldf, contentstring, targetstring):
   updated_content = contentstring
   targetstringlist = []
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
-    targetstringlocal = targetstring
-    counter = 0
-    for arg in args:
-      counterstring = str(counter)
-      fullcounter = "#arg"+counterstring
-      targetstringlocal = targetstringlocal.replace(fullcounter, arg.replace("#tmpcommaplaceholder", ","))
-      counter = counter + 1
-      targetstringlist.append(targetstringlocal)
-    targetstringlength = len(targetstringlist)
-    lastarget = targetstringlist[targetstringlength - 1] 
-    updated_content = updated_content.replace(sourcesting, lastarget)
+    if targetstring == "CASE WHEN lower(#arg0) IN ('year', 'years','y', 'yr', 'yrs') THEN date_trunc('year', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('month', 'months', 'mon', 'mons') THEN date_trunc('month', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('week', 'weeks', 'w') THEN date_trunc('week', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('day', 'days', 'd') THEN date_trunc('day', #arg1::timestamp)::timestamp ELSE NULL END":
+      tiempounit = args[0]
+      mappingdict = {"year": "date_trunc('year', #arg1::timestamp)::timestamp", "years": "date_trunc('year', #arg1::timestamp)::timestamp", "y": "date_trunc('year', #arg1::timestamp)::timestamp", "yr": "date_trunc('year', #arg1::timestamp)::timestamp", "yrs": "date_trunc('year', #arg1::timestamp)::timestamp", "month": "date_trunc('month', #arg1::timestamp)::timestamp", "months": "date_trunc('month', #arg1::timestamp)::timestamp", "mon": "date_trunc('month', #arg1::timestamp)::timestamp", "mons": "date_trunc('month', #arg1::timestamp)::timestamp", "week": "date_trunc('week', #arg1::timestamp)::timestamp", "weeks": "date_trunc('week', #arg1::timestamp)::timestamp", "w": "date_trunc('week', #arg1::timestamp)::timestamp", "day": "date_trunc('day', #arg1::timestamp)::timestamp", "days": "date_trunc('day', #arg1::timestamp)::timestamp", "d": "date_trunc('day', #arg1::timestamp)::timestamp"}
+      tiempunitnosq = tiempounit.replace("'", "") 
+      tiempunitnodq = tiempunitnosq.replace('"','')
+      cwval = mappingdict[tiempunitnodq]
+      lastarget = cwval.replace('#arg1', args[1])
+      updated_content = updated_content.replace(sourcesting, lastarget)
+    elif targetstring == "CASE WHEN lower( '#arg0') IN ('year', 'years','y', 'yr', 'yrs') THEN FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1) WHEN lower( '#arg0') IN ('month', 'months', 'mon', 'mons') THEN timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)  WHEN lower( '#arg0') IN ('week', 'weeks', 'w') THEN timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)   WHEN lower( '#arg0') IN ('day', 'days', 'd') THEN timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp) ELSE NULL END":
+      tiempounit = args[0]
+      mappingdict = {"year": "FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1)", "years": "FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1)", "y": "FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1)", "yr": "FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1)", "yrs": "FLOOR(timestampdiff(YEAR, #arg1::timestamp, #arg2::timestamp) / 1)", "month": "timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)", "months": "timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)", "mon": "timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)", "mons": "timestampdiff(MONTH, #arg1::timestamp, #arg2::timestamp)", "week": "timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)", "weeks": "timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)", "w": "timestampdiff(WEEK, #arg1::timestamp, #arg2::timestamp)", "day": "timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp)", "days": "timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp)", "d": "timestampdiff(DAY, #arg1::timestamp, #arg2::timestamp)"}
+      tiempunitnosq = tiempounit.replace("'", "") 
+      tiempunitnodq = tiempunitnosq.replace('"','')
+      cwval = mappingdict[tiempunitnodq]
+      putarget = cwval.replace('#arg1', args[1])
+      lastarget = putarget.replace('#arg2', args[2])
+      updated_content = updated_content.replace(sourcesting, lastarget)   
+    else:    
+      targetstringlocal = targetstring
+      counter = 0
+      for arg in args:
+        counterstring = str(counter)
+        fullcounter = "#arg"+counterstring
+        targetstringlocal = targetstringlocal.replace(fullcounter, arg.replace("#tmpcommaplaceholder", ","))
+        counter = counter + 1
+        targetstringlist.append(targetstringlocal)
+      targetstringlength = len(targetstringlist)
+      lastarget = targetstringlist[targetstringlength - 1] 
+      updated_content = updated_content.replace(sourcesting, lastarget)
   return(updated_content)    
 
 def finalcountdowndbt(finaldf, contentstring, targetmacroname):
