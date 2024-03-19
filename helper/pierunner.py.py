@@ -25,6 +25,16 @@
 # COMMAND ----------
 
 # MAGIC %sh
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'discovery' --parse_first 'syntax' --customdp "true"
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'discovery' --parse_first 'syntax' --customdp "true"
+
+# COMMAND ----------
+
+# MAGIC %sh
 # MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "/Workspace/Repos/roberto.salcido@databricks.com/lakehouse_utils/tmp/beyondsqltest/testpyfiles" --parse_mode 'syntax' --parse_first 'syntax' --dir_mode 'nondbt' --file_type 'py' --except_list 'uno.py','dos.py'
 
 # COMMAND ----------

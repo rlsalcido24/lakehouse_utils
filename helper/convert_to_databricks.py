@@ -464,6 +464,18 @@ def function_to_macrodev(content: str, function_name: dict[str, str]):
   
   return (updated_content, num_matches)
 
+def discovery_parser(content: str, function_name: [str]):
+  num_matches = 0
+  spappend = "\\([^)]*?\\)"
+  source_pattern = function_name + spappend
+
+  initargs = findargs(content, source_pattern)
+  ## todo add logic to eliminate matches prepended by lakehouseutils 
+  num_matches = len(initargs)
+  updated_content = content
+  
+  return (updated_content, num_matches)  
+
 ## Function to convert Snowflake/Redshift functions to dbt macros
 def convert_syntax_expressions(content: str, source_pattern: str, target_pattern: str):
   
@@ -585,7 +597,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
 
 ## Function to asynchronously kick off: open each file, loop through every function, write results
 ## Make new directory for new results
-def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_mode:str = 'functions', syntax_map : {str, str} = {}, parse_first='functions'):
+def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str, str]], parse_mode:str = 'functions', syntax_map : {str, str} = {}, parse_first='functions'):
 
   ## Steps 
   ## 1. If function mode or all mode - process the function conversions first
@@ -594,8 +606,9 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
   converted_functions = dict()
   converted_syntax = dict()
+  parsed_discovery = dict()
 
-  assert (parse_mode in ['functions', 'syntax', 'all'])
+  #assert (parse_mode in ['functions', 'syntax', 'discovery', 'all'])
 
   print(f"Converting SQL File: {full_path}")
 
@@ -618,7 +631,22 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
 
     return content, results_dict
   
-      
+  def discovery_chunk(discovery_map, content, results_dict = {}):
+
+    ## v2.0.1 - make functions_list a json dict of soure and target names to allow for namespace resolution errors
+    discovery_functions = discovery_map['function_name']
+
+    for func in discovery_functions:
+
+      content, num_matches = discovery_parser(content, func)
+      #print(f"NUM MATCHES FOR: {function_name} = {no_matches}")
+      if func in results_dict:
+        results_dict[func] += num_matches
+      else: 
+        results_dict[func] = num_matches
+        results_dict['full_path'] = full_path
+
+    return content, results_dict    
   ## private Function to convert syntax
   def syntax_chunk(syntax_map, content, results_dict = {}):
     if len(syntax_map.keys()) > 0:
@@ -641,7 +669,7 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
     
     return content, results_dict
 
-      
+  print(full_path)    
   with open(full_path, 'r+') as file:
     content = file.read()
 
@@ -650,6 +678,9 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
     ## Parse and convert syntax nuances with source and target regex expressions from sourcedb/syntax_mappings.json
     elif parse_mode in ['syntax']:
        content, converted_syntax = syntax_chunk(syntax_map=syntax_map, content=content, results_dict=converted_syntax)
+
+    elif parse_mode in ['discovery']:
+       content, parsed_discovery = discovery_chunk(discovery_map=discovery_map, content=content, results_dict=parsed_discovery)   
       
     ## If the syntax map changes functions that are recognized, then we need to go back through and check for functions as well
     if parse_mode == 'all':
@@ -670,26 +701,34 @@ def process_file(full_path: str, function_map: dict[str, dict[str, str]], parse_
     # Write content to the new file
 
     # Create a Path object from the full path
-    original_path = Path(full_path)
-
-    # Determine the new directory's path
-    new_dir = original_path.parent.parent / (original_path.parent.name + "_to_databricks")
+    if parse_mode == 'discovery':
+      #print(parsed_discovery)
+      cow = 'moo'
 
     # Ensure the new directory exists
-    os.makedirs(new_dir, exist_ok=True)
+      #os.makedirs(new_dir, exist_ok=True)
+
+    else: 
+      original_path = Path(full_path)
+
+    # Determine the new directory's path
+      new_dir = original_path.parent.parent / (original_path.parent.name + "_to_databricks")
+
+    # Ensure the new directory exists
+      os.makedirs(new_dir, exist_ok=True)
 
     # Define the new file path
-    new_file_path = new_dir / original_path.name
-    if noisylogs == 'true':
-      print(f"FILE PATH: {new_file_path}")
-    with open(new_file_path, 'w') as file:
+      new_file_path = new_dir / original_path.name
+      if noisylogs == 'true':
+        print(f"FILE PATH: {new_file_path}")
+      with open(new_file_path, 'w') as file:
         file.write(content)
 
-  return (full_path, converted_functions, converted_syntax) ## Return list of functions that converted
+  return (full_path, converted_functions, converted_syntax, parsed_discovery) ## Return list of functions that converted
 
    
 
-def dbt_project_functions_to_macros(base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, dbtmodelroot : str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
+def dbt_project_functions_to_macros(discovery_map, base_project_path: str, input_functions: [str], dir_mode: str, file_type: str, dbtmodelroot : str, except_list: [str] = [], subdirpath: str = '', parse_mode:str = None, syntax_map : {str, str} = {}, parse_first:str=None):
   # Verify we are running in a dbt project
 
   ### LOCAL VERSION - 2 options - running as a parent project, or running as a package in another project. 
@@ -729,19 +768,30 @@ def dbt_project_functions_to_macros(base_project_path: str, input_functions: [st
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
   if noisylogs == 'true':
     print(f"FILES: {files}")
-
+  discovery_array = []
   with ThreadPoolExecutor() as executor:
-    futures_sql = {executor.submit(process_file, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
+    futures_sql = {executor.submit(process_file, discovery_map, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
     for future in as_completed(futures_sql):
       data = future.result()
       if data:
           print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
+          discovery_array.append(data[3])
            
       else:
           print(f"Nothing to change: {data}")
+
+  if parse_mode == 'discovery':
+    final_disco = discovery_array
+    discoverydf = pd.DataFrame(discovery_array)
+    meltdf = discoverydf.melt(id_vars = ['full_path'])
+    sumseries = meltdf["value"].sum()
+    totaleffort = sumseries / 2
+    print(f"Approximate Total effort: {totaleffort} hours")
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / 'snowflake' / 'discoveryparser.csv'
+    meltdf.to_csv(file_path, index=False)        
             
-
-
 
 def find_dbt_project_file(start_path: str, run_mode: str = "standalone"):
 
@@ -870,7 +920,23 @@ def get_syntax_map(sourcedb, customdp):
 
 
 #### Main runner
+def get_discovery_map(sourcedb):
 
+    current_script = Path(__file__).resolve()
+
+    parent_directory = current_script.parent
+
+    file_path = parent_directory / '_resources' / 'config' / 'snowflake' / 'blockedfunctionlist.csv'
+    discovery_map = pd.read_csv(file_path)
+    if noisylogs == 'true':
+      print(f"FILE PATH: {file_path}")
+    # Check if the file exists
+    if not file_path.is_file():
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+
+    return discovery_map
+    
 if __name__ == '__main__':
 
     def list_of_strings(arg):
@@ -882,7 +948,7 @@ if __name__ == '__main__':
     parser.add_argument("--dir_mode", type=str, default = 'dbt', help='Binary-- select dbt if you are parsing a dbt project, otherwise state anything else such as nondbt')
     parser.add_argument("--sourcedb", type=str, help='The database in which we are converting from - snowflake or redshift')
     parser.add_argument("--dir_path", type=str, default = "", help="If dbt mode, a sub-path under the models folder if you have multiple model folders and only want to convert one. Leave blank if you want all models parsed. If non-dbt mode, include root path that contains all the files you want to be parsed. To indicate files you dont want to be parsed, leverage except list var.")
-    parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all.")
+    parser.add_argument("--parse_mode", type=str, default = 'functions', help = "Flag stating whether to parse for functions, syntax, or all or discovery mode.")
     parser.add_argument("--run_mode", type=str, default = 'standalone', help = "'package' or 'standalone' mode. package mode is running within another DBT project as an import package. standalone is running in a DBT project directly. ")
     parser.add_argument("--output_folder", type=str, default = 'databricks', help = "Name of output directory of converted functions. 'databricks' by default under the models folder. Takes name of source folder and name of target foler to create output folder for each folder.")
     parser.add_argument("--parse_first", type=str, default = 'syntax', help = "parse mode to run first if mode is 'all")
@@ -910,10 +976,11 @@ if __name__ == '__main__':
       subdirpath = ""
     
     ## Parse Mode
-    if str(args.parse_mode).lower() not in ["functions", "syntax", "all"]:
-      raise(Exception("ERROR: Parse mode must be 'functions', 'syntax' or 'all'"))
+    if str(args.parse_mode).lower() not in ["functions", "syntax", "all", "discovery"]:
+      raise(Exception("ERROR: Parse mode must be 'functions', 'syntax' or 'all' or 'discovery'"))
     else: 
       parse_mode = str(args.parse_mode).lower()
+      #print(parse_mode)
 
     ## Which parse mode to run first
     if str(args.parse_first).lower() not in ["functions", "syntax"]:
@@ -964,13 +1031,17 @@ if __name__ == '__main__':
     if noisylogs == 'true':
       print(f"\nConverting the following functions from {sourcedb} to Databricks Dialect: \n {input_functions}")
 
+    discovery_map = get_discovery_map(sourcedb = sourcedb)
+    if noisylogs == 'true':
+      print(f"\nScanning the files for unsupported snowflake function invocations \n {discovery_map}")  
+
     ## Load syntax regex mappings
     syntax_map = get_syntax_map(sourcedb= sourcedb, customdp = customdp)
     if noisylogs == 'true':
       print(f"\nConverting the following syntax rules from {sourcedb} to Databricks Dialect: \n {syntax_map}")
 
     ## Now do project conversion
-    dbt_project_functions_to_macros(base_project_path= project_base_directory, 
+    dbt_project_functions_to_macros(discovery_map = discovery_map,base_project_path= project_base_directory, 
                                     input_functions= input_functions,
                                     subdirpath= subdirpath, 
                                     parse_mode= parse_mode,

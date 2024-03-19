@@ -16,8 +16,11 @@ select
     c_mktsegment,
     c_comment,
     last_query_id() as lastquery,
-    current_transaction() as ct
-    
+    current_transaction() as ct,
+    convert_timezone(test),
+    to_varchar(test),
+    parse_json(testuno),
+    parse_json(testdos)
 
 
 
