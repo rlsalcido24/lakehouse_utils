@@ -257,7 +257,9 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
         firstcomma = platinumreplace.find(",")
         timeargslice = platinumreplace[0:firstcomma]
         timeargnoquotes = platinumreplace[1:firstcomma-1]
-        platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)    
+        platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)
+      if platinumreplace.find("xmlget") > -1:
+        platinumreplace = '"xmlgetplaceholder"'      
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
@@ -296,7 +298,9 @@ def finalcountdown(finaldf, contentstring, targetstring):
       cwval = mappingdict[tiempunitnodq]
       putarget = cwval.replace('#arg1', args[1])
       lastarget = putarget.replace('#arg2', args[2])
-      updated_content = updated_content.replace(sourcesting, lastarget)   
+      updated_content = updated_content.replace(sourcesting, lastarget)
+    elif sourcesting.find("xmlget") > -1:
+      xmlfunc = "true"      
     else:    
       targetstringlocal = targetstring
       counter = 0
