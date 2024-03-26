@@ -257,7 +257,9 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
         firstcomma = platinumreplace.find(",")
         timeargslice = platinumreplace[0:firstcomma]
         timeargnoquotes = platinumreplace[1:firstcomma-1]
-        platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)    
+        platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)
+      if platinumreplace.find("xmlget") > -1:
+        platinumreplace = '"xmlgetplaceholder"'      
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
@@ -282,7 +284,7 @@ def finalcountdown(finaldf, contentstring, targetstring):
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
     if targetstring == "CASE WHEN lower(#arg0) IN ('year', 'years','y', 'yr', 'yrs') THEN date_trunc('year', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('month', 'months', 'mon', 'mons') THEN date_trunc('month', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('week', 'weeks', 'w') THEN date_trunc('week', #arg1::timestamp)::timestamp WHEN lower(#arg0) IN ('day', 'days', 'd') THEN date_trunc('day', #arg1::timestamp)::timestamp ELSE NULL END":
       tiempounit = args[0]
-      mappingdict = {"year": "date_trunc('year', #arg1::timestamp)::timestamp", "years": "date_trunc('year', #arg1::timestamp)::timestamp", "y": "date_trunc('year', #arg1::timestamp)::timestamp", "yr": "date_trunc('year', #arg1::timestamp)::timestamp", "yrs": "date_trunc('year', #arg1::timestamp)::timestamp", "month": "date_trunc('month', #arg1::timestamp)::timestamp", "months": "date_trunc('month', #arg1::timestamp)::timestamp", "mon": "date_trunc('month', #arg1::timestamp)::timestamp", "mons": "date_trunc('month', #arg1::timestamp)::timestamp", "week": "date_trunc('week', #arg1::timestamp)::timestamp", "weeks": "date_trunc('week', #arg1::timestamp)::timestamp", "w": "date_trunc('week', #arg1::timestamp)::timestamp", "day": "date_trunc('day', #arg1::timestamp)::timestamp", "days": "date_trunc('day', #arg1::timestamp)::timestamp", "d": "date_trunc('day', #arg1::timestamp)::timestamp"}
+      mappingdict = {"year": "date_trunc('year', #arg1::timestamp)", "years": "date_trunc('year', #arg1::timestamp)", "y": "date_trunc('year', #arg1::timestamp)", "yr": "date_trunc('year', #arg1::timestamp)", "yrs": "date_trunc('year', #arg1::timestamp)", "month": "date_trunc('month', #arg1::timestamp)", "months": "date_trunc('month', #arg1::timestamp)", "mon": "date_trunc('month', #arg1::timestamp)", "mons": "date_trunc('month', #arg1::timestamp)", "week": "date_trunc('week', #arg1::timestamp)", "weeks": "date_trunc('week', #arg1::timestamp)", "w": "date_trunc('week', #arg1::timestamp)", "day": "date_trunc('day', #arg1::timestamp)", "days": "date_trunc('day', #arg1::timestamp)", "d": "date_trunc('day', #arg1::timestamp)"}
       tiempunitnosq = tiempounit.replace("'", "") 
       tiempunitnodq = tiempunitnosq.replace('"','')
       cwval = mappingdict[tiempunitnodq]
@@ -296,7 +298,9 @@ def finalcountdown(finaldf, contentstring, targetstring):
       cwval = mappingdict[tiempunitnodq]
       putarget = cwval.replace('#arg1', args[1])
       lastarget = putarget.replace('#arg2', args[2])
-      updated_content = updated_content.replace(sourcesting, lastarget)   
+      updated_content = updated_content.replace(sourcesting, lastarget)
+    elif sourcesting.find("xmlget") > -1:
+      xmlfunc = "true"      
     else:    
       targetstringlocal = targetstring
       counter = 0
