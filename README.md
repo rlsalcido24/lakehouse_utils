@@ -56,7 +56,7 @@ III) Ability to run as a package or standalone locally
 IV) Ability execute locally without needing to connect or import into Databricks for conversion. 
 
 Example Command:
-python3 ./convert_to_databricks.py redshift --subdir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
+python3 ./convert_to_databricks.py --sourcedb redshift --dir_path "redshift/" --parse_mode 'all' --parse_first 'syntax'
 
 For the full list of avail vars, use the --h flag or look at the code base. Other examples also exist in the pierunner doc in the helper directory as well!
 
