@@ -73,8 +73,8 @@
 "customnoposix" : {"source_pattern": "!~",
                       "target_pattern": "not rlike"
                        },
-"tocharlower" : {"source_pattern": "to_char\\([^)]*?\\)",
-                      "target_pattern": "to_char(#arg0, lower(#arg1))"
+"yearformat" : {"source_pattern": "YYYY-",
+                      "target_pattern": "yyyy-"
                        },                                                                                                                
 "getdate_to_df" : {"source_pattern": "getdate\\(\\)",
                   "target_pattern": "date_format(date_trunc('second', current_timestamp()), 'yyyy-MM-dd HH:mm:ss')"
