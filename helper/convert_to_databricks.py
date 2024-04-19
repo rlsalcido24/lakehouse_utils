@@ -366,9 +366,15 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
           filepathinit = filepath[0]
           filepathreplace = filepathinit.replace("/", "") 
           if except_list.count(filepathreplace) == 0: 
-            files.append(str(file))
+
+            if "to_databricks" not in str(file):
+              files.append(str(file))
         else:
-          files.append(str(file))    
+          if "to_databricks" not in str(file):
+            files.append(str(file))    
+
+    ## TEST
+    print(files)
 
     return files
 
