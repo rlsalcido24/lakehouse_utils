@@ -1,11 +1,11 @@
 # Databricks notebook source
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'functions' --parse_first 'functions' --customdp 'true' 
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'functions' --parse_first 'functions' --customdp 'true' --onlypublishagg "true"
 
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'functions' --parse_first 'functions' 
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'all' --parse_first 'functions' --onlypublishagg "true"
 
 # COMMAND ----------
 
@@ -15,12 +15,12 @@
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'syntax' --parse_first 'syntax'
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'syntax' --parse_first 'syntax' --onlypublishagg "true"
 
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax' --customdp "true"
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax' --customdp "true" --onlypublishagg "true"
 
 # COMMAND ----------
 
