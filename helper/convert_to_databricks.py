@@ -374,7 +374,8 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
             files.append(str(file))    
 
     ## TEST
-    print(files)
+    if noisylogs == 'true':
+      print(files)
 
     return files
 
@@ -661,6 +662,7 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
         results_dict[function_name] += num_matches
       else: 
         results_dict[function_name] = num_matches
+        results_dict['full_path'] = full_path
 
     return content, results_dict
   
@@ -696,13 +698,14 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
               results_dict[key] += num_matches
             else: 
               results_dict[key] = num_matches
+              results_dict['full_path'] = full_path
   
     else:
         print(f"No syntax values to parse: {syntax_map}. Skipping. ")
     
     return content, results_dict
-
-  print(full_path)    
+  if noisylogs == 'true':
+    print(full_path)    
   with open(full_path, 'r+') as file:
     content = file.read()
 
@@ -801,14 +804,19 @@ def dbt_project_functions_to_macros(discovery_map, base_project_path: str, input
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
   if noisylogs == 'true':
     print(f"FILES: {files}")
+  function_array = []
+  syntax_array = []
   discovery_array = []
   with ThreadPoolExecutor() as executor:
     futures_sql = {executor.submit(process_file, discovery_map, p, input_functions, parse_mode, syntax_map, parse_first): p for p in files}
     for future in as_completed(futures_sql):
       data = future.result()
       if data:
+        if onlypublishagg != 'true':
           print(f"Processed: {data[0]} \n Converted Functions: {data[1]} \n Converted Syntax Mappings: {data[2]}")
-          discovery_array.append(data[3])
+        discovery_array.append(data[3])
+        function_array.append(data[1])
+        syntax_array.append(data[2])
            
       else:
           print(f"Nothing to change: {data}")
@@ -816,6 +824,7 @@ def dbt_project_functions_to_macros(discovery_map, base_project_path: str, input
   if parse_mode == 'discovery':
     final_disco = discovery_array
     discoverydf = pd.DataFrame(discovery_array)
+    print(discoverydf.columns)
     meltdf = discoverydf.melt(id_vars = ['full_path'])
     sumseries = meltdf["value"].sum()
     totaleffort = sumseries / 2
@@ -823,7 +832,40 @@ def dbt_project_functions_to_macros(discovery_map, base_project_path: str, input
     current_script = Path(__file__).resolve()
     parent_directory = current_script.parent
     file_path = parent_directory / '_resources' / 'config' / 'snowflake' / 'discoveryparser.csv'
-    meltdf.to_csv(file_path, index=False)        
+    meltdf.to_csv(file_path, index=False) 
+
+  
+  if parse_mode == 'syntax':
+    final_syntax = syntax_array
+    syntaxdf = pd.DataFrame(syntax_array)
+    syntaxmeltdf = syntaxdf.melt(id_vars = ['full_path'])
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'syntaxparser.csv'
+    syntaxmeltdf.to_csv(file_path, index=False)
+  elif parse_mode == 'functions':
+    final_syntax = function_array
+    functiondf = pd.DataFrame(function_array)
+    functionmeltdf = functiondf.melt(id_vars = ['full_path'])
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'functionparser.csv'
+    functionmeltdf.to_csv(file_path, index=False)
+  elif parse_mode == 'all':
+    final_syntax = syntax_array
+    syntaxdf = pd.DataFrame(syntax_array)
+    syntaxmeltdf = syntaxdf.melt(id_vars = ['full_path'])
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'syntaxparser.csv'
+    syntaxmeltdf.to_csv(file_path, index=False)
+    final_syntax = function_array
+    functiondf = pd.DataFrame(function_array)
+    functionmeltdf = functiondf.melt(id_vars = ['full_path'])
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'functionparser.csv'
+    functionmeltdf.to_csv(file_path, index=False)              
             
 
 def find_dbt_project_file(start_path: str, run_mode: str = "standalone"):
@@ -990,6 +1032,7 @@ if __name__ == '__main__':
     parser.add_argument("--customdp", type=str, default = 'false', help = "set this to true to leverage custom date part target pattern logic")
     parser.add_argument("--noisylogs", type=str, default = 'false', help = "set this to true to output additional logs for debugging")
     parser.add_argument("--dbtmodelroot", type=str, default = 'models', help = "modify this config if dbt model root is not models/ directory")
+    parser.add_argument("--onlypublishagg", type=str, default = 'false', help = "modify this config if you want to skip per file print outs and just receive agg summary")
 
     
     ### Script Arguments
@@ -1029,6 +1072,7 @@ if __name__ == '__main__':
     customdp = args.customdp
     noisylogs = args.noisylogs
     dbtmodelroot = args.dbtmodelroot
+    onlypublishagg = args.onlypublishagg
 
 
     if dir_mode == "dbt":
