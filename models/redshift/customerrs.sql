@@ -13,7 +13,9 @@ select
     c_phone, 
     (to_char(date_trunc('month', getdate()), 'YYYY-MM')) as month,
     datediff(days, getdate(), getdate()) as days_since_oldest_unpaid_due_date,
+    datediff(hours, getdate(), getdate()) as days_since_oldest_unpaid_due_date
     date_trunc('months', getdate()),
+    date_trunc('hours', getdate()),
     dateadd('day', -1, getdate()),
     case when 'organictest' ~ 'organic|email' then 'match' else 'no match' end as regexmatch,
     case when 'organictest' !~ 'organic|email' then 'antimatch' else 'antino match' end as antiregexmatch
