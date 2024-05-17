@@ -357,8 +357,7 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
         tmpfilestring = str(file)
         filetypedot = ".{}".format(file_type)
         sourceregex = "\w*\{}".format(filetypedot)
-          lenel = len(except_list)
-          print(f"lenel: {lenel}")
+        lenel = len(except_list)
         if len(except_list) > 1:  
           filepath = re.findall(sourceregex, tmpfilestring)
           filepathinit = filepath[0]
