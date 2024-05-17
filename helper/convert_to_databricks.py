@@ -259,7 +259,9 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
         timeargnoquotes = platinumreplace[1:firstcomma-1]
         platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)
       if platinumreplace.find("xmlget") > -1:
-        platinumreplace = '"xmlgetplaceholder"'      
+        platinumreplace = '"xmlgetplaceholder"'
+      if noisylogs == 'true':
+        print(f'the val of platniumreplace is {platinumreplace}')        
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
@@ -353,12 +355,8 @@ def find_files(directory:str, file_type: str, except_list: [str] = []):
         if noisylogs == 'true':
           print(f"File to glob: {file}")
         tmpfilestring = str(file)
-        if noisylogs == 'true':
-          print(f"tmpfilestring: {tmpfilestring}")
         filetypedot = ".{}".format(file_type)
         sourceregex = "\w*\{}".format(filetypedot)
-        if noisylogs == 'true':
-          print(f"sourceregex: {sourceregex}")
           lenel = len(except_list)
           print(f"lenel: {lenel}")
         if len(except_list) > 1:  
@@ -703,9 +701,7 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
     else:
         print(f"No syntax values to parse: {syntax_map}. Skipping. ")
     
-    return content, results_dict
-  if noisylogs == 'true':
-    print(full_path)    
+    return content, results_dict    
   with open(full_path, 'r+') as file:
     content = file.read()
 
@@ -755,8 +751,6 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
 
     # Define the new file path
       new_file_path = new_dir / original_path.name
-      if noisylogs == 'true':
-        print(f"FILE PATH: {new_file_path}")
       with open(new_file_path, 'w') as file:
         file.write(content)
 
@@ -802,8 +796,6 @@ def dbt_project_functions_to_macros(discovery_map, base_project_path: str, input
     ## TBD: Do not parse macros until we can dynamically handle the package/or standalone structure. We dont want to edit and parse the macros that this utility relies on
     #if parsemacro == 'true':  
     #  paths.extend(find_sql_files(f'{base_project_path}/macros'))
-  if noisylogs == 'true':
-    print(f"FILES: {files}")
   function_array = []
   syntax_array = []
   discovery_array = []
@@ -953,8 +945,6 @@ def get_function_map(sourcedb):
     parent_directory = current_script.parent
 
     file_path = parent_directory / '_resources/config' / sourcedb / 'function_mappings.json'
-    if noisylogs == 'true':
-      print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -973,8 +963,6 @@ def get_syntax_map(sourcedb, customdp):
     parent_directory = current_script.parent
 
     file_path = parent_directory / '_resources/config' / sourcedb / 'syntax_mappings.json'
-    if noisylogs == 'true':
-      print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -1003,8 +991,6 @@ def get_discovery_map(sourcedb):
 
     file_path = parent_directory / '_resources' / 'config' / 'snowflake' / 'blockedfunctionlist.csv'
     discovery_map = pd.read_csv(file_path)
-    if noisylogs == 'true':
-      print(f"FILE PATH: {file_path}")
     # Check if the file exists
     if not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
