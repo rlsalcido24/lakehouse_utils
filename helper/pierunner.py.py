@@ -30,7 +30,7 @@
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'discovery' --parse_first 'syntax' --customdp "true"
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "snowflake" --dir_path "snowflake/" --parse_mode 'discovery' --onlypublishagg 'true'
 
 # COMMAND ----------
 

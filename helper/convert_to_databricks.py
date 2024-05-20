@@ -36,6 +36,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 def findargs (contentstring, sourcepatterninit):
   # this function takes in content and sourcestring and uses a recursive function to isolate the args associated with each function invocation match
+  if tmplogs == 'true':
+    print(f"content prior to error: {contentstring}")
+    print(f"source patter prior to error: {sourcepatterninit}") 
   content = contentstring
   source_patterninit = sourcepatterninit
   initlistraw = []
@@ -1016,6 +1019,7 @@ if __name__ == '__main__':
     parser.add_argument("--except_list", type=list_of_strings, default = [str], help = "list of files of file_type under dir_path that you want to exclude from parsing")
     parser.add_argument("--customdp", type=str, default = 'false', help = "set this to true to leverage custom date part target pattern logic")
     parser.add_argument("--noisylogs", type=str, default = 'false', help = "set this to true to output additional logs for debugging")
+    parser.add_argument("--tmplogs", type=str, default = 'false', help = "set this to true to output additional tmp logs for debugging")
     parser.add_argument("--dbtmodelroot", type=str, default = 'models', help = "modify this config if dbt model root is not models/ directory")
     parser.add_argument("--onlypublishagg", type=str, default = 'false', help = "modify this config if you want to skip per file print outs and just receive agg summary")
 
@@ -1056,6 +1060,7 @@ if __name__ == '__main__':
     except_list = args.except_list
     customdp = args.customdp
     noisylogs = args.noisylogs
+    tmplogs = args.tmplogs
     dbtmodelroot = args.dbtmodelroot
     onlypublishagg = args.onlypublishagg
 
