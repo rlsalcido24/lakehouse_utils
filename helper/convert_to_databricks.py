@@ -264,7 +264,8 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
       if platinumreplace.find("xmlget") > -1:
         platinumreplace = '"xmlgetplaceholder"'
       if noisylogs == 'true':
-        print(f'the val of platniumreplace is {platinumreplace}')        
+        print(f'the val of platniumreplace is {platinumreplace}')
+      platinumreplace = platinumreplace.replace("\n", "")   
       platinumtuple = eval(platinumreplace)
       llavesplatinum = platinum["uniquekey"]
       secondsilverdict = {"args": platinumtuple, "uniquekey": llavesplatinum}
