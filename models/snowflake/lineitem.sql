@@ -25,7 +25,7 @@ select
     l_comment,
     current_version() as cv,
     get_ddl('table', 'snowflake_sample_data.tpch_sf1.lineitem') as ddl,
-    GETDATE()
+    timestampdiff(getdate(), getdate(), getdate())
    
 
 from

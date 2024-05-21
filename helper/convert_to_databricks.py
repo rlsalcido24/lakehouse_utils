@@ -45,6 +45,9 @@ def findargs (contentstring, sourcepatterninit):
   initlistgold = []
   findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
   funlength = len(findfunction)
+  if tmplogs == 'true':
+    print(f"findfunc prior to error: {findfunction}")
+    print(f"funlength patter prior to error: {funlength}")
   if funlength > 0:
     for i in range(funlength):
       leftparen = findfunction[i].count("(")
@@ -263,8 +266,6 @@ def splitargstuple(finalparsedstrings, goldenargs, flag, sourcepattern):
         platinumreplace = platinumreplace.replace(timeargslice, timeargnoquotes)
       if platinumreplace.find("xmlget") > -1:
         platinumreplace = '"xmlgetplaceholder"'
-      if noisylogs == 'true':
-        print(f'the val of platniumreplace is {platinumreplace}')
       platinumreplace = platinumreplace.replace("\n", "")
       platinumreplace = platinumreplace.replace(" ", "")    
       platinumtuple = eval(platinumreplace)
@@ -325,20 +326,22 @@ def finalcountdown(finaldf, contentstring, targetstring):
 def finalcountdowndbt(finaldf, contentstring, targetmacroname):
 
   updated_content = contentstring
+  enrichedargs = 'zzzplaceholderzzz'
   for sourcesting, args in zip(finaldf["funcstring"], finaldf["args"]):
-    #findfirstparen = sourcesting.find("(")
-    substring = targetmacroname + "("
-    lowersubstring = substring.lower()
-    lowerargs = args.lower()
-    enrichedargs = "{{lakehouse_utils." + lowersubstring + lowerargs + ")}}"
-    lenarg = len(lowerargs)
-    lastcomma = lowerargs.rfind(",")
-    if lowerargs == "'',":
-      enrichedargs = "{{lakehouse_utils." + lowersubstring + ")}}"
-    elif lenarg == lastcomma + 1:
-      nocommarg = lowerargs[0:lenarg - 1]
-      enrichedargs = "{{lakehouse_utils." + lowersubstring + nocommarg + ")}}"  
-    updated_content = updated_content.replace(sourcesting, enrichedargs)
+    alreadyenriched = updated_content.find(enrichedargs)
+    if alreadyenriched == -1: 
+      substring = targetmacroname + "("
+      lowersubstring = substring.lower()
+      lowerargs = args.lower()
+      enrichedargs = "{{lakehouse_utils." + lowersubstring + lowerargs + ")}}"
+      lenarg = len(lowerargs)
+      lastcomma = lowerargs.rfind(",")
+      if lowerargs == "'',":
+        enrichedargs = "{{lakehouse_utils." + lowersubstring + ")}}"
+      elif lenarg == lastcomma + 1:
+        nocommarg = lowerargs[0:lenarg - 1]
+        enrichedargs = "{{lakehouse_utils." + lowersubstring + nocommarg + ")}}"  
+      updated_content = updated_content.replace(sourcesting, enrichedargs)
   return(updated_content)    
 
 ## Function to find all sql files within a given directory
@@ -554,6 +557,8 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
     # todo eliminate some of this custom logic
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
+    if noisylogs == 'true':
+      print(f"inputsearchinit = {inputsearchinit}")
     num_matches = len(inputsearchinit)
     updated_content = content
     for i in inputsearchinit:

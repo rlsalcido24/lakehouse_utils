@@ -47,9 +47,6 @@
 "from_utc_timestamp" : {"source_pattern": "from_utc_timestamp\\([^)]*?\\)",
                    "target_pattern": "from_utc_timestamp(to_utc_timestamp(#arg2, #arg0), #arg1)"
                        },
-"getdate" : {"source_pattern": "getdate\\([^)]*?\\)",
-                      "target_pattern": "current_timestamp"
-                       },
 "hex_decode_string" : {"source_pattern": "hex_decode_string\\([^)]*?\\)",
                    "target_pattern": "decode(unhex(#arg0), 'UTF-8')"
                        },
@@ -116,14 +113,8 @@
 "timestamp_ntz_from_parts" : {"source_pattern": "timestamp_ntz_from_parts\\([^)]*?\\)",
                       "target_pattern": "cast((make_timestamp(#arg0, #arg1, #arg2, #arg3, #arg4, #arg5)as timestamp_ntz)" 
                        },
-"timediff" : {"source_pattern": "timediff\\([^)]*?\\)",
-                   "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN EXTRACT(YEAR FROM #arg2) - EXTRACT(YEAR FROM #arg1) WHEN lower(#arg0) = 'month'  THEN (EXTRACT(YEAR FROM #arg2) * 12 + EXTRACT(MONTH FROM #arg2)) - (EXTRACT(YEAR FROM #arg1) * 12 + EXTRACT(MONTH FROM #arg1)) WHEN lower(#arg0) = 'day'    THEN datediff(CAST(#arg2 AS DATE), CAST(#arg1 AS DATE)) WHEN lower(#arg0) = 'hour'   THEN EXTRACT(HOUR FROM #arg2) - EXTRACT(HOUR FROM #arg1) WHEN lower(#arg0) = 'minute' THEN (EXTRACT(HOUR FROM #arg2) * 60 + EXTRACT(MINUTE FROM #arg2)) - (EXTRACT(HOURs FROM #arg1) * 60 + EXTRACT(MINUTE FROM #arg1)) WHEN lower(#arg0) = 'second' THEN (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) - (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) END"
-                       },
 "timestampadd" : {"source_pattern": "timestampadd\\([^)]*?\\)",
                       "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN #arg2 + make_interval(#arg1) WHEN lower(#arg0) = 'month'  THEN #arg2 + make_interval(0, #arg1) WHEN lower(#arg0) = 'day'    THEN #arg2 + make_interval(0, 0, 0, #arg1) WHEN lower(#arg0) = 'hour'   THEN #arg2 + make_interval(0, 0, 0, 0, #arg1) WHEN lower(#arg0) = 'minute' THEN #arg2 + make_interval(0, 0, 0, 0, 0, #arg1) WHEN lower(#arg0) = 'second' THEN #arg2 + make_interval(0, 0, 0, 0, 0, 0, #arg1) END"
-                       },
-"timestampdiff" : {"source_pattern": "timestampdiff\\([^)]*?\\)",
-                   "target_pattern": "CASE WHEN lower(#arg0) = 'year'   THEN EXTRACT(YEAR FROM #arg2) - EXTRACT(YEAR FROM #arg1) WHEN lower(#arg0) = 'month'  THEN (EXTRACT(YEAR FROM #arg2) * 12 + EXTRACT(MONTH FROM #arg2)) - (EXTRACT(YEAR FROM #arg1) * 12 + EXTRACT(MONTH FROM #arg1)) WHEN lower(#arg0) = 'day'    THEN datediff(CAST(#arg2 AS DATE), CAST(#arg1 AS DATE)) WHEN lower(#arg0) = 'hour'   THEN EXTRACT(HOUR FROM #arg2) - EXTRACT(HOUR FROM #arg1) WHEN lower(#arg0) = 'minute' THEN (EXTRACT(HOUR FROM #arg2) * 60 + EXTRACT(MINUTE FROM #arg2)) - (EXTRACT(HOUR FROM #arg1) * 60 + EXTRACT(MINUTE FROM #arg1)) WHEN lower(#arg0) = 'second' THEN (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) - (EXTRACT(HOUR FROM #arg2) * 3600 + EXTRACT(MINUTE FROM #arg2) * 60 + EXTRACT(SECOND FROM #arg2)) END"
                        },
 "to_array" : {"source_pattern": "to_array\\([^)]*?\\)",
                    "target_pattern": "array(#arg0)"
