@@ -36,19 +36,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 def findargs (contentstring, sourcepatterninit):
   # this function takes in content and sourcestring and uses a recursive function to isolate the args associated with each function invocation match
-  if tmplogs == 'true':
-    print(f"content prior to error: {contentstring}")
-    print(f"source patter prior to error: {sourcepatterninit}") 
   content = contentstring
   source_patterninit = sourcepatterninit
   initlistraw = []
   initlistgold = []
   findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
   funlength = len(findfunction)
-  if tmplogs == 'true':
-    print(f"findfunc prior to error: {findfunction}")
-    print(f"funlength patter prior to error: {funlength}")
-    [('JSON_EXTRACT_PATH_TEXT(', '\'{"f2":{"f3":1},"f4":{"f5":99,"f6":"star"}}\',\'f4\', \'f6\'', ')')]
   if funlength > 0:
     for i in range(funlength):
       leftparen = findfunction[i].count("(")
@@ -64,7 +57,14 @@ def findargs (contentstring, sourcepatterninit):
             updatedregex = findfunction[0] + sourceappend
           udpatedregexescapeuno = updatedregex.replace("(", "\(")
           udpatedregexescapedos = udpatedregexescapeuno.replace(")", "\)")
+          udpatedregexescapedos = udpatedregexescapedos.replace("[", "\[")
+          udpatedregexescapedos = udpatedregexescapedos.replace("]", "\]")
+          udpatedregexescapedos = udpatedregexescapedos.replace("\[^\)\]*?\)", "[^\)]*?\)")
           findfunction = re.findall(udpatedregexescapedos, content)
+          if len(findfunction) == 0:
+            if tmplogs == 'true':
+              print(f"localregex: {udpatedregexescapedos}")
+              print(f"localfindfunc: {findfunction}")
           leftparen = findfunction[0].count("(")
           rightparen = findfunction[0].count(")")
           latestdict = {"leftparen": leftparen, "rightparen": rightparen, "funcstring": findfunction[0]}
@@ -568,8 +568,6 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
     # todo eliminate some of this custom logic
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)
-    if noisylogs == 'true':
-      print(f"inputsearchinit = {inputsearchinit}")
     num_matches = len(inputsearchinit)
     updated_content = content
     for i in inputsearchinit:
