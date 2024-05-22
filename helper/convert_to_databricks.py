@@ -48,6 +48,7 @@ def findargs (contentstring, sourcepatterninit):
   if tmplogs == 'true':
     print(f"findfunc prior to error: {findfunction}")
     print(f"funlength patter prior to error: {funlength}")
+    [('JSON_EXTRACT_PATH_TEXT(', '\'{"f2":{"f3":1},"f4":{"f5":99,"f6":"star"}}\',\'f4\', \'f6\'', ')')]
   if funlength > 0:
     for i in range(funlength):
       leftparen = findfunction[i].count("(")
@@ -308,7 +309,17 @@ def finalcountdown(finaldf, contentstring, targetstring):
       lastarget = putarget.replace('#arg2', args[2])
       updated_content = updated_content.replace(sourcesting, lastarget)
     elif sourcesting.find("xmlget") > -1:
-      xmlfunc = "true"      
+      xmlfunc = "true"
+    elif targetstring == "get_json_object(#arg0, #arg1)":
+      firstarg = args[0]
+      restarg = args[1:]
+      newarray = list(restarg)
+      jsonpatharg = '.'.join(newarray)
+      jsonpathnq = jsonpatharg.replace("'","")
+      jsonpathfinal = "$."+ jsonpathnq
+      firstargenrich = firstarg.replace('#tmpcommaplaceholder', ",")
+      getjsonddl = "get_json_object({}, '{}')".format(firstargenrich, jsonpathfinal)
+      updated_content = updated_content.replace(sourcesting, getjsonddl)
     else:    
       targetstringlocal = targetstring
       counter = 0
@@ -553,7 +564,7 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
       updated_match = re.sub(commas,commareplace, i, flags=re.IGNORECASE)
       updated_content = updated_content.replace(i, updated_match)
   
-  elif target_pattern == "jsonextractpathplaceholder":
+  elif target_pattern == "jsonextractpathplaceholderzzz":
     # todo eliminate some of this custom logic
     source_patternuno = "json_extract_path_text\([^)]*\)"
     inputsearchinit = re.findall(source_patternuno, content, flags= re.DOTALL | re.IGNORECASE)

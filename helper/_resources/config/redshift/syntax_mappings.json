@@ -38,8 +38,8 @@
 "strtol_to_conv" : {"source_pattern": "strtol\\([^)]*?\\)",
                    "target_pattern": "conv(#arg0, #arg1, 10)"
                        },                                                                                                                                                                                                                                                      
-"jsonextractpath_to_gjo" : {"source_pattern": "(json_extract_path_text\\()([^)]*)(\\))",
-                   "target_pattern": "jsonextractpathplaceholder"
+"jsonextractpath_to_gjo" : {"source_pattern": "json_extract_path_text\\([^)]*?\\)",
+                   "target_pattern": "get_json_object(#arg0, #arg1)"
                        },
 "jsonal_to_arraysize" : {"source_pattern": "json_array_length\\([^)]*?\\)",
                       "target_pattern": "array_size(#arg0)"
