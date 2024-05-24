@@ -22,6 +22,7 @@ select
     dlog10(c_acctbal) as actbalbaseten,
     dlog10(c_acctbal) as actbalbaseten,
     JSON_EXTRACT_PATH_TEXT('{"f2":{"f3":1},"f4":{"f5":99,"f6":"star"}}','f4', 'f6'),
+    JSON_EXTRACT_PATH_TEXT(NULLIF(REPLACE(REPLACE( REPLACE(related_videos, '\\', ''), '"{', ''), '}"', ''), ''), 'id')
     dexp(100),
     date_part(dow, 2008-01-05 14:00:00),
     hll_cardinality(expr),
@@ -37,7 +38,7 @@ select
     isnull(test, 'test_is_null') AS null_test_col,
     date_part(year, date(origination_date)) || '-' || 'Q' || floor(
             (date_part(month, date(origination_date)) - 1) / 3) + 1 as origination_quarter,
-    date_part(SECONDS, '2019-10-01 00:00:01.000001'::timestamp)
+    date_part(SECONDS, '2019-10-01 00:00:01.000001'::timestamp),
     first_value(
             case when colA = 2 then id2
             end ignore nulls
