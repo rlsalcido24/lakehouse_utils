@@ -20,7 +20,7 @@
 # COMMAND ----------
 
 # MAGIC %sh
-# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax' --customdp "true" --onlypublishagg "true"
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'syntax' --parse_first 'syntax' --customdp "true" --onlypublishagg "true" --tmplogs 'true'
 
 # COMMAND ----------
 

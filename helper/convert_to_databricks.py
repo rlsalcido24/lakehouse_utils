@@ -55,7 +55,8 @@ def findargs (contentstring, sourcepatterninit):
             updatedregex = initfunc + sourceappend
           else:  
             updatedregex = findfunction[0] + sourceappend
-          udpatedregexescapeuno = updatedregex.replace("(", "\(")
+          udpatedregexescapepre = updatedregex.replace("\\", "\\\\")   
+          udpatedregexescapeuno = udpatedregexescapepre.replace("(", "\(")
           udpatedregexescapedos = udpatedregexescapeuno.replace(")", "\)")
           udpatedregexescapedos = udpatedregexescapedos.replace("[", "\[")
           udpatedregexescapedos = udpatedregexescapedos.replace("]", "\]")
@@ -157,18 +158,13 @@ def parseparens(parsedstrings):
     for start, end in zip(indexdf["startindex"], indexdf["endindex"]):
       substring = silverstring[start:end + 1]
       indexdflist.append(substring)
-    tmpindexlist = []
-    for stringarg in indexdflist:
-      commaph = "#tmpcommaplaceholder"
+    llave = silver["uniquekey"]  
+    listlengthindex = len(indexdflist)
+    if listlengthindex > 0: 
+      stringarg = indexdflist[listlengthindex - 1]
       substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
       removecomma = silverstring.replace(stringarg, substringargreplace)
-      silverstring = removecomma
-      tmpindexlist.append(removecomma)
-    llave = silver["uniquekey"]  
-    listlengthindex = len(tmpindexlist)
-    if listlengthindex > 0: 
-      lastelementindex = tmpindexlist[listlengthindex - 1]
-      platinumdict = {"target_string": lastelementindex, "uniquekey": llave }
+      platinumdict = {"target_string": removecomma, "uniquekey": llave }
       initlistplatiunum.append(platinumdict)
     else:
       platinumdict = {"target_string": silverstring, "uniquekey": llave }
