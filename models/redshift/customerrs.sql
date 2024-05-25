@@ -22,7 +22,9 @@ select
     dlog10(c_acctbal) as actbalbaseten,
     dlog10(c_acctbal) as actbalbaseten,
     JSON_EXTRACT_PATH_TEXT('{"f2":{"f3":1},"f4":{"f5":99,"f6":"star"}}','f4', 'f6'),
-    JSON_EXTRACT_PATH_TEXT(NULLIF(REPLACE(REPLACE( REPLACE(related_videos, '\\', ''), '"{', ''), '}"', ''), ''), 'id')
+    JSON_EXTRACT_PATH_TEXT(NULLIF(REPLACE(REPLACE( REPLACE(related_videos, '\\', ''), '"{', ''), '}"', ''), ''), getdate(), 'id'),
+    JSON_EXTRACT_PATH_TEXT(NULLIF(REPLACE(REPLACE( REPLACE(related_videos, '\\', ''), '"{', ''), '}"', ''), ''), 'id'),
+    JSON_EXTRACT_PATH_TEXT(NULLIF(REPLACE(REPLACE( REPLACE(related_videos, '\\', ''), '"{', ''), '}"', ''), ''), getdate(123,467, getdate(),789), 'id'),
     dexp(100),
     date_part(dow, 2008-01-05 14:00:00),
     hll_cardinality(expr),

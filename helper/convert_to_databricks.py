@@ -40,21 +40,26 @@ def findargs (contentstring, sourcepatterninit):
   source_patterninit = sourcepatterninit
   initlistraw = []
   initlistgold = []
-  findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
-  funlength = len(findfunction)
-  if funlength > 0:
-    for i in range(funlength):
-      leftparen = findfunction[i].count("(")
-      rightparen = findfunction[i].count(")")
+  counter = 0
+  ogfindfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
+  print(f'findfunctinaqui {ogfindfunction}')
+  ogfunlength = len(ogfindfunction)
+  print(f'funlengthaqui: {ogfindfunction}')
+  if ogfunlength > 0:
+    for i in range(ogfunlength):
+      leftparen = ogfindfunction[i].count("(")
+      rightparen = ogfindfunction[i].count(")")
       init = 1
-      initfunc = findfunction[i]
+      initfunc = ogfindfunction[i]
       if leftparen != rightparen:
         while leftparen != rightparen:
           sourceappend = "[^)]*?)"
           if init == 1:
             updatedregex = initfunc + sourceappend
+            print(f'updatedregexinit{updatedregex}')
           else:  
             updatedregex = findfunction[0] + sourceappend
+            print(f'updatedregelse{updatedregex}')
           udpatedregexescapepre = updatedregex.replace("\\", "\\\\")   
           udpatedregexescapeuno = udpatedregexescapepre.replace("(", "\(")
           udpatedregexescapedos = udpatedregexescapeuno.replace(")", "\)")
@@ -62,36 +67,61 @@ def findargs (contentstring, sourcepatterninit):
           udpatedregexescapedos = udpatedregexescapedos.replace("]", "\]")
           udpatedregexescapedos = udpatedregexescapedos.replace("\[^\)\]*?\)", "[^\)]*?\)")
           findfunction = re.findall(udpatedregexescapedos, content)
-          if len(findfunction) == 0:
+          if len(findfunction) == 4:
             if tmplogs == 'true':
               print(f"localregex: {udpatedregexescapedos}")
               print(f"localfindfunc: {findfunction}")
+          print(f"localregex: {udpatedregexescapedos}")
+          print(f"localfindfunc: {findfunction}")   
           leftparen = findfunction[0].count("(")
           rightparen = findfunction[0].count(")")
-          latestdict = {"leftparen": leftparen, "rightparen": rightparen, "funcstring": findfunction[0]}
+          ultimatefunk = findfunction[0]
+          #print(f"localultimatefunk: {ultimatefunk}") 
+          latestdict = {"leftparen": leftparen, "rightparen": rightparen, "funcstring": ultimatefunk}
+          print(f"latestdict: {latestdict}") 
           initlistraw.append(latestdict)
-          if len(findfunction) == 0:
-            break
           init = 0
+          #if len(findfunction) == 0:
+          #  break
+        listlength = len(initlistraw)
+        lastelement = initlistraw[listlength - 1]
+        lastleftparen = lastelement['leftparen'] 
+        lastrightparen = lastelement['rightparen']
+        lastfuncstring = lastelement['funcstring']
+        parendiff = leftparen - rightparen
+        parenappend = parendiff * (")") 
+        funcstring = lastfuncstring + parenappend
+        uniquekey = i
+        args = []
+        funcdict = {"funcstring": funcstring, "uniquekey": uniquekey}
+        print(f'fundict = {funcdict}')
+        #print(funcdict)
+        initlistgold.append(funcdict)
+        #print(initlistgold)
+        #init = 0
+        content = content.replace(funcstring, 'derppppp')
       else: 
         latestdict = {"leftparen": 0, "rightparen": 0, "funcstring": initfunc}
         initlistraw.append(latestdict)  
 
-      listlength = len(initlistraw)
-      lastelement = initlistraw[listlength - 1]
-      lastleftparen = lastelement['leftparen'] 
-      lastrightparen = lastelement['rightparen']
-      lastfuncstring = lastelement['funcstring']
-      parendiff = leftparen - rightparen
-      parenappend = parendiff * (")") 
-      funcstring = lastfuncstring + parenappend
-      uniquekey = i
-      args = []
-      funcdict = {"funcstring": funcstring, "uniquekey": uniquekey}
-      #print(funcdict)
-      initlistgold.append(funcdict)
+        listlength = len(initlistraw)
+        lastelement = initlistraw[listlength - 1]
+        lastleftparen = lastelement['leftparen'] 
+        lastrightparen = lastelement['rightparen']
+        lastfuncstring = lastelement['funcstring']
+        parendiff = leftparen - rightparen
+        parenappend = parendiff * (")") 
+        funcstring = lastfuncstring + parenappend
+        uniquekey = i
+        args = []
+        funcdict = {"funcstring": funcstring, "uniquekey": uniquekey}
+        print(f'fundict = {funcdict}')
+        #print(funcdict)
+        initlistgold.append(funcdict)
       #print(initlistgold)
-      findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
+        #init = 0
+        content = content.replace(funcstring, 'derppppp')
+      #findfunction = re.findall(source_patterninit, content, flags= re.IGNORECASE)
   return initlistgold  
 
 def parsestrings(fullargs):
@@ -130,6 +160,7 @@ def parseparens(parsedstrings):
   # this function parses the args and replaces commas in nested function invocations with a tmp placeholder. this ensures that our tuple logic can delimit individual args
   initlistsilver = parsedstrings
   initlistplatiunum = []
+  print(f'initlistsilverqui{initlistsilver}')
   for silver in initlistsilver:
     
     findleftparen = silver["target_string"].find("(", 0)
@@ -158,17 +189,77 @@ def parseparens(parsedstrings):
     for start, end in zip(indexdf["startindex"], indexdf["endindex"]):
       substring = silverstring[start:end + 1]
       indexdflist.append(substring)
-    llave = silver["uniquekey"]  
-    listlengthindex = len(indexdflist)
-    if listlengthindex > 0: 
-      stringarg = indexdflist[listlengthindex - 1]
-      substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
-      removecomma = silverstring.replace(stringarg, substringargreplace)
-      platinumdict = {"target_string": removecomma, "uniquekey": llave }
-      initlistplatiunum.append(platinumdict)
-    else:
+    print(f'indexdflist: {indexdflist}')  
+    llave = silver["uniquekey"] 
+    init = 1 
+    tmpcounter = 0 
+    if len(indexdflist) == 0:
       platinumdict = {"target_string": silverstring, "uniquekey": llave }
       initlistplatiunum.append(platinumdict)
+    elif len(indexdflist) == 1:
+      stringarg = indexdflist[0]
+      commaph = "#tmpcommaplaceholder"
+      substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+      removecomma = silverstring.replace(stringarg, substringargreplace)
+      silverstring = removecomma
+      platinumdict = {"target_string": silverstring, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+    else:   
+      for count, stringarg in enumerate(indexdflist):
+        commaph = "#tmpcommaplaceholder"
+        substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+        #tmpcounter = 0
+        if init == 1:
+          if indexdflist[count +1].find(indexdflist[count]) > -1:
+            tmpcounter = tmpcounter + 1
+          else:
+            silverstring = silverstring.replace(stringarg, substringargreplace)
+          #tmpcounter = 0
+          #commacounter = 0
+          print(f'tmpcounterinit {tmpcounter}')
+          #removecomma = silverstring.replace(stringarg, substringargreplace)
+          #silverstring = removecomma
+          #silverstring = silverstring.replace(stringarg, substringargreplace)
+          print(f'silverstring aqui {silverstring}')
+        else:
+          #tmpcounter = tmpcounter    
+          if indexdflist[count].find(indexdflist[count - 1]) > -1:
+            print(f'tmpcounterifgraterloop {tmpcounter}')
+            print(f'silverstring aqui {silverstring}')
+            tmpcounter = tmpcounter + 1
+          else:
+            #tmpcounter = tmpcounter
+            print(f'tmpcounterelse {tmpcounter}')
+            if tmpcounter > 0:
+              #commacounter = stringarg.find(",")
+              stringargtmp = indexdflist[count - 1]
+              #print(f'indexcountnow = {indexdflist[count]}')
+              #print(f'indexcountprev = {indexdflist[count - 1]}')
+              #print(f'stringargtmp {stringargtmp}')
+              substringargreplacetmp = indexdflist[count - 1].replace(",", "#tmpcommaplaceholder")
+              #print(f'substringargreplacetmp {substringargreplacetmp}')
+              #removecomma = silverstring.replace(stringargtmp, substringargreplacetmp)
+              silverstring = silverstring.replace(stringargtmp, substringargreplacetmp)
+              #print(f'platastring aqui {silverstring}')
+            #removecomma = removecomma.replace(stringarg, substringargreplace)
+            #silverstring = removecomma
+            silverstring = silverstring.replace(stringarg, substringargreplace)
+            print(f'finalstringarg {stringarg}')
+            print(f'finalsubstring {substringargreplace}')
+            print(f'silverstring aqui {silverstring}')
+            tmpcounter = tmpcounter * 0 
+        init = 0
+      if tmpcounter > 0:
+        print(f'tmpescape {tmpcounter}')
+        #stringargtmp = indexdflist[count - 1]
+        #substringargreplacetmp = indexdflist[count - 1].replace(",", "#tmpcommaplaceholder")
+          #removecomma = silverstring.replace(stringargtmp, substringargreplacetmp) 
+          #silverstring = removecomma
+        silverstring = silverstring.replace(stringarg, substringargreplace)
+        print(f'silverstring aqui {silverstring}')   
+      platinumdict = {"target_string": silverstring, "uniquekey": llave }
+      initlistplatiunum.append(platinumdict)
+      print(f'initlistplatiunum aqui {initlistplatiunum}')
   return initlistplatiunum 
     
 def splitargs(finalparsedstrings):
@@ -309,12 +400,15 @@ def finalcountdown(finaldf, contentstring, targetstring):
     elif targetstring == "get_json_object(#arg0, #arg1)":
       firstarg = args[0]
       restarg = args[1:]
+      print(f'firstargaqui {firstarg}')
+      print(f'restargaqui {restarg}')
       newarray = list(restarg)
       jsonpatharg = '.'.join(newarray)
       jsonpathnq = jsonpatharg.replace("'","")
       jsonpathfinal = "$."+ jsonpathnq
       firstargenrich = firstarg.replace('#tmpcommaplaceholder', ",")
-      getjsonddl = "get_json_object({}, '{}')".format(firstargenrich, jsonpathfinal)
+      jsonpathfinalenrich = jsonpathfinal.replace('#tmpcommaplaceholder', ",")
+      getjsonddl = "get_json_object({}, '{}')".format(firstargenrich, jsonpathfinalenrich)
       updated_content = updated_content.replace(sourcesting, getjsonddl)
     else:    
       targetstringlocal = targetstring
@@ -492,11 +586,13 @@ def function_to_macrodev(content: str, function_name: dict[str, str]):
   source_pattern = raw_function_name + spappend
 
   initargs = findargs(content, source_pattern)
+  print(f'initargsaqui = {stringdelim}')
   ## todo add logic to eliminate matches prepended by lakehouseutils 
   num_matches = len(initargs)
   if len(initargs) > 0: 
     stringdelim = parsestrings(initargs)
     parendelim = parseparens(stringdelim)
+    print(f'stringdelimqui = {stringdelim}')
     gentuple = splitargstuple(parendelim, initargs, "function", source_pattern)
     finalcontent = finalcountdowndbt(gentuple, content, target_macro_name)
     updated_content = finalcontent
@@ -627,9 +723,11 @@ def convert_syntax_expressions(content: str, source_pattern: str, target_pattern
   else:
       initargs = findargs(content, source_pattern)
       num_matches = len(initargs)
+      print(f'initargsquia: {initargs}')
       if len(initargs) > 0: 
         stringdelim = parsestrings(initargs)
         #print(silver)
+        print(f'stringdelimaqui: {stringdelim}')
         parendelim = parseparens(stringdelim)
         gentuple = splitargstuple(parendelim, initargs, "syntax", source_pattern)
         finalcontent = finalcountdown(gentuple, content, target_pattern)
