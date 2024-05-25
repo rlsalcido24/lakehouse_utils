@@ -208,12 +208,15 @@ def parseparens(parsedstrings):
       for count, stringarg in enumerate(indexdflist):
         commaph = "#tmpcommaplaceholder"
         substringargreplace = stringarg.replace(",", "#tmpcommaplaceholder")
+        print(f'stringargfindhere{stringarg}')
         #tmpcounter = 0
         if init == 1:
           if indexdflist[count +1].find(indexdflist[count]) > -1:
             tmpcounter = tmpcounter + 1
+            init = 0
           else:
             silverstring = silverstring.replace(stringarg, substringargreplace)
+            init = 0
           #tmpcounter = 0
           #commacounter = 0
           print(f'tmpcounterinit {tmpcounter}')
@@ -240,26 +243,34 @@ def parseparens(parsedstrings):
               #print(f'substringargreplacetmp {substringargreplacetmp}')
               #removecomma = silverstring.replace(stringargtmp, substringargreplacetmp)
               silverstring = silverstring.replace(stringargtmp, substringargreplacetmp)
+              silverstring = silverstring.replace(stringarg, substringargreplace)
               #print(f'platastring aqui {silverstring}')
             #removecomma = removecomma.replace(stringarg, substringargreplace)
             #silverstring = removecomma
-            silverstring = silverstring.replace(stringarg, substringargreplace)
-            print(f'finalstringarg {stringarg}')
-            print(f'finalsubstring {substringargreplace}')
-            print(f'silverstring aqui {silverstring}')
+            else:
+              silverstring = silverstring.replace(stringarg, substringargreplace)
+              print(f'finalstringarg {stringarg}')
+              print(f'finalsubstring {substringargreplace}')
+              print(f'silverstring aqui {silverstring}')
             tmpcounter = tmpcounter * 0 
-        init = 0
+          init = 0
       if tmpcounter > 0:
-        print(f'tmpescape {tmpcounter}')
-        #stringargtmp = indexdflist[count - 1]
-        #substringargreplacetmp = indexdflist[count - 1].replace(",", "#tmpcommaplaceholder")
+        #  print(f'tmpescape {tmpcounter}')
+        silverstring = silverstring.replace(stringarg, substringargreplace)
+        stringargtmp = indexdflist[count - tmpcounter]
+        substringargtmp = stringargtmp.replace(",", "#tmpcommaplaceholder")
+        stringarg = stringarg.replace(stringargtmp, substringargtmp )
+        silverstring = silverstring.replace(stringarg, substringargreplace)
+        #substringargreplacetmp = indexdflist[count].replace(",", "#tmpcommaplaceholder")
+        #silverstring = silverstring.replace(stringarg, substringargreplace)
           #removecomma = silverstring.replace(stringargtmp, substringargreplacetmp) 
           #silverstring = removecomma
-        silverstring = silverstring.replace(stringarg, substringargreplace)
-        print(f'silverstring aqui {silverstring}')   
+          #silverstring = silverstring.replace(stringarg, substringargreplace)
+        print(f'silverstringfinalfinal aqui {silverstring}')   
       platinumdict = {"target_string": silverstring, "uniquekey": llave }
       initlistplatiunum.append(platinumdict)
       print(f'initlistplatiunum aqui {initlistplatiunum}')
+      #tmpcounter = 0
   return initlistplatiunum 
     
 def splitargs(finalparsedstrings):
