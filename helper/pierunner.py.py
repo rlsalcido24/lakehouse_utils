@@ -25,6 +25,11 @@
 # COMMAND ----------
 
 # MAGIC %sh
+# MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --parse_mode 'syntax' --customdp "true"
+
+# COMMAND ----------
+
+# MAGIC %sh
 # MAGIC python3 ./convert_to_databricks.py --sourcedb "redshift" --dir_path "redshift/" --parse_mode 'discovery' --parse_first 'syntax' --customdp "true"
 
 # COMMAND ----------
