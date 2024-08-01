@@ -20,10 +20,16 @@ select
     convert_timezone(test),
     to_varchar(test),
     parse_json(testuno),
-    parse_json(testdos)
-
-
-
+    parse_json(testdos),
+    Name,
+    Age,
+    CAST(ID AS VARCHAR) as id_text,
+    created_date::TIME,
+    CAST(file_dump AS NUMBER) as file_dump_numeric,
+    COALESCE(col1::FLOAT,col2::FLOAT8,col3::REAL) AS xyz
+    FROM catalog.schema.table1
+    WHERE colA = colB::TEXT
+    AND somethingelse = 1
 
 from
     snowflake_sample_data.tpch_sf1.customer
