@@ -33,6 +33,15 @@ select
     GETDATE AS get_date_caps_test,
     sysdate() AS sys_date_col_test,
     SYSDATE() AS sys_date_caps_col_test,
+    Name,
+    Age,
+    CAST(ID AS TEXT) as id_text,
+    created_date::TIME,
+    CAST(file_dump AS NUMERIC) as file_dump_numeric,
+    COALESCE(col1::FLOAT,col2::FLOAT8,col3::INT2) AS xyz
+    FROM catalog.schema.table1
+    WHERE colA = colB::CHAR
+    AND somethingelse = 1
     ISNULL(test, test_is_null) AS null_test_col_caps,
     ISNULL(test, test_is_null) AS null_test_col_caps,
     isnull(test, 'test_is_null') AS null_test_col,

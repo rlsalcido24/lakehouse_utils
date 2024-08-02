@@ -715,7 +715,31 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
     else:
         print(f"No syntax values to parse: {syntax_map}. Skipping. ")
     
-    return content, results_dict    
+    return content, results_dict 
+
+  def dtchunkuno(content, dtdict):
+   for key, value in dtdict.items():
+      content = dtconvertuno(content, value.get("source_name"), value.get("target_name"))
+   return content   
+
+
+  def dtchunkdos(content, dtdict):
+    for key, value in dtdict.items():
+      content = dtconvertdos(content, value.get("source_name"), value.get("target_name"))
+    return content 
+
+  def dtconvertuno(content, dtinput, dtoutput):
+    cast_pattern = r'(CAST\(\s*[^)]+\s+AS\s+){}(\s*\))'.format(dtinput)
+    replacement_pattern = r'\1{}\2'.format(dtoutput)
+    updated_content = re.sub(cast_pattern, replacement_pattern, content, flags= re.DOTALL | re.IGNORECASE)  
+    return updated_content
+
+  def dtconvertdos(content, dtinput, dtoutput):
+    cast_pattern = r'::{}'.format(dtinput)
+    replacement_pattern = r'::{}'.format(dtoutput)
+    updated_content = re.sub(cast_pattern, replacement_pattern, content, flags= re.DOTALL | re.IGNORECASE)  
+    return updated_content     
+  
   with open(full_path, 'r+') as file:
     content = file.read()
 
@@ -741,8 +765,14 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
           content, converted_functions = functions_chunk(function_map=function_map, content=content, results_dict=converted_functions)
        else:
           raise(NotImplementedError(f"Incorrect Parse First Parameter Provided {parse_first}. Shoudl be syntax or functions"))
-
-
+    
+    current_script = Path(__file__).resolve()
+    parent_directory = current_script.parent
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'dt_mappings.json'
+    with open(file_path, 'r') as file:
+      dtmap = json.load(file)
+    contentuno = dtchunkuno(content, dtmap)
+    contentdos = dtchunkdos(contentuno, dtmap)
     ## Instead of writing data in place, lets write it to a new model subfolder ./databricks/
     # Write content to the new file
 
@@ -766,7 +796,7 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
     # Define the new file path
       new_file_path = new_dir / original_path.name
       with open(new_file_path, 'w') as file:
-        file.write(content)
+        file.write(contentdos)
 
   return (full_path, converted_functions, converted_syntax, parsed_discovery) ## Return list of functions that converted
 

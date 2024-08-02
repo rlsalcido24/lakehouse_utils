@@ -1,0 +1,20 @@
+{
+    "VARCHAR": {"source_name": "VARCHAR", "target_name": "STRING"},
+    "CHAR": {"source_name": "CHAR", "target_name": "STRING"},
+    "CHARACTER": {"source_name": "CHARACTER", "target_name": "STRING"},
+    "TEXT": {"source_name": "TEXT", "target_name": "STRING"},
+    "VARBINARY": {"source_name": "VARBINARY", "target_name": "BINARY"},
+    "NUMBER": {"source_name": "NUMBER", "target_name": "NUMERIC"},
+    "BYTEINT": {"source_name": "BYTEINT", "target_name": "BYTE"},
+    "FLOAT": {"source_name": "FLOAT", "target_name": "DOUBLE"},
+    "FLOAT4": {"source_name": "FLOAT4", "target_name": "DOUBLE"},
+    "FLOAT8": {"source_name": "FLOAT8", "target_name": "DOUBLE"},
+    "DOUBLE PRECISION": {"source_name": "DOUBLE PRECISION", "target_name": "DOUBLE"},
+    "REAL": {"source_name": "REAL", "target_name": "DOUBLE"},
+    "TIME": {"source_name": "TIME", "target_name": "TIMESTAMP"},
+    "DATETIME": {"source_name": "DATETIME", "target_name": "TIMESTAMP"},
+    "TIMESTAMP_LTZ": {"source_name": "TIMESTAMP_LTZ", "target_name": "TIMESTAMP"},
+    "TIMESTAMP_NTZ": {"source_name": "TIMESTAMP_NTZ", "target_name": "TIMESTAMP"},
+    "TIMESTAMP_TZ": {"source_name": "TIMESTAMP_TZ", "target_name": "TIMESTAMP"},
+    "OBJECT": {"source_name": "OBJECT", "target_name": "STRUCT"}
+}
