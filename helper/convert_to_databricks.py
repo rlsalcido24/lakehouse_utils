@@ -718,14 +718,14 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
     return content, results_dict 
 
   def dtchunkuno(content, dtdict):
-   for dtinput, dtoutput in zip(dtdict['datatype_input'], dtdict['datatype_output']):
-      content = dtconvertuno(content, dtinput, dtoutput)
+   for key, value in dtdict.items():
+      content = dtconvertuno(content, value.get("source_name"), value.get("target_name"))
    return content   
 
 
   def dtchunkdos(content, dtdict):
-    for dtinput, dtoutput in zip(dtdict['datatype_input'], dtdict['datatype_output']):
-      content = dtconvertdos(content, dtinput, dtoutput)
+    for key, value in dtdict.items():
+      content = dtconvertdos(content, value.get("source_name"), value.get("target_name"))
     return content 
 
   def dtconvertuno(content, dtinput, dtoutput):
@@ -768,8 +768,9 @@ def process_file(discovery_map, full_path: str, function_map: dict[str, dict[str
     
     current_script = Path(__file__).resolve()
     parent_directory = current_script.parent
-    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'dt_mappings.csv'
-    dtmap = pd.read_csv(file_path)
+    file_path = parent_directory / '_resources' / 'config' / sourcedb / 'dt_mappings.json'
+    with open(file_path, 'r') as file:
+      dtmap = json.load(file)
     contentuno = dtchunkuno(content, dtmap)
     contentdos = dtchunkdos(contentuno, dtmap)
     ## Instead of writing data in place, lets write it to a new model subfolder ./databricks/
