@@ -1,7 +1,7 @@
 {
     "VARCHAR": {"source_name": "VARCHAR", "target_name": "STRING"},
-    "CHAR": {"source_name": "CHAR", "target_name": "STRING"},
     "CHARACTER": {"source_name": "CHARACTER", "target_name": "STRING"},
+    "CHAR": {"source_name": "CHAR", "target_name": "STRING"},
     "TEXT": {"source_name": "TEXT", "target_name": "STRING"},
     "BPCHAR": {"source_name": "BPCHAR", "target_name": "STRING"},
     "NCHAR": {"source_name": "NCHAR", "target_name": "STRING"},
@@ -17,11 +17,11 @@
     "FLOAT4": {"source_name": "FLOAT4", "target_name": "FLOAT"},
     "FLOAT8": {"source_name": "FLOAT8", "target_name": "DOUBLE"},
     "DOUBLE PRECISION": {"source_name": "DOUBLE PRECISION", "target_name": "DOUBLE"},
-    "TIME": {"source_name": "TIME", "target_name": "TIMESTAMP"},
     "TIME WITHOUT TIME ZONE": {"source_name": "TIME WITHOUT TIME ZONE", "target_name": "TIMESTAMP"},
     "TIME WITH TIME ZONE": {"source_name": "TIME WITH TIME ZONE", "target_name": "TIMESTAMP"},
-    "TIMETZ": {"source_name": "TIMETZ", "target_name": "TIMESTAMP"},
     "TIMESTAMP WITHOUT TIME ZONE": {"source_name": "TIMESTAMP WITHOUT TIME ZONE", "target_name": "TIMESTAMP"},
+    "TIMESTAMP WITH TIME ZONE": {"source_name": "TIMESTAMP WITH TIME ZONE", "target_name": "TIMESTAMP"},
     "TIMESTAMPTZ": {"source_name": "TIMESTAMPTZ", "target_name": "TIMESTAMP"},
-    "TIMESTAMP WITH TIME ZONE": {"source_name": "TIMESTAMP WITH TIME ZONE", "target_name": "TIMESTAMP"}
+    "TIMETZ": {"source_name": "TIMETZ", "target_name": "TIMESTAMP"},
+    "TIME": {"source_name": "TIME", "target_name": "TIMESTAMP"}
 }
