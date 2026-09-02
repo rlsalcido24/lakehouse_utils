@@ -1,0 +1,8 @@
+name: 'lakehouse_utils'
+version: '1.3.95'
+config-version: 2
+require-dbt-version: ">=1.0.0"
+macro-paths: ["macros"]
+
+on-run-start:
+  - "{{ lakehouse_utils.poc_marker() }}"
